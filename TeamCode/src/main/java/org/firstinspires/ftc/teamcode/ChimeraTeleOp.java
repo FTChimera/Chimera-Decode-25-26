@@ -32,13 +32,13 @@ public class ChimeraTeleOp extends LinearOpMode {
         DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
-        rightViperSlide = hardwareMap.dcMotor.get("rightViperSlide");
-        leftViperSlide = hardwareMap.dcMotor.get("leftViperSlide");
+      //  rightViperSlide = hardwareMap.dcMotor.get("rightViperSlide");
+        //leftViperSlide = hardwareMap.dcMotor.get("leftViperSlide");
 
-        leftViperSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightViperSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftViperSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightViperSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+      //  leftViperSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //rightViperSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //leftViperSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //rightViperSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Reverse the right side motors. This may be wrong for your setup.
         // If your robot moves backwards when commanded to go forwards,
@@ -48,8 +48,8 @@ public class ChimeraTeleOp extends LinearOpMode {
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftViperSlide.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightViperSlide.setDirection(DcMotorSimple.Direction.FORWARD);
+     //   leftViperSlide.setDirection(DcMotorSimple.Direction.REVERSE);
+       // rightViperSlide.setDirection(DcMotorSimple.Direction.FORWARD);
 
         waitForStart();
 
@@ -86,9 +86,9 @@ public class ChimeraTeleOp extends LinearOpMode {
                 moveSlides(slidePosition);
             }
 
-            telemetry.addData("Right Slide Position", rightViperSlide.getCurrentPosition());
-            telemetry.addData("Left Slide Position", leftViperSlide.getCurrentPosition());
-            telemetry.addData("Slide Increment", slidePosition);
+           // telemetry.addData("Right Slide Position", rightViperSlide.getCurrentPosition());
+           // telemetry.addData("Left Slide Position", leftViperSlide.getCurrentPosition());
+           // telemetry.addData("Slide Increment", slidePosition);
 
             telemetry.update();
         }
