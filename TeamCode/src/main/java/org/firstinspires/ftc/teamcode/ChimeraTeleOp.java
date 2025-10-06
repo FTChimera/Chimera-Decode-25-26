@@ -32,6 +32,10 @@ public class ChimeraTeleOp extends LinearOpMode {
         DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
+        DcMotor OutakeMotorRight = hardwareMap.dcMotor.get("OutakeMotorRight");
+        DcMotor OutakeMotorLeft = hardwareMap.dcMotor.get("OutakeMotorLeft");
+        DcMotor intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
+
       //  rightViperSlide = hardwareMap.dcMotor.get("rightViperSlide");
         //leftViperSlide = hardwareMap.dcMotor.get("leftViperSlide");
 
@@ -48,6 +52,9 @@ public class ChimeraTeleOp extends LinearOpMode {
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        OutakeMotorRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        OutakeMotorLeft.setDirection(DcMotorSimple.Direction.REVERSE);
      //   leftViperSlide.setDirection(DcMotorSimple.Direction.REVERSE);
        // rightViperSlide.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -84,6 +91,22 @@ public class ChimeraTeleOp extends LinearOpMode {
             }
             if (slidePosition != 0) {
                 moveSlides(slidePosition);
+            }
+
+            if (gamepad1.a){
+                OutakeMotorLeft.setPower(1);
+                OutakeMotorRight.setPower(1);
+            }
+
+            if (gamepad1.b){
+                OutakeMotorRight.setPower(0);
+                OutakeMotorLeft.setPower(0);
+            }
+            if(gamepad1.x){
+                intakeMotor.setPower(1);
+            }
+            if(gamepad1.y){
+                intakeMotor.setPower(0);
             }
 
            // telemetry.addData("Right Slide Position", rightViperSlide.getCurrentPosition());
