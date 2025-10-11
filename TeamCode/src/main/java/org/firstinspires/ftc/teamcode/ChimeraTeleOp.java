@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "ChimeraTeleOp", group = "AbsolutePriority")// Name and Group
 public class ChimeraTeleOp extends LinearOpMode {
@@ -35,6 +36,7 @@ public class ChimeraTeleOp extends LinearOpMode {
         DcMotor OutakeMotorRight = hardwareMap.dcMotor.get("OutakeMotorRight");
         DcMotor OutakeMotorLeft = hardwareMap.dcMotor.get("OutakeMotorLeft");
         DcMotor intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
+        Servo pushServo = hardwareMap.servo.get("pushServo");
 
       //  rightViperSlide = hardwareMap.dcMotor.get("rightViperSlide");
         //leftViperSlide = hardwareMap.dcMotor.get("leftViperSlide");
@@ -53,7 +55,7 @@ public class ChimeraTeleOp extends LinearOpMode {
         frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        OutakeMotorRight.setDirection(DcMotorSimple.Direction.FORWARD);
+        OutakeMotorRight.setDirection(DcMotorSimple.Direction.REVERSE);
         OutakeMotorLeft.setDirection(DcMotorSimple.Direction.REVERSE);
      //   leftViperSlide.setDirection(DcMotorSimple.Direction.REVERSE);
        // rightViperSlide.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -81,17 +83,7 @@ public class ChimeraTeleOp extends LinearOpMode {
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
 
-            if (gamepad1.dpad_up && rightViperSlide.getCurrentPosition() <= MAX_SLIDE_POSITION) {
-                slidePosition += 30;
-            } else if (gamepad1.dpad_down) {
-                slidePosition -= 30;
-            }
-            if (slidePosition < 0) {
-                slidePosition = 0;
-            }
-            if (slidePosition != 0) {
-                moveSlides(slidePosition);
-            }
+           ////
 
             if (gamepad1.a){
                 OutakeMotorLeft.setPower(1);
@@ -107,6 +99,9 @@ public class ChimeraTeleOp extends LinearOpMode {
             }
             if(gamepad1.y){
                 intakeMotor.setPower(0);
+            }
+            if(gamepad1.dpad_up){
+                pushServo.setPosition(1);
             }
 
            // telemetry.addData("Right Slide Position", rightViperSlide.getCurrentPosition());
