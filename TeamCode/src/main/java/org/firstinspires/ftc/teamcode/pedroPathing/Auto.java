@@ -26,7 +26,7 @@ public class Auto extends OpMode {
     /* Here is an example for Constant Interpolation
     scorePreload.setConstantInterpolation(startPose.getHeading()); */
 
-
+/// delete if not ready
     }
     public void autonomousPathUpdate() {
         switch (pathState) {
