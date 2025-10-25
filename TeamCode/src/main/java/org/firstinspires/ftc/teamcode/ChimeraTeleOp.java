@@ -3,6 +3,10 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
 import static java.lang.Math.sqrt;
 
+import android.graphics.Paint;
+
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -33,33 +37,56 @@ public class ChimeraTeleOp extends LinearOpMode {
     final int SERVO_LAUNCH_POSITION = 0;
     final int SERVO_REST_POSITION = 1;
     final int SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
+
     // declaring our PIDF tuning values
     final double Kp = 300;
-
     final double Ki = 0.0;
     final double Kd = 0.0;
     final double Kf = 10;
     double  setTargetVelocity = 0;
     double setMinVelocity = 0;
     private Follower follower;
+    public static Pose startingPose;
+    private TelemetryManager telemetryM;
     double X_Coordinate_Blue_Goal = 0;
     double Y_Coordinate_Blue_Goal = 144;
     double X_Coordinate_Red_Goal = 144;
     double Y_Coordinate_Red_Goal = 144;
     double X_Coordinate = 0.0;
     double Y_Coordinate = 0.0;
-    double heading = 0.0;
-    double Distance_To_Goal_Red = 0;
+    double Distance_To_Goal = 0;
     double Distance_To_Goal_Blue = 0;
-    double launchPostionHeading = 0;
+    double currentHeading = 0.0;
+    double launchPositionHeading = 0;
     final double SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE = 18;
     final double SHOOTING_ZONE_FAR_FRONT_LAUNCH_ZONE = 24;
     final double SHOOTING_ZONE_BACK_LAUNCH_ZONE = 36;
+
+    final double RED_ALLIANCE_STARTING_X_COORDINATE = 0;
+    final double RED_ALLIANCE_STARTING_Y_COORDINATE = 0;
+    final double RED_ALLIANCE_STARTING_HEADING_POSITION = 90;
+
+    final double BLUE_ALLIANCE_STARTING_X_COORDINATE = 144;
+    final double BLUE_ALLIANCE_STARTING_Y_COORDINATE = 0;
+    final double BLUE_ALLIANCE_STARTING_HEADING_POSITION = 90;
+    enum AllianceColor {
+        BLUE,
+        RED
+    };
+  AllianceColor allianceColor;
 
     ElapsedTime feederTimer = new ElapsedTime();
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        if(gamepad1.right_bumper){
+            allianceColor = AllianceColor.BLUE;
+
+        }else if (gamepad1.left_bumper){
+            allianceColor = AllianceColor.RED;
+        }
+
 
         // Declare our motors
         // Make sure your ID's match your configuration
@@ -77,14 +104,6 @@ public class ChimeraTeleOp extends LinearOpMode {
         follower = Constants.createFollower(hardwareMap);
 
 
-      //  rightViperSlide = hardwareMap.dcMotor.get("rightViperSlide");
-        //leftViperSlide = hardwareMap.dcMotor.get("leftViperSlide");
-
-      //  leftViperSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //rightViperSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //leftViperSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        //rightViperSlide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
         // Reverse the right side motors. This may be wrong for your setup.
         // If your robot moves backwards when commanded to go forwards,
         // reverse the left side instead.
@@ -97,7 +116,7 @@ public class ChimeraTeleOp extends LinearOpMode {
         rightOutakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         leftOutakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         /*
-         * Here we set our launcher to the RUN_USING_ENCODER runmode.
+         * Here we set our Left and Right Outtake Motor to the RUN_USING_ENCODER runmode.
          * If you notice that you have no control over the velocity of the motor, it just jumps
          * right to a number much higher than your set point, make sure that your encoders are plugged
          * into the port right beside the motor itself. And that the motors polarity is consistent
@@ -116,8 +135,21 @@ public class ChimeraTeleOp extends LinearOpMode {
 
         leftOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
         rightOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
+        if (allianceColor == AllianceColor.RED)
+        {
+            // Starting position Red Goal
+            startingPose = new Pose(RED_ALLIANCE_STARTING_X_COORDINATE, RED_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(RED_ALLIANCE_STARTING_HEADING_POSITION));
+            follower.setStartingPose(startingPose);
+            follower.update();
+        }
+        else if(allianceColor == AllianceColor.BLUE)
+        {
+            startingPose = new Pose(BLUE_ALLIANCE_STARTING_X_COORDINATE, BLUE_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(BLUE_ALLIANCE_STARTING_HEADING_POSITION));
+            follower.setStartingPose(startingPose);
+            follower.update();
+        }
 
-
+        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         /*
          * Tell the driver that initialization is complete.
          */
@@ -147,6 +179,9 @@ public class ChimeraTeleOp extends LinearOpMode {
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
 
+            follower.update();
+            telemetryM.update();
+
            /*
             * When driver presses the button to launch, 7 things need to happen
             * Step 1. Find the position of the robot on the field
@@ -162,69 +197,76 @@ public class ChimeraTeleOp extends LinearOpMode {
             if (gamepad2.a)
             {
                 //Step 1. Find the position of the robot on the field
-                // TODO- implement this-Shlok/Atul
-                telemetry.addData("x", follower.getPose().getX());
-                telemetry.addData("y", follower.getPose().getY());
-                telemetry.addData("heading", follower.getPose().getHeading());
-                telemetry.update();
                 X_Coordinate = follower.getPose().getX();
                 Y_Coordinate = follower.getPose().getY();
+                currentHeading =  follower.getPose().getHeading();
+                telemetry.addData("Current X Coordinate", X_Coordinate);
+                telemetry.addData("Current Y Coordinate", Y_Coordinate);
+                telemetry.addData("Current heading", currentHeading);
+                telemetry.addData("X Coordinate Red Goal", X_Coordinate_Red_Goal);
+                telemetry.addData("Y Coordinate Red Goal", Y_Coordinate_Red_Goal);
+                telemetry.update();
 
                 // TODO - Add code to account for if you are on the right field.
-
-
-
                 // Step 2. Determine the TARGET_VELOCITY based on robot position
-                // TODO- implement this-Shlok/Atul
                 // Calculate distance from robot to the goal
-                Distance_To_Goal_Red = sqrt( Math.pow((X_Coordinate_Red_Goal - X_Coordinate),2) + Math.pow((Y_Coordinate_Red_Goal - Y_Coordinate),2) );
-                if (Distance_To_Goal_Red <= SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE)
+                if (allianceColor == AllianceColor.RED) {
+                    Distance_To_Goal = sqrt(Math.pow((X_Coordinate_Red_Goal - X_Coordinate), 2) + Math.pow((Y_Coordinate_Red_Goal - Y_Coordinate), 2));
+                } else if (allianceColor == AllianceColor.BLUE)
+                {
+                    Distance_To_Goal = sqrt(Math.pow((X_Coordinate_Blue_Goal - X_Coordinate), 2) + Math.pow((Y_Coordinate_Blue_Goal - Y_Coordinate), 2));
+                }
+                if (Distance_To_Goal <= SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE)
                 {
                     setMinVelocity = MIN_VELOCITY_FRONT_LAUNCH_ZONE;
                     setTargetVelocity = TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
                 }
-                else if ((Distance_To_Goal_Red > SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE) &&
-                        ( Distance_To_Goal_Red <= SHOOTING_ZONE_FAR_FRONT_LAUNCH_ZONE))
+                else if ((Distance_To_Goal > SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE) &&
+                        ( Distance_To_Goal <= SHOOTING_ZONE_FAR_FRONT_LAUNCH_ZONE))
                 {
                     // TODO: Change these values
                     setMinVelocity = MIN_VELOCITY_FRONT_LAUNCH_ZONE;
                     setTargetVelocity = TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
 
                 }
-                else if(Distance_To_Goal_Red > SHOOTING_ZONE_FAR_FRONT_LAUNCH_ZONE)
+                else if(Distance_To_Goal > SHOOTING_ZONE_FAR_FRONT_LAUNCH_ZONE)
                 {
                     setMinVelocity = MIN_VELOCITY_BACK_LAUNCH_ZONE;
                     setTargetVelocity = TARGET_VELOCITY_BACK_LAUNCH_ZONE;
-
+                }
+                //  Step 3. Determine the current heading of the robot in the field
+                if (allianceColor == AllianceColor.RED)
+                {
+                    launchPositionHeading = Math.atan2( (Y_Coordinate_Red_Goal - Y_Coordinate), (X_Coordinate_Red_Goal - X_Coordinate) );
+                } else if(allianceColor == AllianceColor.BLUE)
+                {
+                    launchPositionHeading = Math.atan2( (Y_Coordinate_Blue_Goal - Y_Coordinate), (X_Coordinate_Blue_Goal - X_Coordinate) );
                 }
 
 
-                //  Step 3. Determine the current heading of the robot in the field
-                launchPostionHeading = Math.atan2((Y_Coordinate_Red_Goal - Y_Coordinate), (X_Coordinate_Red_Goal - X_Coordinate) );
-
                 // Step 4. Change direction of the robot so its aimed at the goal
-                Pose scorePose = new Pose(X_Coordinate, Y_Coordinate, Math.toRadians(launchPostionHeading)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+                Pose scorePose = new Pose(X_Coordinate, Y_Coordinate, Math.toRadians(launchPositionHeading)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
                 follower.setPose(scorePose);
+                follower.update();
+
+                telemetry.addData("Score Pose X Coordinate", X_Coordinate);
+                telemetry.addData("Score Pose Y Coordinate", Y_Coordinate);
+                telemetry.addData("Score Pose heading", launchPositionHeading);
+                telemetry.addData("Score Pose heading in Radians", Math.toRadians(launchPositionHeading));
+                telemetry.addData("X Coordinate Red Goal", X_Coordinate_Red_Goal);
+                telemetry.addData("Y Coordinate Red Goal", Y_Coordinate_Red_Goal);
+                telemetry.addData("Target Velocity", setTargetVelocity);
+                telemetry.addData("Min Velocity", setMinVelocity);
 
                 // Step 5. Set TARGET_VELOCITY determined in Step 2 to start the left and right outake motors
                 leftOutakeMotor.setVelocity(setTargetVelocity);
                 rightOutakeMotor.setVelocity(setTargetVelocity);
                 pushServo.setPosition(SERVO_REST_POSITION);
+
                 telemetry.addData("Left Outake Motor Velocity", leftOutakeMotor.getVelocity());
                 telemetry.addData("Right Outake Motor Velocity", rightOutakeMotor.getVelocity());
-                telemetry.addData("Target Velocity", setTargetVelocity);
-                telemetry.addData("Min Velocity", setMinVelocity);
-                telemetry.addData("Min Velocity", setMinVelocity);
                 telemetry.update();
-                // Step 6. Check if the velocity of the motors is more than the min velocity
-//                if ((leftOutakeMotor.getVelocity() >= setMinVelocity) && (rightOutakeMotor.getVelocity() >= setMinVelocity))  {
-                    //Step 7. position servo into launch position
-//                    if (gamepad2.dpad_up) {
-//                        pushServo.setPosition(SERVO_LAUNCH_POSITION);
-//                        sleep(SLEEP_BEFORE_RESET_SERVO_POSITION);
-//                        pushServo.setPosition(SERVO_REST_POSITION);
-//                    }
-//                }
+                // Step 6 and Step 7 are performed upon pressing dpad_up.
             }
 
             // Step 6. Check if the velocity of the motors is more than the min velocity
