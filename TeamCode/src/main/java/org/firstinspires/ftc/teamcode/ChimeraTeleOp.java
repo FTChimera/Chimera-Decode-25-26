@@ -3,9 +3,6 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
 import static java.lang.Math.sqrt;
 
-import android.graphics.Paint;
-
-import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -59,7 +56,7 @@ public class ChimeraTeleOp extends LinearOpMode {
     double Distance_To_Goal = 0;
     double Distance_To_Goal_Blue = 0;
     double currentHeading = 0.0;
-    double launchPositionHeading = 0;
+    double launchPositionHeadingRadians = 0;
     final double SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE = 40;
     final double SHOOTING_ZONE_FAR_FRONT_LAUNCH_ZONE = 60;
     final double SHOOTING_ZONE_BACK_LAUNCH_ZONE = 65;
@@ -83,16 +80,30 @@ public class ChimeraTeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        allianceColor = AllianceColor.RED;
-        if (gamepad1.right_bumper)
-        {
-            allianceColor = AllianceColor.BLUE;
-        } else if (gamepad1.left_bumper) {
-            allianceColor = AllianceColor.RED;
-        } else {
-            allianceColor = AllianceColor.RED;
-        }
 
+        //while (!isStarted() && !isStopRequested())
+        while (opModeInInit())
+        {
+            telemetry.addData("Press 'GamePad1 Right Bumper'", "for BLUE");
+            telemetry.addData("Press 'GamePad1 Left Bumper'", "for RED");
+            // This method is called repeatedly during the init phase
+            allianceColor = AllianceColor.RED;
+            if (gamepad1.right_bumper)
+            {
+                allianceColor = AllianceColor.BLUE;
+                // Display the current selection on the Driver Station
+                telemetry.addData("Alliance", "Selected: ", "BLUE");
+            } else if (gamepad1.left_bumper) {
+                allianceColor = AllianceColor.RED;
+                // Display the current selection on the Driver Station
+                telemetry.addData("Alliance", "Selected: ", "RED");
+            } else {
+                allianceColor = AllianceColor.RED;
+                // Display the current selection on the Driver Station
+                telemetry.addData("Alliance", "Selected: ", "RED");
+            }
+            telemetry.update();
+        }
 
         // Declare our motors
         // Make sure your ID's match your configuration
@@ -148,6 +159,7 @@ public class ChimeraTeleOp extends LinearOpMode {
             follower.setStartingPose(startingPose);
             follower.update();
             telemetry.addData("Alliance Color", "Red");
+            telemetry.addData("Starting Pose", follower.getPose());
         }
         else if(allianceColor == AllianceColor.BLUE)
         {
@@ -155,8 +167,16 @@ public class ChimeraTeleOp extends LinearOpMode {
             follower.setStartingPose(startingPose);
             follower.update();
             telemetry.addData("Alliance Color", "Blue");
+            telemetry.addData("Starting Pose", follower.getPose());
+        } else {
+            // Starting position Red Goal
+            startingPose = new Pose(RED_ALLIANCE_STARTING_X_COORDINATE, RED_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(RED_ALLIANCE_STARTING_HEADING_POSITION));
+            follower.setStartingPose(startingPose);
+            follower.update();
+            telemetry.addData("Alliance Color", "Red");
+            telemetry.addData("Starting Pose", follower.getPose());
+            telemetry.addData("Alliance Color Variable", allianceColor);
         }
-        telemetry.addData("alliance color", allianceColor);
 
         //telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         /*
@@ -269,27 +289,24 @@ public class ChimeraTeleOp extends LinearOpMode {
                 //  Step 3. Determine the current heading of the robot in the field
                 if (allianceColor == AllianceColor.RED)
                 {
-                    launchPositionHeading = Math.atan2( (Y_Coordinate_Red_Goal - Y_Coordinate), (X_Coordinate_Red_Goal - X_Coordinate) );
+                    //Math.atan2 returns the angle in radians
+                    launchPositionHeadingRadians = Math.atan2( (Y_Coordinate_Red_Goal - Y_Coordinate), (X_Coordinate_Red_Goal - X_Coordinate) );
                 } else if(allianceColor == AllianceColor.BLUE)
                 {
-                    launchPositionHeading = Math.atan2( (Y_Coordinate_Blue_Goal - Y_Coordinate), (X_Coordinate_Blue_Goal - X_Coordinate) );
+                    //Math.atan2 returns the angle in radians
+                    launchPositionHeadingRadians = Math.atan2( (Y_Coordinate_Blue_Goal - Y_Coordinate), (X_Coordinate_Blue_Goal - X_Coordinate) );
                 }
 
 
                 // Step 4. Change direction of the robot so its aimed at the goal
-                Pose scorePose = new Pose(X_Coordinate, Y_Coordinate, Math.toRadians(launchPositionHeading)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+                Pose scorePose = new Pose(X_Coordinate, Y_Coordinate, launchPositionHeadingRadians); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
                 follower.setPose(scorePose);
                 follower.update();
-                telemetry.addData("Current X Coordinate", X_Coordinate);
-                telemetry.addData("Current Y Coordinate", Y_Coordinate);
+                telemetry.addData("Current and Score Pose X Coordinate", X_Coordinate);
+                telemetry.addData("Current and Score Pose Y Coordinate", Y_Coordinate);
                 telemetry.addData("Current heading", Math.toDegrees(currentHeading));
-
-//                telemetry.addData("Score Pose X Coordinate", X_Coordinate);
-//                telemetry.addData("Score Pose Y Coordinate", Y_Coordinate);
-                telemetry.addData("Score Pose heading in Degrees", Math.toDegrees(launchPositionHeading));
-                telemetry.addData("Score Pose heading in Radians", Math.toRadians(launchPositionHeading));
-//                telemetry.addData("X Coordinate Red Goal", X_Coordinate_Red_Goal);
-//                telemetry.addData("Y Coordinate Red Goal", Y_Coordinate_Red_Goal);
+                telemetry.addData("Score Pose heading in Degrees", Math.toDegrees(launchPositionHeadingRadians));
+                telemetry.addData("Score Pose heading in Radians", launchPositionHeadingRadians);
                 telemetry.addData("Target Velocity", setTargetVelocity);
                 telemetry.addData("Min Velocity", setMinVelocity);
 
