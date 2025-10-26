@@ -7,21 +7,57 @@ import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
+
 @Autonomous(name = " Auto", group = "pedroPathing")
+
 public class Auto extends OpMode {
+    final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 1150;// Set target velocity from front launch zone
+    final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 50;// Set target velocity from back launch zone
+    final int SERVO_LAUNCH_POSITION = 0;
+    final int SERVO_REST_POSITION = 1;
+    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
+    double  setTargetVelocity = 0;
+    double setMinVelocity = 0;
+
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
-    private final Pose startPose = new Pose(130, 113, Math.toRadians(180)); // Start Pose of our robot.
-    private final Pose firstArtifact = new Pose(75, 81, Math.toRadians(50)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
 
-    private Path pathOne;
+    enum OutTakeMotorDirection {
+        FORWARD,
+        REVERSE
+    };
+
+    private OutTakeMotorDirection direction;
+
+    private final Pose startPose = new Pose(130, 113, Math.toRadians(180)); // Start Pose of our robot.
+    private final Pose scorePose = new Pose(75, 81, Math.toRadians(50)); // Sco
+    private final Pose pickup1Pose = new Pose(37, 121, Math.toRadians(0)); // Highest (First Set) of Artifacts from the Spike Mark.
+    private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0)); // Middle (Second Set) of Artifacts from the Spike Mark.
+    private final Pose pickup3Pose = new Pose(49, 135, Math.toRadians(0)); // Lowest (Third Set) of Artifacts from the Spike Mark.
+    // Using DcMotorEx instead of DcMotor to use PID controller
+    DcMotorEx rightOutakeMotor = hardwareMap.get(DcMotorEx.class,"OutakeMotorRight");
+    DcMotorEx leftOutakeMotor = hardwareMap.get(DcMotorEx.class,"OutakeMotorLeft");
+    Servo pushServo = hardwareMap.servo.get("pushServo");
+    //rightOutakeMotor.setDirection(1);
+    //leftOutakeMotor.setDirection(2);
+
+
+
+    private Path scorePreload;
+
 
 
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
-        pathOne = new Path(new BezierLine(startPose, firstArtifact));
-        pathOne.setLinearHeadingInterpolation(startPose.getHeading(), firstArtifact.getHeading());
+        scorePreload = new Path(new BezierLine(startPose, scorePose));
+        scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
     /* Here is an example for Constant Interpolation
     scorePreload.setConstantInterpolation(startPose.getHeading()); */
@@ -31,12 +67,27 @@ public class Auto extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                follower.followPath(pathOne);
+                follower.followPath(scorePreload);
                 setPathState(1);
-
-
                 break;
             case 1:
+                /* You could check for
+                    - Follower State: "if(!follower.isBusy()) {}"
+                    - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
+                    - Robot Position: "if(follower.getPose().getX() > 36) {}"
+                */
+                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+                if(!follower.isBusy()) {
+                    /* Score Preload */
+                    leftOutakeMotor.setVelocity(setTargetVelocity);
+                    rightOutakeMotor.setVelocity(setTargetVelocity);
+                    pushServo.setPosition(SERVO_REST_POSITION);
+
+                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
+                    //follower.followPath(scorePose,true);
+                    //setPathState(2);
+                }
+                break;
         }
     }
 
@@ -90,6 +141,13 @@ public class Auto extends OpMode {
     /** We do not use this because everything should automatically disable **/
     @Override
     public void stop() {}
+
+
+    public void Launcher(){
+
+
+
+    }
 
 
 }

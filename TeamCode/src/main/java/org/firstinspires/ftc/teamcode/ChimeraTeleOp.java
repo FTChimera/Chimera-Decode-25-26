@@ -26,8 +26,8 @@ public class ChimeraTeleOp extends LinearOpMode {
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1150;// Set target velocity from back launch zone
-    final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
-    final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 10;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 250;// Set target velocity from front launch zone
+    final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 200;// Set target velocity from back launch zone
     final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 50;// Set target velocity from back launch zone
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double MIN_VELOCITY = 1075;
@@ -47,6 +47,8 @@ public class ChimeraTeleOp extends LinearOpMode {
     double setMinVelocity = 0;
     private Follower follower;
     public static Pose startingPose;
+    private boolean automatedDrive = false;
+    private boolean slowMode = false;
     private TelemetryManager telemetryM;
     double X_Coordinate_Blue_Goal = 0;
     double Y_Coordinate_Blue_Goal = 144;
@@ -58,11 +60,13 @@ public class ChimeraTeleOp extends LinearOpMode {
     double Distance_To_Goal_Blue = 0;
     double currentHeading = 0.0;
     double launchPositionHeading = 0;
-    final double SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE = 18;
-    final double SHOOTING_ZONE_FAR_FRONT_LAUNCH_ZONE = 24;
-    final double SHOOTING_ZONE_BACK_LAUNCH_ZONE = 36;
+    final double SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE = 40;
+    final double SHOOTING_ZONE_FAR_FRONT_LAUNCH_ZONE = 60;
+    final double SHOOTING_ZONE_BACK_LAUNCH_ZONE = 65;
 
-    final double RED_ALLIANCE_STARTING_X_COORDINATE = 0;
+    // TODO Change Starting position. Temporarily set starting position to back launch
+    // zone, (x,y) = (72,0)
+    final double RED_ALLIANCE_STARTING_X_COORDINATE = 72;
     final double RED_ALLIANCE_STARTING_Y_COORDINATE = 0;
     final double RED_ALLIANCE_STARTING_HEADING_POSITION = 90;
 
@@ -73,17 +77,19 @@ public class ChimeraTeleOp extends LinearOpMode {
         BLUE,
         RED
     };
-  AllianceColor allianceColor;
+    AllianceColor allianceColor;
 
     ElapsedTime feederTimer = new ElapsedTime();
 
     @Override
     public void runOpMode() throws InterruptedException {
-
-        if(gamepad1.right_bumper){
+        allianceColor = AllianceColor.RED;
+        if (gamepad1.right_bumper)
+        {
             allianceColor = AllianceColor.BLUE;
-
-        }else if (gamepad1.left_bumper){
+        } else if (gamepad1.left_bumper) {
+            allianceColor = AllianceColor.RED;
+        } else {
             allianceColor = AllianceColor.RED;
         }
 
@@ -141,22 +147,27 @@ public class ChimeraTeleOp extends LinearOpMode {
             startingPose = new Pose(RED_ALLIANCE_STARTING_X_COORDINATE, RED_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(RED_ALLIANCE_STARTING_HEADING_POSITION));
             follower.setStartingPose(startingPose);
             follower.update();
+            telemetry.addData("Alliance Color", "Red");
         }
         else if(allianceColor == AllianceColor.BLUE)
         {
             startingPose = new Pose(BLUE_ALLIANCE_STARTING_X_COORDINATE, BLUE_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(BLUE_ALLIANCE_STARTING_HEADING_POSITION));
             follower.setStartingPose(startingPose);
             follower.update();
+            telemetry.addData("Alliance Color", "Blue");
         }
+        telemetry.addData("alliance color", allianceColor);
 
-        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+        //telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         /*
          * Tell the driver that initialization is complete.
          */
+
         telemetry.addData("Status", "Initialized");
 
-
         waitForStart();
+
+        follower.startTeleopDrive();
 
         if (isStopRequested()) return;
 
@@ -164,6 +175,19 @@ public class ChimeraTeleOp extends LinearOpMode {
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
             double rx = gamepad1.right_stick_x;
+
+            follower.update();
+//            telemetryM.update();
+
+           // if (!automatedDrive)
+            //{
+              //  if (!slowMode) follower.setTeleOpDrive(
+                       // -gamepad1.left_stick_y, // Remember, Y stick value is reversed
+                        // gamepad1.left_stick_x * 1.1,
+                         //gamepad1.right_stick_x,
+                         //true // Robot Centric
+               // );
+          //  }
 
             // Denominator is the largest motor power (absolute value) or 1
             // This ensures all the powers maintain the same ratio,
@@ -179,10 +203,30 @@ public class ChimeraTeleOp extends LinearOpMode {
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
 
-            follower.update();
-            telemetryM.update();
 
-           /*
+            //Step 1. Find the position of the robot on the field
+            X_Coordinate = follower.getPose().getX();
+            Y_Coordinate = follower.getPose().getY();
+            currentHeading =  follower.getPose().getHeading();
+
+            if (allianceColor == AllianceColor.RED)
+            {
+                telemetry.addData("Alliance Color", "Red");
+            }
+            else if(allianceColor == AllianceColor.BLUE)
+            {
+                telemetry.addData("Alliance Color", "Blue");
+            }
+            telemetry.addData("alliance color", allianceColor);
+            telemetry.addData("Current X Coordinate", X_Coordinate);
+            telemetry.addData("Current Y Coordinate", Y_Coordinate);
+            telemetry.addData("Current heading", Math.toDegrees(currentHeading));
+//            telemetry.addData("X Coordinate Red Goal", X_Coordinate_Red_Goal);
+//            telemetry.addData("Y Coordinate Red Goal", Y_Coordinate_Red_Goal);
+//            telemetry.addData("X Coordinate Blue Goal", X_Coordinate_Blue_Goal);
+//            telemetry.addData("Y Coordinate Blue Goal", Y_Coordinate_Blue_Goal);
+
+            /*
             * When driver presses the button to launch, 7 things need to happen
             * Step 1. Find the position of the robot on the field
             * Step 2. Determine the TARGET_VELOCITY based on robot position
@@ -196,18 +240,6 @@ public class ChimeraTeleOp extends LinearOpMode {
 
             if (gamepad2.a)
             {
-                //Step 1. Find the position of the robot on the field
-                X_Coordinate = follower.getPose().getX();
-                Y_Coordinate = follower.getPose().getY();
-                currentHeading =  follower.getPose().getHeading();
-                telemetry.addData("Current X Coordinate", X_Coordinate);
-                telemetry.addData("Current Y Coordinate", Y_Coordinate);
-                telemetry.addData("Current heading", currentHeading);
-                telemetry.addData("X Coordinate Red Goal", X_Coordinate_Red_Goal);
-                telemetry.addData("Y Coordinate Red Goal", Y_Coordinate_Red_Goal);
-                telemetry.update();
-
-                // TODO - Add code to account for if you are on the right field.
                 // Step 2. Determine the TARGET_VELOCITY based on robot position
                 // Calculate distance from robot to the goal
                 if (allianceColor == AllianceColor.RED) {
@@ -248,13 +280,16 @@ public class ChimeraTeleOp extends LinearOpMode {
                 Pose scorePose = new Pose(X_Coordinate, Y_Coordinate, Math.toRadians(launchPositionHeading)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
                 follower.setPose(scorePose);
                 follower.update();
+                telemetry.addData("Current X Coordinate", X_Coordinate);
+                telemetry.addData("Current Y Coordinate", Y_Coordinate);
+                telemetry.addData("Current heading", Math.toDegrees(currentHeading));
 
-                telemetry.addData("Score Pose X Coordinate", X_Coordinate);
-                telemetry.addData("Score Pose Y Coordinate", Y_Coordinate);
-                telemetry.addData("Score Pose heading", launchPositionHeading);
+//                telemetry.addData("Score Pose X Coordinate", X_Coordinate);
+//                telemetry.addData("Score Pose Y Coordinate", Y_Coordinate);
+                telemetry.addData("Score Pose heading in Degrees", Math.toDegrees(launchPositionHeading));
                 telemetry.addData("Score Pose heading in Radians", Math.toRadians(launchPositionHeading));
-                telemetry.addData("X Coordinate Red Goal", X_Coordinate_Red_Goal);
-                telemetry.addData("Y Coordinate Red Goal", Y_Coordinate_Red_Goal);
+//                telemetry.addData("X Coordinate Red Goal", X_Coordinate_Red_Goal);
+//                telemetry.addData("Y Coordinate Red Goal", Y_Coordinate_Red_Goal);
                 telemetry.addData("Target Velocity", setTargetVelocity);
                 telemetry.addData("Min Velocity", setMinVelocity);
 
@@ -265,7 +300,7 @@ public class ChimeraTeleOp extends LinearOpMode {
 
                 telemetry.addData("Left Outake Motor Velocity", leftOutakeMotor.getVelocity());
                 telemetry.addData("Right Outake Motor Velocity", rightOutakeMotor.getVelocity());
-                telemetry.update();
+                //telemetry.update();
                 // Step 6 and Step 7 are performed upon pressing dpad_up.
             }
 
