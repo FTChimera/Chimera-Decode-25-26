@@ -20,7 +20,7 @@ public class BlueAutoPedro extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
     private final Pose startPose = new Pose(15.75, 111.27, Math.toRadians(180)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(67, 81, Math.toRadians(315));// Scoring Pose of our robot.
+    private final Pose launchPose = new Pose(67, 81, Math.toRadians(315));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose intakePrep = new Pose(50,84.7, Math.toRadians(180));
     private final Pose red1Intake = new Pose(15.51, 84.84, Math.toRadians(180));
     private final Pose red2Intake = new Pose(41.69,60.36, Math.toRadians(180));
@@ -46,6 +46,7 @@ public class BlueAutoPedro extends OpMode {
     final int CHIMERA_PATH_THREE = 4;
     final int CHIMERA_PATH_FOUR = 5;
     final int CHIMERA_PATH_FIVE = 6;
+    final int CHIMERA_STOP = 7;
 
     boolean first_iteration = false;
 
@@ -133,8 +134,11 @@ public class BlueAutoPedro extends OpMode {
                 if (!follower.isBusy()) {
                     follower.followPath(pathFive);
                     IntakeStop();
+                    setPathState(CHIMERA_STOP);
                 }
                 break;
+            case CHIMERA_STOP:
+                telemetry.addLine("Autonomous Complete");
             default:
                 break;
         }
