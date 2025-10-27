@@ -13,6 +13,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.firstinspires.ftc.teamcode.LauncherSubsystem;
+
 
 @Autonomous(name = " Auto", group = "pedroPathing")
 
@@ -28,6 +30,7 @@ public class Auto extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
+    public LauncherSubsystem launch;
 
     enum OutTakeMotorDirection {
         FORWARD,
@@ -78,10 +81,11 @@ public class Auto extends OpMode {
                 */
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if(!follower.isBusy()) {
-                    /* Score Preload */
-                    leftOutakeMotor.setVelocity(setTargetVelocity);
-                    rightOutakeMotor.setVelocity(setTargetVelocity);
-                    pushServo.setPosition(SERVO_REST_POSITION);
+                    /* Score 3 Preloads */
+                    launch.runOutake();
+                    launch.runOutake();
+                    launch.runOutake();
+                    launch.stopOutake();
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
                     //follower.followPath(scorePose,true);
