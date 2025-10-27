@@ -23,9 +23,9 @@ public class ChimeraTeleOp extends LinearOpMode {
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1150;// Set target velocity from back launch zone
-    final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 250;// Set target velocity from front launch zone
-    final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 200;// Set target velocity from back launch zone
-    final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 50;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 800;// Set target velocity from front launch zone
+    final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 900;// Set target velocity from back launch zone
+    final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 500;// Set target velocity from back launch zone
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double MIN_VELOCITY = 1075;
     final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
@@ -57,15 +57,15 @@ public class ChimeraTeleOp extends LinearOpMode {
     double Distance_To_Goal_Blue = 0;
     double currentHeading = 0.0;
     double launchPositionHeadingRadians = 0;
-    final double SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE = 40;
+    final double SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE = 20;
     final double SHOOTING_ZONE_FAR_FRONT_LAUNCH_ZONE = 60;
     final double SHOOTING_ZONE_BACK_LAUNCH_ZONE = 65;
 
     // TODO Change Starting position. Temporarily set starting position to back launch
     // zone, (x,y) = (72,0)
-    final double RED_ALLIANCE_STARTING_X_COORDINATE = 72;
-    final double RED_ALLIANCE_STARTING_Y_COORDINATE = 0;
-    final double RED_ALLIANCE_STARTING_HEADING_POSITION = 90;
+    final double RED_ALLIANCE_STARTING_X_COORDINATE = 104;
+    final double RED_ALLIANCE_STARTING_Y_COORDINATE = 60;
+    final double RED_ALLIANCE_STARTING_HEADING_POSITION = 180;
 
     final double BLUE_ALLIANCE_STARTING_X_COORDINATE = 144;
     final double BLUE_ALLIANCE_STARTING_Y_COORDINATE = 0;
@@ -198,17 +198,17 @@ public class ChimeraTeleOp extends LinearOpMode {
 
             follower.update();
 //            telemetryM.update();
-
-           // if (!automatedDrive)
-            //{
-              //  if (!slowMode) follower.setTeleOpDrive(
-                       // -gamepad1.left_stick_y, // Remember, Y stick value is reversed
-                        // gamepad1.left_stick_x * 1.1,
-                         //gamepad1.right_stick_x,
-                         //true // Robot Centric
-               // );
-          //  }
-
+            /*
+           if (!automatedDrive)
+            {
+                if (!slowMode) follower.setTeleOpDrive(
+                       -gamepad1.left_stick_y, // Remember, Y stick value is reversed
+                        gamepad1.left_stick_x * 1.1,
+                       gamepad1.right_stick_x,
+                       true // Robot Centric
+               );
+            }
+            */
             // Denominator is the largest motor power (absolute value) or 1
             // This ensures all the powers maintain the same ratio,
             // but only if at least one is out of the range [-1, 1]
@@ -237,7 +237,7 @@ public class ChimeraTeleOp extends LinearOpMode {
             {
                 telemetry.addData("Alliance Color", "Blue");
             }
-            telemetry.addData("alliance color", allianceColor);
+
             telemetry.addData("Current X Coordinate", X_Coordinate);
             telemetry.addData("Current Y Coordinate", Y_Coordinate);
             telemetry.addData("Current heading", Math.toDegrees(currentHeading));
@@ -263,11 +263,13 @@ public class ChimeraTeleOp extends LinearOpMode {
                 // Step 2. Determine the TARGET_VELOCITY based on robot position
                 // Calculate distance from robot to the goal
                 if (allianceColor == AllianceColor.RED) {
-                    Distance_To_Goal = sqrt(Math.pow((X_Coordinate_Red_Goal - X_Coordinate), 2) + Math.pow((Y_Coordinate_Red_Goal - Y_Coordinate), 2));
+                    Distance_To_Goal = Math.sqrt(Math.pow((X_Coordinate_Red_Goal - X_Coordinate), 2) + Math.pow((Y_Coordinate_Red_Goal - Y_Coordinate), 2));
                 } else if (allianceColor == AllianceColor.BLUE)
                 {
-                    Distance_To_Goal = sqrt(Math.pow((X_Coordinate_Blue_Goal - X_Coordinate), 2) + Math.pow((Y_Coordinate_Blue_Goal - Y_Coordinate), 2));
+                    Distance_To_Goal = Math.sqrt(Math.pow((X_Coordinate_Blue_Goal - X_Coordinate), 2) + Math.pow((Y_Coordinate_Blue_Goal - Y_Coordinate), 2));
                 }
+                telemetry.addData("Distance to Goal", Distance_To_Goal);
+
                 if (Distance_To_Goal <= SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE)
                 {
                     setMinVelocity = MIN_VELOCITY_FRONT_LAUNCH_ZONE;
