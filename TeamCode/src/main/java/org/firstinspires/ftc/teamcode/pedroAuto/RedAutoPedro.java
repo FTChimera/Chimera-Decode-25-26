@@ -46,6 +46,7 @@ public class RedAutoPedro extends OpMode {
     final int CHIMERA_PATH_THREE = 4;
     final int CHIMERA_PATH_FOUR = 5;
     final int CHIMERA_PATH_FIVE = 6;
+    final int CHIMERA_STOP = 7;
 
     boolean first_iteration = false;
 
@@ -133,7 +134,11 @@ public class RedAutoPedro extends OpMode {
                 if (!follower.isBusy()) {
                     follower.followPath(pathFive);
                     IntakeStop();
+                    setPathState(CHIMERA_STOP);
                 }
+                break;
+            case CHIMERA_STOP:
+                telemetry.addLine("Autonomous Complete");
                 break;
             default:
                 break;
