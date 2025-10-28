@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.Vision;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+
+import java.util.List;
 
 /*
 Pipelines:
@@ -47,7 +50,7 @@ public class LimelightObjectDetection extends LinearOpMode {
         double FrameCheck = 0;
         boolean isRed = gamepad1.a; // fixed at init
         boolean LocalizationOn;
-        double tx = 0, ty = 0, ta = 0;
+        double tx = 0, ty = 0, ta = 0, tid = 0;
         Pose3D botpose = null;
         waitForStart();
         limelight1.start();
@@ -68,6 +71,13 @@ public class LimelightObjectDetection extends LinearOpMode {
                 tx = result.getTx();
                 ty = result.getTy();
                 ta = result.getTa();
+
+                List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+                for (LLResultTypes.FiducialResult fiducial : fiducials) {
+                    tid = fiducial.getFiducialId();
+                }
+
+
 
                 if (LocalizationOn) {
                     botpose = result.getBotpose();
