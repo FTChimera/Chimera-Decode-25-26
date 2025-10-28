@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.pedroAuto;
 
-import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
-
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
@@ -12,12 +10,9 @@ import com.pedropathing.ftc.localization.Encoder;
 import com.pedropathing.ftc.localization.constants.PinpointConstants;
 import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
-
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 //TODO- Change the robots mass(in kg)
 public class Constants {
@@ -41,21 +36,18 @@ public class Constants {
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
-
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pathConstraints(pathConstraints)
                 .mecanumDrivetrain(driveConstants)
                 .pinpointLocalizer(localizerConstants)
                 .build();
-
-
     }
 
     // TODO- Change the X and Y pod offsets
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
             .forwardPodY(6)
-            .strafePodX(0)
+            .strafePodX(-0.375)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
@@ -91,3 +83,5 @@ public class Constants {
 //leftBack = hardwareMap.get(DcMotorEx.class, "backLeftMotor");
 //rightBack = hardwareMap.get(DcMotorEx.class, "backRightMotor");
 //rightFront = hardwareMap.get(DcMotorEx.class, "frontRightMotor");
+
+
