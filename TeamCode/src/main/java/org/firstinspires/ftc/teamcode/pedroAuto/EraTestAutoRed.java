@@ -1,24 +1,20 @@
-package org.firstinspires.ftc.teamcode.pedroPathing; // make sure this aligns with class location
+package org.firstinspires.ftc.teamcode.pedroAuto; // make sure this aligns with class location
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.LauncherSubsystem;
 
 
-@Autonomous(name = " Auto", group = "pedroPathing")
+@Autonomous(name = " EraTestAutoRed", group = "pedroPathing")
 
-public class Auto extends OpMode {
+public class EraTestAutoRed extends OpMode {
     final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 1150;// Set target velocity from front launch zone
     final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 50;// Set target velocity from back launch zone
     final int SERVO_LAUNCH_POSITION = 0;
