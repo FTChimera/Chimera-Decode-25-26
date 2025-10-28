@@ -5,6 +5,9 @@ import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.List;
@@ -21,6 +24,12 @@ Pipelines:
 @TeleOp
 public class LimelightObjectDetection extends LinearOpMode {
 
+    enum AllianceColor {
+        BLUE,
+        RED
+    };
+    AllianceColor allianceColor = AllianceColor.RED;
+    int goalID = 24; // CHANGE FOR ALLIANCE COLOR - Blue: 20, Red: 24
     public int changePipeline(int curPipe, boolean isRed) {
         switch (curPipe) {
             case 1:
@@ -40,6 +49,17 @@ public class LimelightObjectDetection extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
+        DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
+        DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
+        DcMotor backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
+
+        frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
         Limelight3A limelight1 = hardwareMap.get(Limelight3A.class, "limelight");
         limelight1.pipelineSwitch(1);
 
@@ -56,6 +76,18 @@ public class LimelightObjectDetection extends LinearOpMode {
         limelight1.start();
 
         while (opModeIsActive()) {
+                if (gamepad2.a && tid==goalID) {
+                double denominator = Math.max(Math.abs(tx), 1);
+                double frontLeftPower = 0.85 * (tx) / denominator;
+                double backLeftPower = 0.85 * (-tx) / denominator;
+                double frontRightPower = 0.85 * (-tx) / denominator;
+                double backRightPower = 0.85 * (tx) / denominator;
+                frontLeftMotor.setPower(frontLeftPower);
+                backLeftMotor.setPower(backLeftPower);
+                frontRightMotor.setPower(frontRightPower);
+                backRightMotor.setPower(backRightPower);
+            }
+
             telemetry.addData("Status", "Running");
             telemetry.addData("Current Pipeline", curPipe);
             curPipe = changePipeline(curPipe, isRed);
