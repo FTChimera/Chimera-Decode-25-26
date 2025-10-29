@@ -21,11 +21,23 @@ public class LLToolkit {
         }
     }
 
-    public double CalculateDistanceCurve(double TargetArea) {
-        // Calculates the Distance based on a formula from the Target Area.
-        return TargetArea;
-    }
+    public double calculateDistanceCurve(double x) {
+        // Calculate the exponent term (x / 6.633929)^7.298902
+        double exponentTerm = Math.pow(x / 6.633929, 7.298902);
 
+        // Calculate the denominator (1 + exponentTerm)
+        double denominator = 1 + exponentTerm;
+
+        // Calculate the numerator (84.12366 - 46.68694)
+        double numerator = 84.12366 - 46.68694;
+
+        // Perform the division
+        double divisionResult = numerator / denominator;
+
+        // Calculate the final value of y
+
+        return 46.68694 + divisionResult;
+    }
     public class LimelightResult {
         public double tx=-1,ty=-1,ta=-1,tid=-1, dist=-1;
 

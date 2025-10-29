@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 
 
 @TeleOp(name = "ChimeraTeleOpPedro", group = "AbsolutePriority")// Name and Group
