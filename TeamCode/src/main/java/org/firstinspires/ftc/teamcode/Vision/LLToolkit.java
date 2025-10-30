@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.Vision;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import java.util.List;
 
 public class LLToolkit {
 
@@ -38,15 +41,25 @@ public class LLToolkit {
 
         return 46.68694 + divisionResult;
     }
-    public class LimelightResult {
-        public double tx=-1,ty=-1,ta=-1,tid=-1, dist=-1;
+    public class ChimeraLL {
+        public double tx=-1.0,ty=-1.0,ta=-1.0,tid=-1.0, dist=-1.0;
 
         public Limelight3A limelight1;
 
-        public double getTa() {return ta;}
-        public double getId() {return tid;}
-        public double[] getTxy() {return new double[]{tx, ty};}
-
+        public void setDevice(Limelight3A device) {limelight1=device;}
+        public void startLL(){limelight1.start();}
+        public double[] getLatest(){return new double[]{tx,ty,ta,tid,dist};}
+        public void LLUpdate() {
+            LLResult result = limelight1.getLatestResult();
+            if (result!=null && result.isValid()) {
+                tx=result.getTx();
+                ty= result.getTy();
+                ta=result.getTa();
+                List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+                for (LLResultTypes.FiducialResult fiduciary : fiducials ) {tid = fiduciary.getFiducialId();}
+                dist = calculateDistanceCurve(ta);
+            }
+        }
     }
 }
 
