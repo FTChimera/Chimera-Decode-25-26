@@ -24,7 +24,7 @@ public class LLToolkit {
         }
     }
 
-    public double calculateDistanceCurve(double x) {
+    public static double calculateDistanceCurve(double x) {
         // Calculate the exponent term (x / 6.633929)^7.298902
         double exponentTerm = Math.pow(x / 6.633929, 7.298902);
 
@@ -41,13 +41,13 @@ public class LLToolkit {
 
         return 46.68694 + divisionResult;
     }
-    public class ChimeraLL {
+    public static class ChimeraLL {
         public double tx=-1.0,ty=-1.0,ta=-1.0,tid=-1.0, dist=-1.0;
 
         public Limelight3A limelight1;
 
         public void setDevice(Limelight3A device) {limelight1=device;}
-        public void startLL(){limelight1.start();}
+        public void startLLWithPipeline(int pipeline){limelight1.start();limelight1.pipelineSwitch(pipeline);}
         public double[] getLatest(){return new double[]{tx,ty,ta,tid,dist};}
         public void LLUpdate() {
             LLResult result = limelight1.getLatestResult();
