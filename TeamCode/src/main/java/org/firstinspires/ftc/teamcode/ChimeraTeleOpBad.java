@@ -17,8 +17,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 
 
-@TeleOp(name = "ChimeraTeleOp", group = "AbsolutePriority")// Name and Group
-public class ChimeraTeleOp extends LinearOpMode {
+@TeleOp(name = "ChimeraTeleOpBad", group = "AbsolutePriority")// Name and Group
+public class ChimeraTeleOpBad extends LinearOpMode {
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1200;// Set target velocity from back launch zone
@@ -126,7 +126,7 @@ public class ChimeraTeleOp extends LinearOpMode {
 
         waitForStart();
 
-        if (isStopRequested()) return;
+        // if (isStopRequested()) return;
 
         while (opModeIsActive()) {
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
@@ -245,8 +245,8 @@ public class ChimeraTeleOp extends LinearOpMode {
                 telemetry.addData("Right Outake Motor Velocity front", rightOutakeMotor.getVelocity());
                 telemetry.addData("Target Velocity front launch Zone", setTargetVelocity);
                 telemetry.addData("Min Velocity front", setMinVelocity);
-                
-                
+
+
             }
 
             // Step 6. Check if the velocity of the motors is more than the min velocity

@@ -20,7 +20,7 @@ import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 public class ChimeraTeleOpPedro extends LinearOpMode {
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1150;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1170;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 800;// Set target velocity from front launch zone
     final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 900;// Set target velocity from back launch zone
     final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 500;// Set target velocity from back launch zone
