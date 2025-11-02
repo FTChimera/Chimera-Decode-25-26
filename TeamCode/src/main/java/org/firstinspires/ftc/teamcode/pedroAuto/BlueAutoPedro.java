@@ -20,15 +20,17 @@ public class BlueAutoPedro extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
     private final Pose startPose = new Pose(15.75, 111.27, Math.toRadians(180)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(67, 81, Math.toRadians(315));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose launchPose = new Pose(50, 78.06, Math.toRadians(310));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose intakePrep = new Pose(50,84.7, Math.toRadians(180));
     private final Pose red1Intake = new Pose(15.51, 84.84, Math.toRadians(180));
-    private final Pose red2Intake = new Pose(41.69,60.36, Math.toRadians(180));
+    private final Pose intakePrep2 = new Pose(40.48,55.99, Math.toRadians(180));
+    private final Pose blue2Intake = new Pose(10.78, 55.99, Math.toRadians(180));
+    private final Pose finalPose = new Pose(37.77, 38.19, Math.toRadians(0));
 
-    private Path pathOne, pathTwo, pathThree, pathFour, pathFive;
+    private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight;
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1085;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1065;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
     final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 10;// Set target velocity from back launch zone
     final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 50;// Set target velocity from back launch zone
@@ -46,12 +48,13 @@ public class BlueAutoPedro extends OpMode {
     final int CHIMERA_PATH_THREE = 4;
     final int CHIMERA_PATH_FOUR = 5;
     final int CHIMERA_PATH_FIVE = 6;
-    final int CHIMERA_STOP = 7;
+    final int CHIMERA_PATH_SIX = 7;
+    final int CHIMERA_PATH_SEVEN = 8;
+    final int CHIMERA_PATH_EIGHT = 9;
+    final int CHIMERA_STOP = 10;
 
     boolean first_iteration = false;
-
-
-
+    boolean second_iteration = false;
 
     final double Kp = 300;
     final double Ki = 0.0;
@@ -77,10 +80,17 @@ public class BlueAutoPedro extends OpMode {
         pathFour = new Path(new BezierLine(red1Intake, launchPose));
         pathFour.setLinearHeadingInterpolation(red1Intake.getHeading(), launchPose.getHeading());
 
-        pathFive = new Path(new BezierLine(launchPose, red2Intake));
-        pathFive.setLinearHeadingInterpolation(launchPose.getHeading(), red2Intake.getHeading());
+        pathFive = new Path(new BezierLine(launchPose, intakePrep2));
+        pathFive.setLinearHeadingInterpolation(launchPose.getHeading(), intakePrep2.getHeading());
 
+        pathSix = new Path(new BezierLine(intakePrep, blue2Intake));
+        pathSix.setLinearHeadingInterpolation(intakePrep2.getHeading(), blue2Intake.getHeading());
 
+        pathSeven = new Path(new BezierLine(blue2Intake, launchPose));
+        pathSeven.setLinearHeadingInterpolation(blue2Intake.getHeading(), launchPose.getHeading());
+
+        pathEight = new Path(new BezierLine(launchPose, finalPose));
+        pathEight.setLinearHeadingInterpolation(launchPose.getHeading(), finalPose.getHeading() );
 
     /* Here is an example for Constant Interpolation
     scorePreload.setConstantInterpolation(startPose.getHeading()); */
@@ -96,20 +106,25 @@ public class BlueAutoPedro extends OpMode {
             case CHIMERA_LAUNCH:
                 if (!follower.isBusy()){
                     Launcher();
-                    sleep(800);
+                    sleep(200);
                     Launcher();
                     setPathState(CHIMERA_LAUNCH_INTAKE);
                 }
                 break;
             case CHIMERA_LAUNCH_INTAKE:
                 Intake();
-                sleep(800);
+                sleep(500);
                 Launcher();
+                LauncherStop();
                 if(!first_iteration) {
                     setPathState(CHIMERA_PATH_TWO);
                     first_iteration = true;
-                } else {
+                } else if (!second_iteration) {
                     setPathState(CHIMERA_PATH_FIVE);
+                    second_iteration = true;
+                } else {
+                    setPathState(CHIMERA_PATH_EIGHT);
+                    IntakeStop();
                 }
                 break;
             case CHIMERA_PATH_TWO:
@@ -133,7 +148,24 @@ public class BlueAutoPedro extends OpMode {
             case CHIMERA_PATH_FIVE:
                 if (!follower.isBusy()) {
                     follower.followPath(pathFive);
-                    IntakeStop();
+                    setPathState(CHIMERA_PATH_SIX);
+                }
+                break;
+            case CHIMERA_PATH_SIX:
+                if (!follower.isBusy()) {
+                    follower.followPath(pathSix);
+                    setPathState(CHIMERA_PATH_SEVEN);
+                }
+                break;
+            case CHIMERA_PATH_SEVEN:
+                if (!follower.isBusy()) {
+                    follower.followPath(pathSeven);
+                    setPathState(CHIMERA_LAUNCH);
+                }
+                break;
+            case CHIMERA_PATH_EIGHT:
+                if (!follower.isBusy()) {
+                    follower.followPath(pathEight);
                     setPathState(CHIMERA_STOP);
                 }
                 break;
@@ -220,14 +252,17 @@ public class BlueAutoPedro extends OpMode {
         // Start the timer and motors on the first run
         OutakeMotorRight.setVelocity(TARGET_VELOCITY_BACK_LAUNCH_ZONE);
         OutakeMotorLeft.setVelocity(TARGET_VELOCITY_BACK_LAUNCH_ZONE);
-        sleep(200);
+        sleep(350);
         pushServo.setPosition(SERVO_LAUNCH_POSITION);//Set pushServo to launch
-        sleep(1200);
+        sleep(500);
+        pushServo.setPosition(SERVO_REST_POSITION);
+
+    }
+    public void LauncherStop() {
         OutakeMotorRight.setVelocity(STOP_VELOCITY);
         OutakeMotorLeft.setVelocity(STOP_VELOCITY);
         pushServo.setPosition(SERVO_REST_POSITION);//Resets the pushServo position
-        sleep(1200);
-
+        sleep(200);
     }
     public void Intake() {
         intakeMotor.setPower(1);
