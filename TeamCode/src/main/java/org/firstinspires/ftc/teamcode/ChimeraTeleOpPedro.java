@@ -85,16 +85,11 @@ public class ChimeraTeleOpPedro extends LinearOpMode {
             telemetry.addData("Press 'GamePad1 Right Bumper'", "for BLUE");
             telemetry.addData("Press 'GamePad1 Left Bumper'", "for RED");
             // This method is called repeatedly during the init phase
-            allianceColor = AllianceColor.RED;
             if (gamepad1.right_bumper)
             {
                 allianceColor = AllianceColor.BLUE;
                 // Display the current selection on the Driver Station
                 telemetry.addData("Alliance", "Selected: ", "BLUE");
-            } else if (gamepad1.left_bumper) {
-                allianceColor = AllianceColor.RED;
-                // Display the current selection on the Driver Station
-                telemetry.addData("Alliance", "Selected: ", "RED");
             } else {
                 allianceColor = AllianceColor.RED;
                 // Display the current selection on the Driver Station
@@ -158,22 +153,12 @@ public class ChimeraTeleOpPedro extends LinearOpMode {
             follower.update();
             telemetry.addData("Alliance Color", "Red");
             telemetry.addData("Starting Pose", follower.getPose());
-        }
-        else if(allianceColor == AllianceColor.BLUE)
-        {
+        } else {
             startingPose = new Pose(BLUE_ALLIANCE_STARTING_X_COORDINATE, BLUE_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(BLUE_ALLIANCE_STARTING_HEADING_POSITION));
             follower.setStartingPose(startingPose);
             follower.update();
             telemetry.addData("Alliance Color", "Blue");
             telemetry.addData("Starting Pose", follower.getPose());
-        } else {
-            // Starting position Red Goal
-            startingPose = new Pose(RED_ALLIANCE_STARTING_X_COORDINATE, RED_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(RED_ALLIANCE_STARTING_HEADING_POSITION));
-            follower.setStartingPose(startingPose);
-            follower.update();
-            telemetry.addData("Alliance Color", "Red");
-            telemetry.addData("Starting Pose", follower.getPose());
-            telemetry.addData("Alliance Color Variable", allianceColor);
         }
 
         //telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
@@ -227,15 +212,7 @@ public class ChimeraTeleOpPedro extends LinearOpMode {
             Y_Coordinate = follower.getPose().getY();
             currentHeading =  follower.getPose().getHeading();
 
-            if (allianceColor == AllianceColor.RED)
-            {
-                telemetry.addData("Alliance Color", "Red");
-            }
-            else if(allianceColor == AllianceColor.BLUE)
-            {
-                telemetry.addData("Alliance Color", "Blue");
-            }
-
+            telemetry.addData("Alliance Color: ", allianceColor);
             telemetry.addData("Current X Coordinate", X_Coordinate);
             telemetry.addData("Current Y Coordinate", Y_Coordinate);
             telemetry.addData("Current heading", Math.toDegrees(currentHeading));
@@ -342,9 +319,7 @@ public class ChimeraTeleOpPedro extends LinearOpMode {
 
             if (gamepad2.x){
                 intakeMotor.setPower(1);
-            }
-
-            if(gamepad2.y){
+            } else {
                 intakeMotor.setPower(0);
             }
             /*

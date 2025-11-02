@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode.Vision;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+
 import java.util.List;
 
 public class LLToolkit {
@@ -43,14 +46,14 @@ public class LLToolkit {
     }
     public static class ChimeraLL {
         public double tx=-1.0,ty=-1.0,ta=-1.0,tid=-1.0, dist=-1.0;
-
         public Limelight3A limelight1;
-
+        public Pose3D botpose;
+        public LLResult result;
         public void setDevice(Limelight3A device) {limelight1=device;}
         public void startLLWithPipeline(int pipeline){limelight1.start();limelight1.pipelineSwitch(pipeline);}
         public double[] getLatest(){return new double[]{tx,ty,ta,tid,dist};}
         public void LLUpdate() {
-            LLResult result = limelight1.getLatestResult();
+            result = limelight1.getLatestResult();
             if (result!=null && result.isValid()) {
                 tx=result.getTx();
                 ty= result.getTy();
@@ -58,6 +61,7 @@ public class LLToolkit {
                 List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
                 for (LLResultTypes.FiducialResult fiduciary : fiducials ) {tid = fiduciary.getFiducialId();}
                 dist = calculateDistanceCurve(ta);
+                botpose = result.getBotpose_MT2();
             }
         }
     }
