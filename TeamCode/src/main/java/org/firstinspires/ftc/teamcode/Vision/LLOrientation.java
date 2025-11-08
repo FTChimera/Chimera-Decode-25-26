@@ -6,7 +6,8 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.Consts;
+import org.firstinspires.ftc.teamcode.Systems.Consts;
+import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 
 @TeleOp
@@ -15,7 +16,7 @@ public class LLOrientation extends LinearOpMode {
     public static Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;
     private Follower follower = Constants.createFollower(hardwareMap);
     public Pose curPose = follower.getPose();
-    public LLToolkit.ChimeraLL limelight = new LLToolkit.ChimeraLL();
+    public LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
     public double findAngleToRotate() {
         // return allianceColor==Consts.AllianceColor.RED? Math.atan2( (Consts.Y_Coordinate_Red_Goal - curPose.getY()), (Consts.X_Coordinate_Red_Goal - curPose.getX()) ):Math.atan2( (Consts.Y_Coordinate_Blue_Goal - curPose.getY()), (Consts.X_Coordinate_Blue_Goal - curPose.getX()) );
         return limelight.tx;

@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
+
 @TeleOp
 public class LimelightObjectDetection extends LinearOpMode {
     enum AllianceColor {BLUE, RED};
@@ -23,7 +25,7 @@ public class LimelightObjectDetection extends LinearOpMode {
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        LLToolkit.ChimeraLL limelight = new LLToolkit.ChimeraLL();
+        LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
         Limelight3A lldevice = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setDevice(lldevice);
         waitForStart();
