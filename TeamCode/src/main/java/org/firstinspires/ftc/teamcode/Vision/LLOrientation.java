@@ -26,7 +26,7 @@ public class LLOrientation extends LinearOpMode {
     public void runOpMode() {
         limelight.setDevice(hardwareMap.get(Limelight3A.class, "limelight"));
         startingPose = allianceColor==Consts.AllianceColor.RED? Consts.RED_STARTING_POSE : Consts.BLUE_STARTING_POSE;follower.setStartingPose(startingPose);follower.update();
-        waitForStart();limelight.startLLWithPipeline(0);follower.startTeleopDrive();
+        waitForStart();limelight.startLLWithPipeline(allianceColor==Consts.AllianceColor.RED?4:5);follower.startTeleopDrive();
         while (opModeIsActive()) {
             limelight.LLUpdate();follower.update();
             if (gamepad2.a) {

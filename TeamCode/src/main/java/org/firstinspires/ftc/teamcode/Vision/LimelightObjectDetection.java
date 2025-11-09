@@ -31,8 +31,8 @@ public class LimelightObjectDetection extends LinearOpMode {
         waitForStart();
         limelight.startLLWithPipeline(0);
         while (opModeIsActive()) {
-            limelight.LLUpdate();double[]result=limelight.getLatest();
-            double tx = result[0];double ty = result[1];double ta = result[2];double tid = result[3];double dist = result[4];double trx = 0; // trx rotation not implemented yet
+            limelight.LLUpdate();
+            double tx = limelight.tx;double ty = limelight.ty;double ta = limelight.ta;double tid = limelight.tid;double dist = limelight.dist;double trx = 0; // trx rotation not implemented yet
             double denominator = Math.max(Math.abs(ty) + Math.abs(tx) + Math.abs(trx), 1);
             double frontLeftPower = 0.85 *(ty + tx + trx) / denominator;
             double backLeftPower = 0.85 *(ty - tx + trx) / denominator;
