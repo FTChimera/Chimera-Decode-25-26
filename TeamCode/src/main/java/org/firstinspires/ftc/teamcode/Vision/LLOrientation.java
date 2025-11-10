@@ -12,33 +12,35 @@ import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 
 @TeleOp
 public class LLOrientation extends LinearOpMode {
-    public Pose startingPose;
     public static Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;
-    private Follower follower = Constants.createFollower(hardwareMap);
-    public Pose curPose = follower.getPose();
+    private Follower follower;
     public LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
     public double findAngleToRotate() {
         // return allianceColor==Consts.AllianceColor.RED? Math.atan2( (Consts.Y_Coordinate_Red_Goal - curPose.getY()), (Consts.X_Coordinate_Red_Goal - curPose.getX()) ):Math.atan2( (Consts.Y_Coordinate_Blue_Goal - curPose.getY()), (Consts.X_Coordinate_Blue_Goal - curPose.getX()) );
-        telemetry.addData("Tx", limelight.tx);
         return Math.toRadians(limelight.tx);
     }
-    public void rotate(double angle_Radians) {follower.setPose(new Pose(curPose.getX(), curPose.getY(), angle_Radians));}
+    public void rotate(double angle_Radians) {follower.turn(Math.abs(angle_Radians), angle_Radians/Math.abs(angle_Radians)==-1);follower.update();}
     @Override
     public void runOpMode() {
-
-        
+        follower = Constants.createFollower(hardwareMap);
         limelight.setDevice(hardwareMap.get(Limelight3A.class, "limelight"));
-        startingPose = allianceColor==Consts.AllianceColor.RED? Consts.RED_STARTING_POSE : Consts.BLUE_STARTING_POSE;follower.setStartingPose(startingPose);follower.update();
+        // startingPose = allianceColor==Consts.AllianceColor.RED? Consts.RED_STARTING_POSE : Consts.BLUE_STARTING_POSE;follower.setStartingPose(startingPose);follower.update();
         waitForStart();limelight.startLLWithPipeline(allianceColor==Consts.AllianceColor.RED?4:5);follower.startTeleopDrive();
 
 
         while (opModeIsActive()) {
-            limelight.LLUpdate();follower.update();
+            limelight.LLUpdate();
+            telemetry.addData("Tx (radians)", Math.toRadians(limelight.tx));
+            telemetry.addData("Tx (degrees)", limelight.tx);
+            telemetry.addData("Gamepad2.a", "not pressed");
             if (gamepad2.a) {
-                rotate(findAngleToRotate());
+                telemetry.addData("Gamepad2.a", "pressed");
+                rotate(findAngleToRotate()*50);
+            } else {
+                rotate(0);
             }
 
-
+            telemetry.update();
         }
     }
 }
