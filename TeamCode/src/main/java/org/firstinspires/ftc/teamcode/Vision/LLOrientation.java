@@ -50,7 +50,7 @@ public class LLOrientation extends LinearOpMode {
                 telemetry.addData("Gamepad2.a", "pressed");
                 // FIRST, rotate to face the goal
                 if (step==0) {
-                    rotate(findAngleToRotate() * 50);
+                    rotate(findAngleToRotate() * Consts.LAUNCHER_GOALTAG_ANGLE_SCALE);
                 }
                 // THEN, you need to move so that the distance is good for launching.
                 if (step==1){
