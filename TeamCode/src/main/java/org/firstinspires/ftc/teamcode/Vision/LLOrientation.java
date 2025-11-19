@@ -14,9 +14,29 @@ import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 
 @TeleOp
 public class LLOrientation extends LinearOpMode {
+    enum SelectionChange{UP, DOWN}
     public static Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;
+    public String[] options = {"April Heading Rotation", "Distance Test", "April Tag Test"};
+    public int mode;
     private Follower follower;
     public LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
+    void renderSelectMode(int selected) {
+        telemetry.addData("Button to change between testing modes", "Gamepad 2 Dpad up/down");
+        telemetry.addData("Button to select testing mode", "Gamepad2 A");
+        telemetry.addData("Options","");
+        for (int i = 0; i < options.length; i++) {
+            telemetry.addLine((i==selected?"> ":"") + options[i]);
+        }
+        telemetry.update();
+    }
+    public int changeSelection(SelectionChange direction, int select, int maxSelect) {
+        if (direction==SelectionChange.UP) {
+            if (select==0) return maxSelect; else return (select-1);
+        } else if (direction==SelectionChange.DOWN) {
+            if (select==maxSelect) return 0; else return (select+1);
+        }
+        return -1;
+    }
     public double findAngleToRotate() {
         // return allianceColor==Consts.AllianceColor.RED? Math.atan2( (Consts.Y_Coordinate_Red_Goal - curPose.getY()), (Consts.X_Coordinate_Red_Goal - curPose.getX()) ):Math.atan2( (Consts.Y_Coordinate_Blue_Goal - curPose.getY()), (Consts.X_Coordinate_Blue_Goal - curPose.getX()) );
         return Math.toRadians(limelight.tx);
@@ -33,36 +53,54 @@ public class LLOrientation extends LinearOpMode {
     public void rotate(double angle_Radians) {follower.turn(Math.abs(angle_Radians), angle_Radians/Math.abs(angle_Radians)==-1);follower.update();}
     @Override
     public void runOpMode() {
-        follower = Constants.createFollower(hardwareMap);
+        follower = Constants.createFollower(hardwareMap);int pipe = 0; // int pipe = allianceColor==Consts.AllianceColor.RED?4:5
         limelight.setDevice(hardwareMap.get(Limelight3A.class, "limelight"));
-        // startingPose = allianceColor==Consts.AllianceColor.RED? Consts.RED_STARTING_POSE : Consts.BLUE_STARTING_POSE;follower.setStartingPose(startingPose);follower.update();
-        waitForStart();limelight.startLLWithPipeline(allianceColor==Consts.AllianceColor.RED?4:5);follower.startTeleopDrive();
-
+        int selected=0;
+        while (opModeInInit()) {
+            renderSelectMode(selected);
+            if (gamepad2.dpad_up){selected=changeSelection(SelectionChange.UP,selected,options.length-1);}
+            if (gamepad2.dpad_down){selected=changeSelection(SelectionChange.DOWN,selected,options.length-1);}
+            if (gamepad2.a) {telemetry.addData("Option Selected",options[selected]);telemetry.update();break;}
+        }
+        waitForStart();limelight.startLLWithPipeline(pipe);follower.startTeleopDrive();
 
         while (opModeIsActive()) {
             limelight.LLUpdate();
-            telemetry.addData("Tx (radians)", Math.toRadians(limelight.tx));
-            telemetry.addData("Tx (degrees)", limelight.tx);
-            telemetry.addData("Gamepad2.a", "not pressed");
-            if (gamepad2.a) {
-                int step = 0;
-                if (gamepad2.dpad_right) {step=step+1;}
-                telemetry.addData("Gamepad2.a", "pressed");
-                // FIRST, rotate to face the goal
-                if (step==0) {
-                    rotate(findAngleToRotate() * Consts.LAUNCHER_GOALTAG_ANGLE_SCALE);
-                }
-                // THEN, you need to move so that the distance is good for launching.
-                if (step==1){
-                    follower.followPath(getPath(limelight.dist - Consts.LAUNCHER_GOALTAG_OFFSET));
-                    follower.update();
-                }
-            } else {
-                rotate(0);
-                follower.followPath(new Path());
+            switch (selected) {
+                case 0: // April Heading Rotation
+                    telemetry.addData("Tx (radians)", Math.toRadians(limelight.tx));
+                    telemetry.addData("Tx (degrees)", limelight.tx);
+                    telemetry.addData("Gamepad2.a", "not pressed");
+                    if (gamepad2.a) {
+                        int step = 0;
+                        if (gamepad2.dpad_right) {step=step+1;}
+                        telemetry.addData("Gamepad2.a", "pressed");
+                        // FIRST, rotate to face the goal
+                        if (step==0) {
+                            rotate(findAngleToRotate() * Consts.LAUNCHER_GOALTAG_ANGLE_SCALE);
+                        }
+                        // THEN, you need to move so that the distance is good for launching.
+                        if (step==1){
+                            follower.followPath(getPath(limelight.dist - Consts.LAUNCHER_GOALTAG_OFFSET));
+                            follower.update();
+                        }
+                    } else {
+                        rotate(0);
+                        follower.followPath(new Path());
+                    }
+
+                    telemetry.update();
+                case 1: // Distance Test
+
+                case 2: // April Tag Test
+                    telemetry.addLine("TX AND TY ARE IN DEGREES");
+                    telemetry.addData("TX",limelight.tx);
+                    telemetry.addData("TY",limelight.ty);
+                    telemetry.addData("TA",limelight.ta);
+                    telemetry.addData("ID",limelight.tid);
+                    telemetry.addData("DIST",limelight.dist);
             }
 
-            telemetry.update();
         }
     }
 }

@@ -18,7 +18,7 @@ public class TestOuttakeNew extends LinearOpMode {
             if (gamepad1.a) {
                 outtakemotor = !outtakemotor;
             }
-            outtakeMotor.setPower(outtakemotor?0.8:0.0);
+            outtakeMotor.setPower(outtakemotor?1.0:0.0);
         }
     }
 }
