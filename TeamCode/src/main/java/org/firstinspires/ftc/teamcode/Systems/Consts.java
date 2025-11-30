@@ -47,6 +47,7 @@ public class Consts {
     public enum AllianceColor {BLUE, RED}
     public static Pose RED_STARTING_POSE = new Pose(RED_ALLIANCE_STARTING_X_COORDINATE, RED_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(RED_ALLIANCE_STARTING_HEADING_POSITION));
     public static Pose BLUE_STARTING_POSE = new Pose(BLUE_ALLIANCE_STARTING_X_COORDINATE, BLUE_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(BLUE_ALLIANCE_STARTING_HEADING_POSITION));
-    public static double LAUNCHER_GOALTAG_OFFSET = 30; // TUNE
-    public static double LAUNCHER_GOALTAG_ANGLE_SCALE = 30;
+    public static double LAUNCHER_GOALTAG_OFFSET = 10; // TUNE
+    public static double LAUNCHER_GOALTAG_ANGLE_SCALE = 15; // TUNE
+    public static String[] DRIVE_MOTOR_NAMES = {"frontLeftMotor","frontRightMotor","backLeftMotor","backRightMotor"};
 }

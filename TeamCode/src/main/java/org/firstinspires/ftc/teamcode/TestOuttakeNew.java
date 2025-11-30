@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp
 public class TestOuttakeNew extends LinearOpMode {
-    boolean outtakemotor;
     @Override
     public void runOpMode() throws InterruptedException {
         DcMotor outtakeMotor = hardwareMap.get(DcMotor.class, "outtakeNew");
@@ -16,9 +15,12 @@ public class TestOuttakeNew extends LinearOpMode {
         if (isStopRequested()) return;
         while (opModeIsActive()) {
             if (gamepad1.a) {
-                outtakemotor = !outtakemotor;
+                outtakeMotor.setPower(1);
             }
-            outtakeMotor.setPower(outtakemotor?1.0:0.0);
+            if (gamepad1.b) {
+                outtakeMotor.setPower(0);
+            }
+
         }
     }
 }

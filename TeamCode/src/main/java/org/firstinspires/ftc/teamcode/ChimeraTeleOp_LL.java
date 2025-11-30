@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Systems.Consts;
 import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
+import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 
 
@@ -74,7 +75,7 @@ public class ChimeraTeleOp_LL extends LinearOpMode {
     final double BLUE_ALLIANCE_STARTING_Y_COORDINATE = 0;
     final double BLUE_ALLIANCE_STARTING_HEADING_POSITION = 90;
     Consts.AllianceColor allianceColor;
-
+    Servo rgbIndicator;
     ElapsedTime feederTimer = new ElapsedTime();
 
     public double findAngleToRotate() {
@@ -91,9 +92,12 @@ public class ChimeraTeleOp_LL extends LinearOpMode {
         return path;
     }
     public void rotate(double angle_Radians) {follower.turn(Math.abs(angle_Radians), angle_Radians/Math.abs(angle_Radians)==-1);follower.update();}
+    public double getLLScore() {return Math.abs(limelight.tx) + Math.abs(limelight.dist/10 - Consts.LAUNCHER_GOALTAG_OFFSET);}
+
 
     @Override
     public void runOpMode() throws InterruptedException {
+        rgbIndicator = hardwareMap.get(Servo.class, "rgb");
         //while (!isStarted() && !isStopRequested())
         while (opModeInInit())
         {
@@ -206,6 +210,16 @@ public class ChimeraTeleOp_LL extends LinearOpMode {
 
         while (opModeIsActive()) {
             limelight.LLUpdate();
+            if (getLLScore() < 4) {
+                // GREEN
+                rgbIndicator.setPosition(RGBIndicator.GREEN_PWM);
+            } else if (getLLScore() < 10) {
+                // ORANGE
+                rgbIndicator.setPosition(RGBIndicator.ORANGE_PWM);
+            } else {
+                // OFF
+                rgbIndicator.setPosition(RGBIndicator.BLACK_PWM);
+            }
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
             double rx = gamepad1.right_stick_x;
