@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.Systems;
 
-
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class RGBIndicator {
@@ -48,6 +47,19 @@ public class RGBIndicator {
     private Servo rgb;
     public RGBIndicator(Servo indicator){this.rgb = indicator;rgb.setPosition(BLACK_PWM);}
     public void setCustomPWM(double val) {rgb.setPosition(val);}
-    public void setColor() {}
+    public void setColor(Color col) {
+        if (col==Color.BLACK) rgb.setPosition(BLACK_PWM);
+        if (col==Color.RED) rgb.setPosition(RED_PWM);
+        if (col==Color.ORANGE) rgb.setPosition(ORANGE_PWM);
+        if (col==Color.GOLD) rgb.setPosition(GOLD_PWM);
+        if (col==Color.YELLOW) rgb.setPosition(YELLOW_PWM);
+        if (col==Color.SAGE) rgb.setPosition(SAGE_PWM);
+        if (col==Color.GREEN) rgb.setPosition(GREEN_PWM);
+        if (col==Color.AZURE) rgb.setPosition(AZURE_PWM);
+        if (col==Color.BLUE) rgb.setPosition(BLUE_PWM);
+        if (col==Color.INDIGO) rgb.setPosition(INDIGO_PWM);
+        if (col==Color.VIOLET) rgb.setPosition(VIOLET_PWM);
+        if (col==Color.WHITE) rgb.setPosition(WHITE_PWM);
+    }
 
 }
