@@ -45,15 +45,21 @@ public class LimelightSystem {
 
         return 46.68694 + divisionResult;
     }
+
+    private static boolean isDisconnected(LLResult newR, LLResult oldR) {
+        return newR == oldR;
+    }
     public static class ChimeraLL {
         public double tx=0,ty=0,ta=0,tid=0, dist=0;
+        public boolean isDisconnected;
         public Limelight3A limelight1;
         public Pose3D botpose;
-        public LLResult result;
+        public LLResult result, old_Result;
         public void setDevice(Limelight3A device) {limelight1=device;}
         public void startLLWithPipeline(int pipeline){limelight1.start();limelight1.pipelineSwitch(pipeline);}
         public int pipelineChange(Consts.AllianceColor allianceColor){int newPipe = changePipeline(limelight1.getLatestResult().getPipelineIndex(), allianceColor==Consts.AllianceColor.RED);limelight1.pipelineSwitch(newPipe);return newPipe;}
         public void LLUpdate() {
+            old_Result = result;
             result = limelight1.getLatestResult();
             if (result!=null && result.isValid()) {
                 tx=result.getTx();
@@ -63,6 +69,7 @@ public class LimelightSystem {
                 for (LLResultTypes.FiducialResult fiduciary : fiducials ) {tid = fiduciary.getFiducialId();}
                 dist = calculateDistanceCurve(ta);
                 botpose = result.getBotpose_MT2();
+                isDisconnected = isDisconnected(result, old_Result);
             }
         }
     }
