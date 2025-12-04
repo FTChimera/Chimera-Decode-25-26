@@ -210,8 +210,8 @@ public class BlueAutoPedro extends OpMode {
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         pushServo = hardwareMap.servo.get("pushServo");
 
-        OutakeMotorRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        OutakeMotorLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        OutakeMotorRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        OutakeMotorLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         OutakeMotorRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

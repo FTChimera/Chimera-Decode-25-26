@@ -83,10 +83,11 @@ public class ChimeraTeleOp extends LinearOpMode {
         return Math.toRadians(limelight.tx);
     }
     public Path getPath(double amt) {
+        // THIS CODE MAKES THE ROBOT MOVE FORWARD/BACKWARD
         Pose pose = follower.getPose();
-        double heading = pose.getHeading();
-        double RobotCentric_X = Math.sin(heading);
-        double RobotCentric_Y = Math.cos(heading);
+        double heading = pose.getHeading() - (allianceColor==Consts.AllianceColor.RED?0.79:-0.79);
+        double RobotCentric_X = Math.cos(heading);
+        double RobotCentric_Y = Math.sin(heading);
         Pose endPose = new Pose(pose.getX() + RobotCentric_X*amt, pose.getY() + RobotCentric_Y*amt, heading);
         Path path = new Path(new BezierLine(pose, endPose));path.setLinearHeadingInterpolation(heading,heading);
         return path;
@@ -208,8 +209,8 @@ public class ChimeraTeleOp extends LinearOpMode {
         frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightOutakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        leftOutakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightOutakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftOutakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         /*
          * Here we set our Left and Right Outtake Motor to the RUN_USING_ENCODER runmode.
          * If you notice that you have no control over the velocity of the motor, it just jumps
@@ -264,13 +265,14 @@ public class ChimeraTeleOp extends LinearOpMode {
         telemetry.addData("Status", "Initialized");telemetry.update();
         limelight.setDevice(hardwareMap.get(Limelight3A.class, "limelight"));
         waitForStart();
-        limelight.startLLWithPipeline(allianceColor==Consts.AllianceColor.RED?4:5);
+        limelight.startLLWithPipeline(0);
         follower.startTeleopDrive();
 
         if (isStopRequested()) return;
         telemetry.addData("Status", "Running");
         while (opModeIsActive()) {
             limelight.LLUpdate();
+            telemetry.addData("Limelight Score", getLLScore());
             if (getLLScore() < 4) {
                 // GREEN
                 rgbIndicator.setColor(RGBIndicator.Color.GREEN);
@@ -281,7 +283,7 @@ public class ChimeraTeleOp extends LinearOpMode {
                 // OFF
                 rgbIndicator.setColor(RGBIndicator.Color.BLACK);
             }
-            if (limelight.isDisconnected) rgbIndicator.setColor(RGBIndicator.Color.RED); // DISCONNECTED
+            // if (limelight.isDisconnected) rgbIndicator.setColor(RGBIndicator.Color.RED);telemetry.addData("Disconnected",""); // DISCONNECTED
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
             double rx = gamepad1.right_stick_x;

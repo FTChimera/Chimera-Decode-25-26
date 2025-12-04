@@ -128,8 +128,8 @@ public class ChimeraTeleOpOld extends LinearOpMode {
         frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightOutakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        leftOutakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightOutakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftOutakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         /*
          * Here we set our Left and Right Outtake Motor to the RUN_USING_ENCODER runmode.
          * If you notice that you have no control over the velocity of the motor, it just jumps
