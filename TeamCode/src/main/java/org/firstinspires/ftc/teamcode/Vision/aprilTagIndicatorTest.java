@@ -14,9 +14,6 @@ public class aprilTagIndicatorTest extends LinearOpMode {
     LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
     Servo rgbIndicator;
 
-    public double getLLScore() {
-        return Math.abs(limelight.tx) + Math.abs(limelight.dist/10 - Consts.LAUNCHER_GOALTAG_OFFSET);
-    }
 
     public void runOpMode() {
         allianceColor = Consts.AllianceColor.RED; // TEST
@@ -29,14 +26,14 @@ public class aprilTagIndicatorTest extends LinearOpMode {
 
         while (opModeIsActive()) {
             limelight.LLUpdate();
-            telemetry.addData("LLScore()", getLLScore());
+            telemetry.addData("LLScore()", limelight.getLLScore());
             telemetry.addData("Tx",limelight.tx);
             telemetry.addData("Dist",limelight.dist);
 
-            if (getLLScore() < 5) {
+            if (limelight.getLLScore() < 5) {
                 // GREEN
                 rgbIndicator.setPosition(RGBIndicator.GREEN_PWM);
-            } else if (getLLScore() < 10) {
+            } else if (limelight.getLLScore() < 10) {
                 // ORANGE
                 rgbIndicator.setPosition(RGBIndicator.ORANGE_PWM);
             } else {

@@ -1,6 +1,10 @@
 package org.firstinspires.ftc.teamcode.Systems;
 
+import com.pedropathing.control.PIDFController;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
+import java.util.PrimitiveIterator;
 
 public class Consts {
     public static double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
@@ -15,13 +19,12 @@ public class Consts {
     public static double FULL_SPEED = 1.0;
     public static int SERVO_LAUNCH_POSITION = 0;
     public static int SERVO_REST_POSITION = 1;
-    public static int SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
-
+    public static int SLEEP_BEFORE_RESET_SERVO_POSITION = 350;
+    public static double maxVelocityLeftOutakeMotor = 1740;
+    public static double maxVelocityRightOutakeMotor = 1360;
+    public static PIDFCoefficients leftPIDF = getPIDFCoefficients(maxVelocityLeftOutakeMotor);
+    public static PIDFCoefficients rightPIDF = getPIDFCoefficients(maxVelocityRightOutakeMotor);
     // declaring our PIDF tuning values
-    public static double Kp = 300;
-    public static double Ki = 0.0;
-    public static double Kd = 0.0;
-    public static double Kf = 10;
     public double setTargetVelocity = 0;
     public double setMinVelocity = 0;
     public static Pose startingPose;
@@ -47,7 +50,14 @@ public class Consts {
     public enum AllianceColor {BLUE, RED}
     public static Pose RED_STARTING_POSE = new Pose(RED_ALLIANCE_STARTING_X_COORDINATE, RED_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(RED_ALLIANCE_STARTING_HEADING_POSITION));
     public static Pose BLUE_STARTING_POSE = new Pose(BLUE_ALLIANCE_STARTING_X_COORDINATE, BLUE_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(BLUE_ALLIANCE_STARTING_HEADING_POSITION));
-    public static double LAUNCHER_GOALTAG_OFFSET = 10; // TUNE
     public static double LAUNCHER_GOALTAG_ANGLE_SCALE = 15; // TUNE
     public static String[] DRIVE_MOTOR_NAMES = {"frontLeftMotor","frontRightMotor","backLeftMotor","backRightMotor"};
+
+    public static PIDFCoefficients getPIDFCoefficients(double maxVelocity) {
+        double Kf = 32767/maxVelocity;
+        double Kp = 0.1*Kf;
+        double Ki = 0.1*Kp;
+        double Kd = 0.1*Ki;
+        return new PIDFCoefficients(Kp, Ki, Kd, Kf);
+    }
 }

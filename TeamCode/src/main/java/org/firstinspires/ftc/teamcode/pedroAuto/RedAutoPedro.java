@@ -11,8 +11,9 @@ import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.teamcode.Systems.Consts;
 
 @Autonomous(name = "RedAutoPedro", group = "pedroAuto")
 public class RedAutoPedro extends OpMode {
@@ -57,11 +58,6 @@ public class RedAutoPedro extends OpMode {
     boolean second_iteration = false;
 
 
-
-    final double Kp = 300;
-    final double Ki = 0.0;
-    final double Kd = 0.0;
-    final double Kf = 10;
 
     DcMotorEx OutakeMotorLeft, OutakeMotorRight;
     DcMotor intakeMotor;
@@ -227,8 +223,8 @@ public class RedAutoPedro extends OpMode {
         OutakeMotorRight.setZeroPowerBehavior(BRAKE);
         OutakeMotorLeft.setZeroPowerBehavior(BRAKE);
 
-        OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
-        OutakeMotorLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
+        OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.rightPIDF);
+        OutakeMotorLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.leftPIDF);
 
         pushServo.setPosition(SERVO_REST_POSITION);
 

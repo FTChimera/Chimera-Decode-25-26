@@ -91,7 +91,7 @@ public class LLOrientation extends LinearOpMode {
                         }
                         // THEN, you need to move so that the distance is good for launching.
                         if (step==1){
-                            follower.followPath(getPath(limelight.dist - Consts.LAUNCHER_GOALTAG_OFFSET));
+                            follower.followPath(getPath(limelight.dist));
                             follower.update();
                         }
                     } else {

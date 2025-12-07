@@ -13,7 +13,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Systems.Consts;
@@ -26,7 +25,7 @@ import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 public class ChimeraTeleOp extends LinearOpMode {
     public LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1150;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1200;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 1040;// Set target velocity from front launch zone
     final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 1050;// Set target velocity from back launch zone
     final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
@@ -37,13 +36,7 @@ public class ChimeraTeleOp extends LinearOpMode {
     final double FULL_SPEED = 1.0;
     final int SERVO_LAUNCH_POSITION = 0;
     final int SERVO_REST_POSITION = 1;
-    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 200;
-
-    // declaring our PIDF tuning values
-    final double Kp = 300;
-    final double Ki = 0.0;
-    final double Kd = 0.0;
-    final double Kf = 10;
+    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 500;
     double  setTargetVelocity;
     double setMinVelocity = 0;
     private Follower follower;
@@ -77,6 +70,7 @@ public class ChimeraTeleOp extends LinearOpMode {
     Consts.AllianceColor allianceColor;
     RGBIndicator rgbIndicator;
     ElapsedTime feederTimer = new ElapsedTime();
+    boolean OneGamepadAControl;
 
     public double findAngleToRotate() {
         // return allianceColor==Consts.AllianceColor.RED? Math.atan2( (Consts.Y_Coordinate_Red_Goal - curPose.getY()), (Consts.X_Coordinate_Red_Goal - curPose.getX()) ):Math.atan2( (Consts.Y_Coordinate_Blue_Goal - curPose.getY()), (Consts.X_Coordinate_Blue_Goal - curPose.getX()) );
@@ -93,13 +87,11 @@ public class ChimeraTeleOp extends LinearOpMode {
         return path;
     }
     public void rotate(double angle_Radians) {follower.turn(Math.abs(angle_Radians), angle_Radians/Math.abs(angle_Radians)==-1);follower.update();}
-    public double getLLScore() {return Math.abs(limelight.tx) + Math.abs(limelight.dist/10 - Consts.LAUNCHER_GOALTAG_OFFSET);}
-
     public void LLRunGamepadA(DcMotorEx leftOutakeMotor, DcMotorEx rightOutakeMotor, Servo pushServo){
         // STEP 1
         rotate(findAngleToRotate() * Consts.LAUNCHER_GOALTAG_ANGLE_SCALE);
         // STEP 2
-        follower.followPath(getPath(limelight.dist - Consts.LAUNCHER_GOALTAG_OFFSET));follower.update();
+        follower.followPath(getPath(limelight.dist));follower.update();
         // STEP 3
         setMinVelocity = MIN_VELOCITY_BACK_LAUNCH_ZONE;setTargetVelocity = TARGET_VELOCITY_BACK_LAUNCH_ZONE;
         leftOutakeMotor.setVelocity(setTargetVelocity);rightOutakeMotor.setVelocity(setTargetVelocity);
@@ -134,27 +126,18 @@ public class ChimeraTeleOp extends LinearOpMode {
         // Step 6 and Step 7 are performed upon pressing dpad_up.
     }
     public void RunDpadUp(DcMotorEx leftOutakeMotor, DcMotorEx rightOutakeMotor, Servo pushServo){
+        pushServo.setPosition(SERVO_REST_POSITION);pushServo.setPosition(SERVO_LAUNCH_POSITION);
+        while (pushServo.getPosition() > SERVO_LAUNCH_POSITION + 0.2) idle();
+        sleep(Consts.SLEEP_BEFORE_RESET_SERVO_POSITION);
         pushServo.setPosition(SERVO_REST_POSITION);
-        telemetry.addData("Launch: Left Outake Motor Velocity", leftOutakeMotor.getVelocity());
-        telemetry.addData("Launch: Right Outake Motor Velocity", rightOutakeMotor.getVelocity());
-        telemetry.addData("Launch: Min Velocity ", setMinVelocity);
-        pushServo.setPosition(SERVO_LAUNCH_POSITION);
-        telemetry.addData("Launch: Setting Servo to Launch Position", "true");
-        sleep(SLEEP_BEFORE_RESET_SERVO_POSITION);
-        telemetry.addData("Launch: Sleeping", "true");
-        pushServo.setPosition(SERVO_REST_POSITION);
-        telemetry.addData("Launch: Setting Servo to Rest Position", "true");
 
-        if ((leftOutakeMotor.getVelocity() >= setMinVelocity) && (rightOutakeMotor.getVelocity() >= setMinVelocity))
-        {
-            //Step 7. position servo into launch position
-            pushServo.setPosition(SERVO_LAUNCH_POSITION);
-            telemetry.addData("Launch: Setting Servo to Launch Position", "true");
-            sleep(SLEEP_BEFORE_RESET_SERVO_POSITION);
-            telemetry.addData("Launch: Sleeping", "true");
-            pushServo.setPosition(SERVO_REST_POSITION);
-            telemetry.addData("Launch: Setting Servo to Rest Position", "true");
-        }
+//        if ((leftOutakeMotor.getVelocity() >= setMinVelocity) && (rightOutakeMotor.getVelocity() >= setMinVelocity))
+//        {
+//            //Step 7. position servo into launch position
+//            pushServo.setPosition(SERVO_LAUNCH_POSITION);
+//            sleep(SLEEP_BEFORE_RESET_SERVO_POSITION);
+//            pushServo.setPosition(SERVO_REST_POSITION);
+//        }
     }
 
     @Override
@@ -167,6 +150,9 @@ public class ChimeraTeleOp extends LinearOpMode {
             telemetry.addData("Press 'GamePad1 Left Bumper'", "for RED");
             // This method is called repeatedly during the init phase
             allianceColor = Consts.AllianceColor.RED;
+            if (gamepad1.a) OneGamepadAControl = true;
+            if (gamepad1.b) OneGamepadAControl = false;
+            telemetry.addData("GamepadA Control ALL", OneGamepadAControl);
             if (gamepad1.right_bumper)
             {
                 allianceColor = Consts.AllianceColor.BLUE;
@@ -229,8 +215,8 @@ public class ChimeraTeleOp extends LinearOpMode {
         rightOutakeMotor.setZeroPowerBehavior(BRAKE);
         leftOutakeMotor.setZeroPowerBehavior(BRAKE);
 
-        leftOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
-        rightOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
+        leftOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.leftPIDF);
+        rightOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.rightPIDF);
         if (allianceColor == Consts.AllianceColor.RED)
         {
             // Starting position Red Goal
@@ -272,11 +258,13 @@ public class ChimeraTeleOp extends LinearOpMode {
         telemetry.addData("Status", "Running");
         while (opModeIsActive()) {
             limelight.LLUpdate();
-            telemetry.addData("Limelight Score", getLLScore());
-            if (getLLScore() < 4) {
+            telemetry.addData("Limelight Score", limelight.getLLScore());
+            if (limelight.getLLScore() < 6) {
                 // GREEN
                 rgbIndicator.setColor(RGBIndicator.Color.GREEN);
-            } else if (getLLScore() < 10) {
+            } else if (limelight.getLLScore() < 10
+
+            ) {
                 // ORANGE
                 rgbIndicator.setColor(RGBIndicator.Color.GOLD);
             } else {
@@ -335,27 +323,26 @@ public class ChimeraTeleOp extends LinearOpMode {
              * Step 6. Check if the velocity of the motors is more than the min velocity
              * Step 7. position servo into launch position
              */
-        if (gamepad2.a){
+        if (gamepad2.a || (OneGamepadAControl&&gamepad1.a)){
             RunGamepadA(leftOutakeMotor,rightOutakeMotor,pushServo);
         }
 
         // Step 6. Check if the velocity of the motors is more than the min velocity
-        if (gamepad2.dpad_up)
+        if (gamepad2.dpad_up || (OneGamepadAControl&&gamepad1.dpad_up))
         {
             RunDpadUp(leftOutakeMotor,rightOutakeMotor,pushServo);
         }
 
-        if (gamepad2.b) {
+        if (gamepad2.b || (OneGamepadAControl&&gamepad1.b)) {
             leftOutakeMotor.setVelocity(STOP_VELOCITY);
             rightOutakeMotor.setVelocity(STOP_VELOCITY);
             pushServo.setPosition(SERVO_REST_POSITION);
         }
 
 
-        intakeMotor.setPower(gamepad2.x?1:0);
+        intakeMotor.setPower(gamepad2.x||(OneGamepadAControl&&gamepad1.x)?1:0);
 
-
-            if(gamepad2.y) {
+            if(gamepad2.y || (OneGamepadAControl&&gamepad1.y)) {
                 setMinVelocity = MIN_VELOCITY_FRONT_LAUNCH_ZONE;
                 setTargetVelocity = TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
 
