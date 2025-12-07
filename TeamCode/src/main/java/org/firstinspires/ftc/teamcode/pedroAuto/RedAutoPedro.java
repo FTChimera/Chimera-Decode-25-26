@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.pedroAuto;
 import static android.os.SystemClock.sleep;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
+import static org.firstinspires.ftc.teamcode.Systems.Consts.STOP_VELOCITY;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -29,20 +31,6 @@ public class RedAutoPedro extends OpMode {
     private final Pose finalPose = new Pose(100.27, 37.14, Math.toRadians(0));
     //add final pos
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight;
-
-    final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1040;// Set target velocity from back launch zone
-    final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
-    final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 10;// Set target velocity from back launch zone
-    final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 50;// Set target velocity from back launch zone
-    final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double MIN_VELOCITY = 1075;
-    final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
-    final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
-    final double FULL_SPEED = 1.0;
-    final int SERVO_LAUNCH_POSITION = -1;
-    final int SERVO_REST_POSITION = 1;
-    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 500;
     final int CHIMERA_LAUNCH = 1;
     final int CHIMERA_LAUNCH_INTAKE = 2;
     final int CHIMERA_PATH_TWO = 3;
@@ -226,7 +214,7 @@ public class RedAutoPedro extends OpMode {
         OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.rightPIDF);
         OutakeMotorLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.leftPIDF);
 
-        pushServo.setPosition(SERVO_REST_POSITION);
+        pushServo.setPosition(Consts.SERVO_REST_POSITION);
 
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
@@ -252,17 +240,17 @@ public class RedAutoPedro extends OpMode {
 
     public void Launcher() {
         // Start the timer and motors on the first run
-        OutakeMotorRight.setVelocity(TARGET_VELOCITY_BACK_LAUNCH_ZONE);
-        OutakeMotorLeft.setVelocity(TARGET_VELOCITY_BACK_LAUNCH_ZONE);
+        OutakeMotorRight.setVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
+        OutakeMotorLeft.setVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
         sleep(200);
-        pushServo.setPosition(SERVO_LAUNCH_POSITION);//Set pushServo to launch
+        pushServo.setPosition(Consts.SERVO_LAUNCH_POSITION);//Set pushServo to launch
         sleep(500);
-        pushServo.setPosition(SERVO_REST_POSITION);//Resets the pushServo position
+        pushServo.setPosition(Consts.SERVO_REST_POSITION);//Resets the pushServo position
     }
     public void LauncherStop() {
-        OutakeMotorRight.setVelocity(STOP_VELOCITY);
-        OutakeMotorLeft.setVelocity(STOP_VELOCITY);
-        pushServo.setPosition(SERVO_REST_POSITION);//Resets the pushServo position
+        OutakeMotorRight.setVelocity(Consts.STOP_VELOCITY);
+        OutakeMotorLeft.setVelocity(Consts.STOP_VELOCITY);
+        pushServo.setPosition(Consts.SERVO_REST_POSITION);//Resets the pushServo position
         sleep(400);
     }
     public void Intake() {
