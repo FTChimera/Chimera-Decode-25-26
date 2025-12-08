@@ -9,17 +9,19 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Systems.Consts;
 import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
+import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 
 @TeleOp
 public class LLOrientation extends LinearOpMode {
     enum SelectionChange{UP, DOWN}
     public static Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;
-    public String[] options = {"April Heading Rotation", "Distance Test", "April Tag Test", "RGB Indicator Test", "PIDF Tuning Test"};
+    public String[] options = {"April Heading Rotation", "Distance Test", "April Tag Test", "RGB Indicator Test", "PIDF Tuning Test", "WHITE LIGHT INDICATOR"};
     public int mode;
     private Follower follower;
     public LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
@@ -61,6 +63,7 @@ public class LLOrientation extends LinearOpMode {
     }
     @Override
     public void runOpMode() {
+        RGBIndicator indicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
         follower = Constants.createFollower(hardwareMap);int pipe = 0; // int pipe = allianceColor==Consts.AllianceColor.RED?4:5
         limelight.setDevice(hardwareMap.get(Limelight3A.class, "limelight"));
         int selected=0;
@@ -135,6 +138,10 @@ public class LLOrientation extends LinearOpMode {
                         telemetry.addData("Max Velocity", maxVelocity[i]);
                         telemetry.update();
                     }
+                    break;
+                case 5: // WHITE LIGHT INDICATOR
+                    indicator.setColor(RGBIndicator.Color.WHITE);
+                    telemetry.update();
                     break;
             }
 

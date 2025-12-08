@@ -77,10 +77,11 @@ public class ChimeraTeleOp extends LinearOpMode {
     public void RunGamepadA(DcMotorEx leftOutakeMotor, DcMotorEx rightOutakeMotor, Servo pushServo) {
         setMinVelocity = Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE;
         setTargetVelocity = Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
+        leftOutakeMotor.setVelocity(setMinVelocity);
+        rightOutakeMotor.setVelocity(setMinVelocity);
         leftOutakeMotor.setVelocity(setTargetVelocity);
         rightOutakeMotor.setVelocity(setTargetVelocity);
         pushServo.setPosition(Consts.SERVO_REST_POSITION);
-
         telemetry.addData("Left Outake Motor Velocity", leftOutakeMotor.getVelocity());
         telemetry.addData("Right Outake Motor Velocity", rightOutakeMotor.getVelocity());
         //telemetry.update();
@@ -221,12 +222,11 @@ public class ChimeraTeleOp extends LinearOpMode {
         while (opModeIsActive()) {
             limelight.LLUpdate();
             telemetry.addData("Limelight Score", limelight.getLLScore());
-            if (limelight.getLLScore() < 6) {
+            if (limelight.getLLScore() == 0) rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
+            else if (limelight.getLLScore() < 6) {
                 // GREEN
                 rgbIndicator.setColor(RGBIndicator.Color.GREEN);
-            } else if (limelight.getLLScore() < 10
-
-            ) {
+            } else if (limelight.getLLScore() < 10) {
                 // ORANGE
                 rgbIndicator.setColor(RGBIndicator.Color.GOLD);
             } else {
@@ -292,7 +292,7 @@ public class ChimeraTeleOp extends LinearOpMode {
         // Step 6. Check if the velocity of the motors is more than the min velocity
         if (gamepad2.dpad_up || (OneGamepadAControl&&gamepad1.dpad_up))
         {
-            RunDpadUp(leftOutakeMotor,rightOutakeMotor,pushServo);
+            LLRunDpadUp(leftOutakeMotor,rightOutakeMotor,pushServo);
         }
 
         if (gamepad2.b || (OneGamepadAControl&&gamepad1.b)) {
