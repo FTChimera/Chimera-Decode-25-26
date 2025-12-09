@@ -105,6 +105,7 @@ public class ChimeraTeleOp extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
+        rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
         //while (!isStarted() && !isStopRequested())
         while (opModeInInit())
         {
