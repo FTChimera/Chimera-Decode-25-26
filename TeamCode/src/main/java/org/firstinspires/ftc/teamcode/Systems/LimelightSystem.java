@@ -61,7 +61,7 @@ public class LimelightSystem {
             }
         }
         public double getLLScore() {
-            return Math.abs(tx) + Math.abs(dist);
+            return Math.abs(tx);
         }
     }
 }

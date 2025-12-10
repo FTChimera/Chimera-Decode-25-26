@@ -11,9 +11,8 @@ import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-
-import org.firstinspires.ftc.teamcode.Systems.Consts;
 
 @Autonomous(name = "BlueAutoPedro", group = "pedroAuto")
 public class BlueAutoPedro extends OpMode {
@@ -23,15 +22,17 @@ public class BlueAutoPedro extends OpMode {
     private final Pose startPose = new Pose(15.75, 111.27, Math.toRadians(180)); // Start Pose of our robot.
     private final Pose launchPose = new Pose(50, 78.06, Math.toRadians(310));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose intakePrep = new Pose(50,84.7, Math.toRadians(180));
-    private final Pose red1Intake = new Pose(15.51, 84.84, Math.toRadians(180));
-    private final Pose intakePrep2 = new Pose(40.48,55.99, Math.toRadians(180));
-    private final Pose blue2Intake = new Pose(10.78, 55.99, Math.toRadians(180));
-    private final Pose finalPose = new Pose(37.77, 38.19, Math.toRadians(0));
+    private final Pose blue1Intake = new Pose(15.51, 84.84, Math.toRadians(180));
+    private final Pose intakePrep2 = new Pose(44.36,54.78, Math.toRadians(180));
+    private final Pose blue2Intake = new Pose(15.75, 66.66, Math.toRadians(180));
+    private final Pose intakePrep3 = new Pose(23.75, 9.66, Math.toRadians(180));
+    private final Pose blue3Intake = new Pose(9.45, 9.21, Math.toRadians(180));
 
-    private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight;
+
+    private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen;
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1065;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1090;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
     final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 10;// Set target velocity from back launch zone
     final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 50;// Set target velocity from back launch zone
@@ -52,10 +53,18 @@ public class BlueAutoPedro extends OpMode {
     final int CHIMERA_PATH_SIX = 7;
     final int CHIMERA_PATH_SEVEN = 8;
     final int CHIMERA_PATH_EIGHT = 9;
-    final int CHIMERA_STOP = 10;
+    final int CHIMERA_PATH_NINE = 10;
+    final int CHIMERA_PATH_TEN = 11;
+    final int CHIMERA_STOP = 12;
 
     boolean first_iteration = false;
     boolean second_iteration = false;
+    boolean third_iteration = false;
+
+    final double Kp = 300;
+    final double Ki = 0.0;
+    final double Kd = 0.0;
+    final double Kf = 10;
 
     DcMotorEx OutakeMotorLeft, OutakeMotorRight;
     DcMotor intakeMotor;
@@ -70,11 +79,11 @@ public class BlueAutoPedro extends OpMode {
         pathTwo = new Path(new BezierLine(launchPose, intakePrep));
         pathTwo.setLinearHeadingInterpolation(launchPose.getHeading(), intakePrep.getHeading());
 
-        pathThree = new Path(new BezierLine(intakePrep, red1Intake));
-        pathThree.setLinearHeadingInterpolation(intakePrep.getHeading(), red1Intake.getHeading());
+        pathThree = new Path(new BezierLine(intakePrep, blue1Intake));
+        pathThree.setLinearHeadingInterpolation(intakePrep.getHeading(), blue1Intake.getHeading());
 
-        pathFour = new Path(new BezierLine(red1Intake, launchPose));
-        pathFour.setLinearHeadingInterpolation(red1Intake.getHeading(), launchPose.getHeading());
+        pathFour = new Path(new BezierLine(blue1Intake, launchPose));
+        pathFour.setLinearHeadingInterpolation(blue1Intake.getHeading(), launchPose.getHeading());
 
         pathFive = new Path(new BezierLine(launchPose, intakePrep2));
         pathFive.setLinearHeadingInterpolation(launchPose.getHeading(), intakePrep2.getHeading());
@@ -85,8 +94,14 @@ public class BlueAutoPedro extends OpMode {
         pathSeven = new Path(new BezierLine(blue2Intake, launchPose));
         pathSeven.setLinearHeadingInterpolation(blue2Intake.getHeading(), launchPose.getHeading());
 
-        pathEight = new Path(new BezierLine(launchPose, finalPose));
-        pathEight.setLinearHeadingInterpolation(launchPose.getHeading(), finalPose.getHeading() );
+        pathEight = new Path(new BezierLine(launchPose, intakePrep3));
+        pathEight.setLinearHeadingInterpolation(launchPose.getHeading(), intakePrep3.getHeading());
+
+        pathNine = new Path(new BezierLine(intakePrep3, blue3Intake));
+        pathNine.setLinearHeadingInterpolation(intakePrep3.getHeading(), blue3Intake.getHeading());
+
+        pathTen = new Path(new BezierLine(blue3Intake, launchPose));
+        pathTen.setLinearHeadingInterpolation(blue3Intake.getHeading(), launchPose.getHeading());
 
     /* Here is an example for Constant Interpolation
     scorePreload.setConstantInterpolation(startPose.getHeading()); */
@@ -118,9 +133,11 @@ public class BlueAutoPedro extends OpMode {
                 } else if (!second_iteration) {
                     setPathState(CHIMERA_PATH_FIVE);
                     second_iteration = true;
-                } else {
+                } else if (!third_iteration) {
                     setPathState(CHIMERA_PATH_EIGHT);
-                    IntakeStop();
+                    third_iteration = true;
+                } else {
+                    setPathState(CHIMERA_STOP);
                 }
                 break;
             case CHIMERA_PATH_TWO:
@@ -162,11 +179,22 @@ public class BlueAutoPedro extends OpMode {
             case CHIMERA_PATH_EIGHT:
                 if (!follower.isBusy()) {
                     follower.followPath(pathEight);
-                    setPathState(CHIMERA_STOP);
+                    setPathState(CHIMERA_PATH_NINE);
                 }
                 break;
+            case CHIMERA_PATH_NINE:
+                if (!follower.isBusy()) {
+                    follower.followPath(pathNine);
+                    setPathState(CHIMERA_PATH_TEN);
+                }
+            case CHIMERA_PATH_TEN:
+                if(!follower.isBusy()) {
+                    follower.followPath(pathTen);
+                    setPathState(CHIMERA_LAUNCH);
+                }
             case CHIMERA_STOP:
                 telemetry.addLine("Autonomous Complete");
+                IntakeStop();
             default:
                 break;
         }
@@ -216,8 +244,8 @@ public class BlueAutoPedro extends OpMode {
         OutakeMotorRight.setZeroPowerBehavior(BRAKE);
         OutakeMotorLeft.setZeroPowerBehavior(BRAKE);
 
-        OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.rightPIDF);
-        OutakeMotorLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.leftPIDF);
+        OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
+        OutakeMotorLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
 
         pushServo.setPosition(SERVO_REST_POSITION);
 

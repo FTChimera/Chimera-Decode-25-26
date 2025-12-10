@@ -37,7 +37,7 @@ public class Consts {
         double Kf = 32767/maxVelocity;
         double Kp = 0.1*Kf;
         double Ki = 0.1*Kp;
-        double Kd = 0.1*Ki;
+        double Kd = 0;
         return new PIDFCoefficients(Kp, Ki, Kd, Kf);
     }
 }
