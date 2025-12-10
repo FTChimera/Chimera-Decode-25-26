@@ -302,7 +302,7 @@ public class RedAutoPedro extends OpMode {
      * - Turns on Intake automatically to feed shots 2 and 3.
      */
     public boolean runLauncherSequence() {
-        // 1. Initialization: Spin up motors if this is the first loop cycle calling this function
+        // 1. Initialization (Start the flywheels)
         if (!isLauncherRunning) {
             OutakeMotorRight.setVelocity(TARGET_VELOCITY_BACK_LAUNCH_ZONE);
             OutakeMotorLeft.setVelocity(TARGET_VELOCITY_BACK_LAUNCH_ZONE);
