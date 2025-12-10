@@ -38,7 +38,6 @@ public class BlueAutoPedro extends OpMode {
     final double MIN_VELOCITY = 1075;
     final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
-    final double FULL_SPEED = 1.0;
     final int SERVO_LAUNCH_POSITION = -1;
     final int SERVO_REST_POSITION = 1;
     final int SLEEP_BEFORE_RESET_SERVO_POSITION = 500;
