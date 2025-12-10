@@ -297,8 +297,9 @@ public class RedAutoPedro extends OpMode {
 
 
     /**
-     * Handles the launch sequence without blocking the loop.
-     * Returns true when the entire sequence (3 shots) is finished.
+     * Executes 3 shots.
+     * - Includes Timeout Fail-Safe for low battery.
+     * - Turns on Intake automatically to feed shots 2 and 3.
      */
     public boolean runLauncherSequence() {
         // 1. Initialization: Spin up motors if this is the first loop cycle calling this function
