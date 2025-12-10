@@ -284,10 +284,10 @@ public class ChimeraTeleOpLimeLight extends LinearOpMode {
              * Step 6. Check if the velocity of the motors is more than the min velocity
              * Step 7. position servo into launch position
              */
-            telemetry.addData("Left Outake Motor Velocity Front:", leftOutakeMotor.getVelocity());
-            telemetry.addData("Right Outake Motor Velocity Front:", rightOutakeMotor.getVelocity());
-            telemetry.addData("Target Velocity front", setTargetVelocity);
-            telemetry.addData("Min Velocity front", setMinVelocity);
+            telemetry.addData("Left Outake Motor Velocity", leftOutakeMotor.getVelocity());
+            telemetry.addData("Right Outake Motor Velocity", rightOutakeMotor.getVelocity());
+            telemetry.addData("Target Velocity", setTargetVelocity);
+            telemetry.addData("Min Velocity", setMinVelocity);
             if (gamepad2.a || (OneGamepadAControl&&gamepad1.a)){
                 RunGamepadA(leftOutakeMotor,rightOutakeMotor,pushServo);
             }

@@ -1,13 +1,8 @@
 package org.firstinspires.ftc.teamcode;
-import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
-
-import static java.lang.Math.sqrt;
 
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -24,59 +19,25 @@ import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 
 
-@TeleOp(name = "ChimeraTeleOp", group = "AbsolutePriority")// Name and Group
+@TeleOp(name = "ChimeraTeleOp Old 1", group = "AbsolutePriority")// Name and Group
 public class ChimeraTeleOp extends LinearOpMode {
 
-    final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1150;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 1040;// Set target velocity from front launch zone
     final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 1050;// Set target velocity from back launch zone
     final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double MIN_VELOCITY = 1075;
-    final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
-    final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
-    final double FULL_SPEED = 1.0;
     final int SERVO_LAUNCH_POSITION = 0;
     final int SERVO_REST_POSITION = 1;
     final int SLEEP_BEFORE_RESET_SERVO_POSITION = 200;
     public LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
 
     // declaring our PIDF tuning values
-    final double Kp = 300;
-    final double Ki = 0.0;
-    final double Kd = 0.0;
-    final double Kf = 10;
+
     double  setTargetVelocity = 0;
     double setMinVelocity = 0;
-    private Follower follower;
     public static Pose startingPose;
-    private boolean automatedDrive = false;
-    private boolean slowMode = false;
-    private TelemetryManager telemetryM;
-    double X_Coordinate_Blue_Goal = 0;
-    double Y_Coordinate_Blue_Goal = 144;
-    double X_Coordinate_Red_Goal = 144;
-    double Y_Coordinate_Red_Goal = 144;
-    double X_Coordinate = 0.0;
-    double Y_Coordinate = 0.0;
-    double Distance_To_Goal = 0;
-    double Distance_To_Goal_Blue = 0;
-    double currentHeading = 0.0;
-    double launchPositionHeadingRadians = 0;
-    final double SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE = 20;
-    final double SHOOTING_ZONE_FAR_FRONT_LAUNCH_ZONE = 60;
-    final double SHOOTING_ZONE_BACK_LAUNCH_ZONE = 65;
-
-    // TODO Change Starting position. Temporarily set starting position to back launch
-    // zone, (x,y) = (72,0)
-    final double RED_ALLIANCE_STARTING_X_COORDINATE = 104;
-    final double RED_ALLIANCE_STARTING_Y_COORDINATE = 60;
-    final double RED_ALLIANCE_STARTING_HEADING_POSITION = 180;
-
-    final double BLUE_ALLIANCE_STARTING_X_COORDINATE = 144;
-    final double BLUE_ALLIANCE_STARTING_Y_COORDINATE = 0;
-    final double BLUE_ALLIANCE_STARTING_HEADING_POSITION = 90;
+    private Follower follower;
     enum AllianceColor {
         BLUE,
         RED
@@ -159,8 +120,8 @@ public class ChimeraTeleOp extends LinearOpMode {
         rightOutakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         leftOutakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        leftOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
-        rightOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
+        leftOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.leftPIDF);
+        rightOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.rightPIDF);
         if (allianceColor == AllianceColor.RED)
         {
             // Starting position Red Goal
