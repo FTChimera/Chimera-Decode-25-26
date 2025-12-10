@@ -20,7 +20,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class RedAutoPedro extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
-    private int pathState, launcherShotCount = 0;
+    private int pathState, launcherShotCount = 0, launcherStage = 0;
     private final Pose startPose = new Pose(128.13, 110.81, Math.toRadians(0)); // Start Pose of our robot.
     private final Pose launchPose = new Pose(90.1, 86.3, Math.toRadians(228));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose intakePrep = new Pose(100,85, Math.toRadians(0));
@@ -32,7 +32,8 @@ public class RedAutoPedro extends OpMode {
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen;
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 600;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 625;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_TOLERANCE = 15;
     final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
     final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 10;// Set target velocity from back launch zone
     final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 50;// Set target velocity from back launch zone
@@ -44,6 +45,7 @@ public class RedAutoPedro extends OpMode {
     final double SERVO_LAUNCH_POSITION = 0;
     final double SERVO_REST_POSITION = 1;
     final int SLEEP_BEFORE_RESET_SERVO_POSITION = 500;
+    final int MAX_RPM_WAIT_TIME_SECONDS = 1000;
     final int CHIMERA_LAUNCH = 1;
     final int CHIMERA_LAUNCH_INTAKE = 2;
     final int CHIMERA_PATH_TWO = 3;
@@ -133,7 +135,7 @@ public class RedAutoPedro extends OpMode {
                     //Launcher();
                     //sleep(1000);
                     //Launcher();
-                    Intake();
+                    //Intake();
                     if (runLauncherSequence()) {
                         setPathState(CHIMERA_LAUNCH_INTAKE);
                     }
@@ -295,7 +297,6 @@ public class RedAutoPedro extends OpMode {
     @Override
     public void stop() {}
 
-
     /**
      * Executes 3 shots.
      * - Includes Timeout Fail-Safe for low battery.
@@ -353,69 +354,44 @@ public class RedAutoPedro extends OpMode {
                 boolean isSpeedReached = (currentVelR >= targetThreshold && currentVelL >= targetThreshold);
                 boolean isTimedOut = (timeWaiting > MAX_RPM_WAIT_TIME_SECONDS);
 
-        if (launcherShotCount < 3) {
-            // Determine where we are in the current shot cycle
-            double timeInCurrentCycle = time - (launcherShotCount * cycleTime);
+                // If speed is good OR we waited too long (fail-safe)
+                if (isSpeedReached || isTimedOut) {
 
-            if (timeInCurrentCycle < (SLEEP_BEFORE_RESET_SERVO_POSITION / 1000.0)) {
-                // First half of cycle: PUSH
+                    // Optional: Stop intake right before shooting to prevent jamming?
+                    // Depending on your robot, you might want to comment this line out
+                    // if you want the intake to keep pushing during the shot.
+                    // IntakeStop();
+
+                    launcherStage = 1;
+                    launcherTimer.resetTimer();
+                }
+                break;
+
+            case 1: // STAGE: PUSHING
                 pushServo.setPosition(SERVO_LAUNCH_POSITION);
-            } else {
-                // Second half of cycle: REST
-                pushServo.setPosition(SERVO_REST_POSITION);
-            }
 
-            // Check if we finished a full cycle
-            if (timeInCurrentCycle >= cycleTime) {
-                launcherShotCount++;
-            }
-            return false; // Not done yet
-        } else {
-            // 3. Cleanup: We have finished 3 shots
-            OutakeMotorRight.setVelocity(STOP_VELOCITY);
-            OutakeMotorLeft.setVelocity(STOP_VELOCITY);
-            pushServo.setPosition(SERVO_REST_POSITION);
-            isLauncherRunning = false; // Reset flag for next time we call this
-            return true; // We are done!
+                // Wait for the servo to physically reach the position
+                if (launcherTimer.getElapsedTimeSeconds() >= (SLEEP_BEFORE_RESET_SERVO_POSITION / 1000.0)) {
+                    launcherStage = 2;
+                    launcherTimer.resetTimer();
+                }
+                break;
+
+            case 2: // STAGE: RESETTING
+                pushServo.setPosition(SERVO_REST_POSITION);
+
+                // Wait for servo to pull back
+                if (launcherTimer.getElapsedTimeSeconds() >= (SLEEP_BEFORE_RESET_SERVO_POSITION / 1000.0)) {
+                    launcherShotCount++; // Increment shot count
+                    launcherStage = 0;   // Loop back to Stage 0
+                }
+                break;
         }
+
+        return false; // Not done yet
     }
 
 
-    /* public void Launcher() {
-        // Start the timer and motors on the first run
-        OutakeMotorRight.setVelocity(TARGET_VELOCITY_BACK_LAUNCH_ZONE);
-        OutakeMotorLeft.setVelocity(TARGET_VELOCITY_BACK_LAUNCH_ZONE);
-        while (OutakeMotorRight.getVelocity() < TARGET_VELOCITY_BACK_LAUNCH_ZONE)
-            continue;
-        while (OutakeMotorLeft.getVelocity() < TARGET_VELOCITY_BACK_LAUNCH_ZONE)
-            continue;
-        pushServo.setPosition(SERVO_LAUNCH_POSITION);//Set pushServo to launch
-        while (pushServo.getPosition() > SERVO_LAUNCH_POSITION)
-            continue;
-        sleep(SLEEP_BEFORE_RESET_SERVO_POSITION);
-        pushServo.setPosition(SERVO_REST_POSITION);//Resets the pushServo position
-        while (pushServo.getPosition() < SERVO_REST_POSITION)
-            continue;
-        sleep(SLEEP_BEFORE_RESET_SERVO_POSITION);
-
-        pushServo.setPosition(SERVO_LAUNCH_POSITION);//Set pushServo to launch
-        while (pushServo.getPosition() > SERVO_LAUNCH_POSITION)
-            continue;
-        sleep(SLEEP_BEFORE_RESET_SERVO_POSITION);
-        pushServo.setPosition(SERVO_REST_POSITION);//Resets the pushServo position
-        while (pushServo.getPosition() < SERVO_REST_POSITION)
-            continue;
-        sleep(1000);
-
-        pushServo.setPosition(SERVO_LAUNCH_POSITION);//Set pushServo to launch
-        while (pushServo.getPosition() > SERVO_LAUNCH_POSITION)
-            continue;
-        sleep(SLEEP_BEFORE_RESET_SERVO_POSITION);
-        pushServo.setPosition(SERVO_REST_POSITION);//Resets the pushServo position
-        while (pushServo.getPosition() < SERVO_REST_POSITION)
-            continue;
-
-    }*/
 
     public void LauncherStop() {
         OutakeMotorRight.setVelocity(STOP_VELOCITY);
