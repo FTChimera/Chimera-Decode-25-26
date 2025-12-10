@@ -327,10 +327,31 @@ public class RedAutoPedro extends OpMode {
             return true; // Return TRUE to tell the main loop we are finished
         }
 
-        // 2. Logic for shots based on time
-        // We want 3 shots. Each shot cycle takes about 1000ms (500ms extend, 500ms retract)
-        double time = launcherTimer.getElapsedTimeSeconds(); // Get seconds
-        double cycleTime = (SLEEP_BEFORE_RESET_SERVO_POSITION * 2) / 1000.0; // e.g., 1.0 second
+        // 3. The Shot Logic State Machine
+        switch (launcherStage) {
+            case 0: // STAGE: RECOVERING RPM & FEEDING
+                pushServo.setPosition(SERVO_REST_POSITION);
+
+                // --- INTAKE LOGIC ---
+                // If we are on Shot 2 (index 1) or Shot 3 (index 2), we need to feed the ring.
+                // We do this while waiting for the motors to spin up.
+                if (launcherShotCount > 1) {
+                    Intake();
+                } else {
+                    // Keep intake off for the very first shot (assuming it's pre-loaded)
+                    IntakeStop();
+                }
+                // --------------------
+
+                double currentVelR = OutakeMotorRight.getVelocity();
+                double currentVelL = OutakeMotorLeft.getVelocity();
+                double targetThreshold = TARGET_VELOCITY_BACK_LAUNCH_ZONE - TARGET_VELOCITY_TOLERANCE;
+
+                // Check time for Fail-Safe
+                double timeWaiting = launcherTimer.getElapsedTimeSeconds();
+
+                boolean isSpeedReached = (currentVelR >= targetThreshold && currentVelL >= targetThreshold);
+                boolean isTimedOut = (timeWaiting > MAX_RPM_WAIT_TIME_SECONDS);
 
         if (launcherShotCount < 3) {
             // Determine where we are in the current shot cycle
