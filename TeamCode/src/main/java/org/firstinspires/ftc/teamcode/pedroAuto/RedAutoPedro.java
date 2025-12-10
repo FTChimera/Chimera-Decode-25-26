@@ -307,17 +307,24 @@ public class RedAutoPedro extends OpMode {
             OutakeMotorRight.setVelocity(TARGET_VELOCITY_BACK_LAUNCH_ZONE);
             OutakeMotorLeft.setVelocity(TARGET_VELOCITY_BACK_LAUNCH_ZONE);
 
-            // Only start shooting if motors are up to speed
-            if (OutakeMotorRight.getVelocity() >= TARGET_VELOCITY_BACK_LAUNCH_ZONE &&
-                    OutakeMotorLeft.getVelocity() >= TARGET_VELOCITY_BACK_LAUNCH_ZONE) {
+            isLauncherRunning = true;
+            launcherShotCount = 0;
+            launcherStage = 0;
+            launcherTimer.resetTimer();
+            return false;
+        }
 
-                isLauncherRunning = true;
-                launcherShotCount = 0;
-                launcherTimer.resetTimer();
-            } else {
-                // Wait for motors to spin up
-                return false;
-            }
+        // 2. Sequence Completion (Safety Stop)
+        if (launcherShotCount >= 3) {
+            OutakeMotorRight.setVelocity(STOP_VELOCITY);
+            OutakeMotorLeft.setVelocity(STOP_VELOCITY);
+            pushServo.setPosition(SERVO_REST_POSITION);
+
+            // IMPORTANT: Turn off the intake when we are done!
+            IntakeStop();
+
+            isLauncherRunning = false;
+            return true; // Return TRUE to tell the main loop we are finished
         }
 
         // 2. Logic for shots based on time
