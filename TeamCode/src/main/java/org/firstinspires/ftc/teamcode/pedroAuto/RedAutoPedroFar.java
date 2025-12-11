@@ -36,8 +36,6 @@ public class RedAutoPedroFar extends OpMode {
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double MIN_VELOCITY = 1075;
-    final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
-
     final int SERVO_LAUNCH_POSITION = 0;
     final int SERVO_REST_POSITION = 1;
     final int SLEEP_BEFORE_RESET_SERVO_POSITION = 500;

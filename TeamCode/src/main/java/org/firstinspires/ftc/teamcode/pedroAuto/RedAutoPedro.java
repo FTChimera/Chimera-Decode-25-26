@@ -35,7 +35,6 @@ public class RedAutoPedro extends OpMode {
     final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 600;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double MIN_VELOCITY = 1075;
     final double SERVO_LAUNCH_POSITION = 0;
     final double SERVO_REST_POSITION = 1;
     final int SLEEP_BEFORE_RESET_SERVO_POSITION = 500;
