@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.pedroAuto;
 import static android.os.SystemClock.sleep;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
+import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -14,22 +16,23 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+
 @Autonomous(name = "RedAutoPedroFar", group = "pedroAuto")
 public class RedAutoPedroFar extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherShotCount = 0, launcherStage = 0;
     private final Pose startPose = new Pose(87.02, 8.97, Math.toRadians(270)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(84.31, 16.06, Math.toRadians(244));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-    private final Pose intakePrep = new Pose(127.09,9.59, Math.toRadians(0));
-    private final Pose red1Intake = new Pose(135.19,9.59, Math.toRadians(0));
-    private final Pose intakePrep2 = new Pose(100.59,34.85, Math.toRadians(0));
-    private final Pose red2Intake = new Pose(128.55, 34.85, Math.toRadians(0));
-    private final Pose finalPose = new Pose(132.31, 11.26, Math.toRadians(180));
+    private final Pose launchPose = new Pose(84.31, 16.06, Math.toRadians(246));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose intakePrep = new Pose(120,8.2, Math.toRadians(0));
+    private final Pose red1Intake = new Pose(137.6,6.0, Math.toRadians(0));
+    private final Pose intakePrep2 = new Pose(95,32.2, Math.toRadians(0));
+    private final Pose red2Intake = new Pose(128.55, 32.2, Math.toRadians(0));
+    private final Pose finalPose = new Pose(133.0, 11.26, Math.toRadians(180));
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight;
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1040;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 750;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
     final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 10;// Set target velocity from back launch zone
@@ -182,6 +185,7 @@ public class RedAutoPedroFar extends OpMode {
                 }
                 break;
             case CHIMERA_STOP:
+                IntakeStop();
                 telemetry.addLine("Autonomous Complete");
             default:
                 break;
@@ -214,7 +218,9 @@ public class RedAutoPedroFar extends OpMode {
     public void init() {
 
         pathTimer = new Timer();
+        launcherTimer = new Timer();
         opmodeTimer = new Timer();
+
         opmodeTimer.resetTimer();
 
         OutakeMotorRight = hardwareMap.get(DcMotorEx.class, "OutakeMotorRight");
@@ -222,8 +228,8 @@ public class RedAutoPedroFar extends OpMode {
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         pushServo = hardwareMap.servo.get("pushServo");
 
-        OutakeMotorRight.setDirection(DcMotorSimple.Direction.FORWARD);
-        OutakeMotorLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        OutakeMotorRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        OutakeMotorLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         OutakeMotorRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
