@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.pedroAuto;
 import static android.os.SystemClock.sleep;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
-import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
-
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -16,27 +14,26 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
-
-@Autonomous(name = "RedAutoPedroFar", group = "pedroAuto")
-public class RedAutoPedroFar extends OpMode {
+@Autonomous(name = "BlueAutoPedroFar", group = "pedroAuto")
+public class BlueAutoPedroFar extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherShotCount = 0, launcherStage = 0;
-    private final Pose startPose = new Pose(87.02, 8.97, Math.toRadians(270)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(84.31, 16.06, Math.toRadians(246));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-    private final Pose intakePrep = new Pose(120,8.2, Math.toRadians(0));
-    private final Pose red1Intake = new Pose(137.6,8.2, Math.toRadians(0));
-    private final Pose intakePrep2 = new Pose(95,32.2, Math.toRadians(0));
-    private final Pose red2Intake = new Pose(128.55, 32.2, Math.toRadians(0));
-    private final Pose finalPose = new Pose(133.0, 11.26, Math.toRadians(180));
-    private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight;
+    private final Pose startPose = new Pose(56.2, 8.2, Math.toRadians(270)); // Start Pose of our robot.
+    private final Pose launchPose = new Pose(56.7, 17.2, Math.toRadians(287));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose intakePrep = new Pose(15.0,8.2, Math.toRadians(180));
+    private final Pose blue1Intake = new Pose(7.7, 8.2, Math.toRadians(180));
+    private final Pose intakePrep2 = new Pose(39.7,36.6, Math.toRadians(180));
+    private final Pose blue2Intake = new Pose(7.7, 36.6, Math.toRadians(180));
+    private final Pose finalpose = new Pose(11.8, 10.4, Math.toRadians(0));
 
-    final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
+
+    private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen;
+
     final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 750;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double MIN_VELOCITY = 1075;
-    final int SERVO_LAUNCH_POSITION = 0;
+    final int SERVO_LAUNCH_POSITION = -1;
     final int SERVO_REST_POSITION = 1;
     final int SLEEP_BEFORE_RESET_SERVO_POSITION = 500;
     final int MAX_RPM_WAIT_TIME_SECONDS = 1000;
@@ -56,11 +53,10 @@ public class RedAutoPedroFar extends OpMode {
     boolean third_iteration = false;
     boolean isLauncherRunning = false;
 
-
-    final double Kp = 3.2767;
-    final double Ki = 0.32767;
-    final double Kd = 0.032767;
-    final double Kf = 32.767;
+    final double Kp = 300;
+    final double Ki = 0.0;
+    final double Kd = 0.0;
+    final double Kf = 10;
 
     DcMotorEx OutakeMotorLeft, OutakeMotorRight;
     DcMotor intakeMotor;
@@ -75,27 +71,24 @@ public class RedAutoPedroFar extends OpMode {
         pathTwo = new Path(new BezierLine(launchPose, intakePrep));
         pathTwo.setLinearHeadingInterpolation(launchPose.getHeading(), intakePrep.getHeading());
 
-        pathThree = new Path(new BezierLine(intakePrep, red1Intake));
-        pathThree.setLinearHeadingInterpolation(intakePrep.getHeading(), red1Intake.getHeading());
+        pathThree = new Path(new BezierLine(intakePrep, blue1Intake));
+        pathThree.setLinearHeadingInterpolation(intakePrep.getHeading(), blue1Intake.getHeading());
 
-        pathFour = new Path(new BezierLine(red1Intake, launchPose));
-        pathFour.setLinearHeadingInterpolation(red1Intake.getHeading(), launchPose.getHeading());
+        pathFour = new Path(new BezierLine(blue1Intake, launchPose));
+        pathFour.setLinearHeadingInterpolation(blue1Intake.getHeading(), launchPose.getHeading());
 
         pathFive = new Path(new BezierLine(launchPose, intakePrep2));
-        pathFive.setLinearHeadingInterpolation(launchPose.getHeading(), red2Intake.getHeading());
+        pathFive.setLinearHeadingInterpolation(launchPose.getHeading(), intakePrep2.getHeading());
 
-        pathSix = new Path(new BezierLine(intakePrep2, red2Intake));
-        pathSix.setLinearHeadingInterpolation(intakePrep2.getHeading(), red2Intake.getHeading());
+        pathSix = new Path(new BezierLine(intakePrep, blue2Intake));
+        pathSix.setLinearHeadingInterpolation(intakePrep2.getHeading(), blue2Intake.getHeading());
 
-        pathSeven = new Path(new BezierLine(red2Intake, launchPose));
-        pathSeven.setLinearHeadingInterpolation(red2Intake.getHeading(), launchPose.getHeading());
+        pathSeven = new Path(new BezierLine(blue2Intake, launchPose));
+        pathSeven.setLinearHeadingInterpolation(blue2Intake.getHeading(), launchPose.getHeading());
 
-        pathEight = new Path(new BezierLine(launchPose, finalPose));
-        pathEight.setLinearHeadingInterpolation(launchPose.getHeading(), finalPose.getHeading());
+        pathEight = new Path(new BezierLine(launchPose, finalpose));
+        pathEight.setLinearHeadingInterpolation(launchPose.getHeading(), finalpose.getHeading());
 
-
-
-/// delete if not ready
     }
     public void autonomousPathUpdate() {
         switch (pathState) {
@@ -105,10 +98,6 @@ public class RedAutoPedroFar extends OpMode {
                 break;
             case CHIMERA_LAUNCH:
                 if (!follower.isBusy()){
-                    //Launcher();
-                    //sleep(1000);
-                    //Launcher();
-                    //Intake();
                     if (runLauncherSequence()) {
                         setPathState(CHIMERA_LAUNCH_INTAKE);
                     }
@@ -211,8 +200,8 @@ public class RedAutoPedroFar extends OpMode {
     public void init() {
 
         pathTimer = new Timer();
-        launcherTimer = new Timer();
         opmodeTimer = new Timer();
+        launcherTimer = new Timer();
 
         opmodeTimer.resetTimer();
 
@@ -254,9 +243,9 @@ public class RedAutoPedroFar extends OpMode {
         setPathState(0);
     }
 
-    /** We do not use this because everything should automatically disable **/
     @Override
     public void stop() {}
+
     public boolean runLauncherSequence() {
         // 1. Initialization (Start the flywheels)
         if (!isLauncherRunning) {
@@ -349,7 +338,7 @@ public class RedAutoPedroFar extends OpMode {
         OutakeMotorRight.setVelocity(STOP_VELOCITY);
         OutakeMotorLeft.setVelocity(STOP_VELOCITY);
         pushServo.setPosition(SERVO_REST_POSITION);//Resets the pushServo position
-        sleep(400);
+        sleep(200);
     }
     public void Intake() {
         intakeMotor.setPower(1);
