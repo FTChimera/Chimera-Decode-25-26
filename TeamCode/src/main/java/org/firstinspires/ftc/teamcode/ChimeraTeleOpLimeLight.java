@@ -222,12 +222,15 @@ public class ChimeraTeleOpLimeLight extends LinearOpMode {
             limelight.LLUpdate();
             telemetry.addData("Limelight Score", limelight.getLLScore());
             if (limelight.getLLScore() == 0) rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
-            else if (limelight.getLLScore() < 6) {
+            else if (limelight.getLLScore() < 2) {
                 // GREEN
                 rgbIndicator.setColor(RGBIndicator.Color.GREEN);
-            } else if (limelight.getLLScore() < 10) {
+            } else if (limelight.getLLScore() < 6) {
+                // YELLOW
+                rgbIndicator.setColor(RGBIndicator.Color.YELLOW);
+            } else if (limelight.getLLScore() < 13) {
                 // ORANGE
-                rgbIndicator.setColor(RGBIndicator.Color.GOLD);
+                rgbIndicator.setColor(RGBIndicator.Color.ORANGE);
             } else {
                 // OFF
                 rgbIndicator.setColor(RGBIndicator.Color.BLACK);
