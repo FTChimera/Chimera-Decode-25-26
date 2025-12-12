@@ -29,9 +29,10 @@ public class BlueAutoPedro extends OpMode {
     private final Pose blue2Intake = new Pose(15.75, 60.1, Math.toRadians(180));
     private final Pose intakePrep3 = new Pose(44.3, 35.3, Math.toRadians(180));
     private final Pose blue3Intake = new Pose(8, 35.3, Math.toRadians(180));
+    private final Pose finalPose = new Pose(35.1, 79.7, Math.toRadians(312));
 
 
-    private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen;
+    private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 590;// Set target velocity from back launch zone
@@ -89,7 +90,7 @@ public class BlueAutoPedro extends OpMode {
         pathFive = new Path(new BezierLine(launchPose, intakePrep2));
         pathFive.setLinearHeadingInterpolation(launchPose.getHeading(), intakePrep2.getHeading());
 
-        pathSix = new Path(new BezierLine(intakePrep, blue2Intake));
+        pathSix = new Path(new BezierLine(intakePrep2, blue2Intake));
         pathSix.setLinearHeadingInterpolation(intakePrep2.getHeading(), blue2Intake.getHeading());
 
         pathSeven = new Path(new BezierLine(blue2Intake, launchPose));
@@ -103,6 +104,10 @@ public class BlueAutoPedro extends OpMode {
 
         pathTen = new Path(new BezierLine(blue3Intake, launchPose));
         pathTen.setLinearHeadingInterpolation(blue3Intake.getHeading(), launchPose.getHeading());
+
+        pathEleven = new Path(new BezierLine(launchPose, finalPose));
+        pathEleven.setLinearHeadingInterpolation(launchPose.getHeading(), finalPose.getHeading());
+
 
     /* Here is an example for Constant Interpolation
     scorePreload.setConstantInterpolation(startPose.getHeading()); */
@@ -202,6 +207,9 @@ public class BlueAutoPedro extends OpMode {
                 }
                 break;
             case CHIMERA_STOP:
+                if(!follower.isBusy()){
+                    follower.followPath(pathEleven);
+                }
                 telemetry.addLine("Autonomous Complete");
                 IntakeStop();
             default:
