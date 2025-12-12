@@ -1,73 +1,41 @@
 package org.firstinspires.ftc.teamcode;
-import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 
-import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Systems.Consts;
+import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
+import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 
 
-@TeleOp(name = "ChimeraTeleOp OLD", group = "AbsolutePriority")// Name and Group
-public class ChimeraTeleOpOld extends LinearOpMode {
+@TeleOp(name = "ChimeraTeleOpBadOldNoConst", group = "AbsolutePriority")// Name and Group
+public class ChimeraTeleOpBadOldNoConst extends LinearOpMode {
 
-    final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1150;// Set target velocity from back launch zone
-    final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 1040;// Set target velocity from front launch zone
+    final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 900;// Set target velocity from front launch zone
     final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 1050;// Set target velocity from back launch zone
     final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double MIN_VELOCITY = 1075;
-    final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
-    final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
-    final double FULL_SPEED = 1.0;
     final int SERVO_LAUNCH_POSITION = 0;
     final int SERVO_REST_POSITION = 1;
     final int SLEEP_BEFORE_RESET_SERVO_POSITION = 200;
+    public LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
 
     // declaring our PIDF tuning values
-    final double Kp = 300;
-    final double Ki = 0.0;
-    final double Kd = 0.0;
-    final double Kf = 10;
+
     double  setTargetVelocity = 0;
     double setMinVelocity = 0;
-    private Follower follower;
     public static Pose startingPose;
-    private boolean automatedDrive = false;
-    private boolean slowMode = false;
-    private TelemetryManager telemetryM;
-    double X_Coordinate_Blue_Goal = 0;
-    double Y_Coordinate_Blue_Goal = 144;
-    double X_Coordinate_Red_Goal = 144;
-    double Y_Coordinate_Red_Goal = 144;
-    double X_Coordinate = 0.0;
-    double Y_Coordinate = 0.0;
-    double Distance_To_Goal = 0;
-    double Distance_To_Goal_Blue = 0;
-    double currentHeading = 0.0;
-    double launchPositionHeadingRadians = 0;
-    final double SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE = 20;
-    final double SHOOTING_ZONE_FAR_FRONT_LAUNCH_ZONE = 60;
-    final double SHOOTING_ZONE_BACK_LAUNCH_ZONE = 65;
-
-    // TODO Change Starting position. Temporarily set starting position to back launch
-    // zone, (x,y) = (72,0)
-    final double RED_ALLIANCE_STARTING_X_COORDINATE = 104;
-    final double RED_ALLIANCE_STARTING_Y_COORDINATE = 60;
-    final double RED_ALLIANCE_STARTING_HEADING_POSITION = 180;
-
-    final double BLUE_ALLIANCE_STARTING_X_COORDINATE = 144;
-    final double BLUE_ALLIANCE_STARTING_Y_COORDINATE = 0;
-    final double BLUE_ALLIANCE_STARTING_HEADING_POSITION = 90;
+    private Follower follower;
     enum AllianceColor {
         BLUE,
         RED
@@ -75,10 +43,12 @@ public class ChimeraTeleOpOld extends LinearOpMode {
     AllianceColor allianceColor;
 
     ElapsedTime feederTimer = new ElapsedTime();
+    RGBIndicator rgbIndicator;
 
     @Override
     public void runOpMode() throws InterruptedException {
-
+        rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
+        rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
         //while (!isStarted() && !isStopRequested())
         while (opModeInInit())
         {
@@ -145,15 +115,15 @@ public class ChimeraTeleOpOld extends LinearOpMode {
          * slow down much faster when it is coasting. This creates a much more controllable
          * drivetrain. As the robot stops much quicker.
          */
-        rightOutakeMotor.setZeroPowerBehavior(BRAKE);
-        leftOutakeMotor.setZeroPowerBehavior(BRAKE);
+        rightOutakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        leftOutakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        leftOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
-        rightOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
+        leftOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.leftPIDF);
+        rightOutakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.rightPIDF);
         if (allianceColor == AllianceColor.RED)
         {
             // Starting position Red Goal
-            startingPose = new Pose(RED_ALLIANCE_STARTING_X_COORDINATE, RED_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(RED_ALLIANCE_STARTING_HEADING_POSITION));
+            startingPose = Consts.RED_STARTING_POSE;
             follower.setStartingPose(startingPose);
             follower.update();
             telemetry.addData("Alliance Color", "Red");
@@ -161,14 +131,14 @@ public class ChimeraTeleOpOld extends LinearOpMode {
         }
         else if(allianceColor == AllianceColor.BLUE)
         {
-            startingPose = new Pose(BLUE_ALLIANCE_STARTING_X_COORDINATE, BLUE_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(BLUE_ALLIANCE_STARTING_HEADING_POSITION));
+            startingPose = Consts.BLUE_STARTING_POSE;
             follower.setStartingPose(startingPose);
             follower.update();
             telemetry.addData("Alliance Color", "Blue");
             telemetry.addData("Starting Pose", follower.getPose());
         } else {
             // Starting position Red Goal
-            startingPose = new Pose(RED_ALLIANCE_STARTING_X_COORDINATE, RED_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(RED_ALLIANCE_STARTING_HEADING_POSITION));
+            startingPose = Consts.RED_STARTING_POSE;
             follower.setStartingPose(startingPose);
             follower.update();
             telemetry.addData("Alliance Color", "Red");
@@ -181,15 +151,29 @@ public class ChimeraTeleOpOld extends LinearOpMode {
          * Tell the driver that initialization is complete.
          */
 
-        telemetry.addData("Status", "Initialized");
-
+        telemetry.addData("Status", "Initialized");telemetry.update();
+        limelight.setDevice(hardwareMap.get(Limelight3A.class, "limelight"));
         waitForStart();
-
+        limelight.startLLWithPipeline(0);
         follower.startTeleopDrive();
 
         if (isStopRequested()) return;
-
+        telemetry.addData("Status", "Running");
         while (opModeIsActive()) {
+            limelight.LLUpdate();
+            telemetry.addData("Limelight Score", limelight.getLLScore());
+            if (limelight.getLLScore() == 0) rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
+            else if (limelight.getLLScore() < 6) {
+                // GREEN
+                rgbIndicator.setColor(RGBIndicator.Color.GREEN);
+            } else if (limelight.getLLScore() < 10) {
+                // ORANGE
+                rgbIndicator.setColor(RGBIndicator.Color.GOLD);
+            } else {
+                // OFF
+                rgbIndicator.setColor(RGBIndicator.Color.BLACK);
+            }
+            // if (limelight.isDisconnected) rgbIndicator.setColor(RGBIndicator.Color.RED);telemetry.addData("Disconnected",""); // DISCONNECTED
             double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
             double rx = gamepad1.right_stick_x;
@@ -221,30 +205,17 @@ public class ChimeraTeleOpOld extends LinearOpMode {
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
 
-            /*
-            //Step 1. Find the position of the robot on the field
-            X_Coordinate = follower.getPose().getX();
-            Y_Coordinate = follower.getPose().getY();
-            currentHeading =  follower.getPose().getHeading();
 
-            if (allianceColor == AllianceColor.RED)
-            {
-                telemetry.addData("Alliance Color", "Red");
-            }
-            else if(allianceColor == AllianceColor.BLUE)
-            {
-                telemetry.addData("Alliance Color", "Blue");
-            }
-
-            telemetry.addData("Current X Coordinate", X_Coordinate);
-            telemetry.addData("Current Y Coordinate", Y_Coordinate);
-            telemetry.addData("Current heading", Math.toDegrees(currentHeading));
-//            telemetry.addData("X Coordinate Red Goal", X_Coordinate_Red_Goal);
-//            telemetry.addData("Y Coordinate Red Goal", Y_Coordinate_Red_Goal);
-//            telemetry.addData("X Coordinate Blue Goal", X_Coordinate_Blue_Goal);
-//            telemetry.addData("Y Coordinate Blue Goal", Y_Coordinate_Blue_Goal);
-            */
             /*
+             * LL:
+             * * ------- gamepad2.a:
+             * Step 1. Find the heading and rotate to face the goal
+             * Step 2. Move forward/backward so that the robot is the correct distance from the goal
+             * Step 3. Start the outtake motors
+             * ------- dpad_up:
+             * Step 4. Check if the velocity of the motors is more than the min velocity
+             * Step 5. position servo into launch position
+             * NORMAL:
              * When driver presses the button to launch, 7 things need to happen
              * Step 1. Find the position of the robot on the field
              * Step 2. Determine the TARGET_VELOCITY based on robot position

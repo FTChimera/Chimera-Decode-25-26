@@ -14,25 +14,27 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.Systems.Consts;
+
 @Autonomous(name = "BlueAutoPedro", group = "pedroAuto")
 public class BlueAutoPedro extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherShotCount = 0, launcherStage = 0;
     private final Pose startPose = new Pose(15.75, 111.27, Math.toRadians(180)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(50, 78.06, Math.toRadians(310));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-    private final Pose intakePrep = new Pose(50,84.7, Math.toRadians(180));
-    private final Pose blue1Intake = new Pose(15.51, 84.84, Math.toRadians(180));
-    private final Pose intakePrep2 = new Pose(44.36,54.78, Math.toRadians(180));
-    private final Pose blue2Intake = new Pose(15.75, 66.66, Math.toRadians(180));
-    private final Pose intakePrep3 = new Pose(23.75, 9.66, Math.toRadians(180));
-    private final Pose blue3Intake = new Pose(9.45, 9.21, Math.toRadians(180));
+    private final Pose launchPose = new Pose(50.6, 87.5, Math.toRadians(312));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose intakePrep = new Pose(50,84, Math.toRadians(180));
+    private final Pose blue1Intake = new Pose(15.51, 84, Math.toRadians(180));
+    private final Pose intakePrep2 = new Pose(42.4,60.1, Math.toRadians(180));
+    private final Pose blue2Intake = new Pose(15.75, 60.1, Math.toRadians(180));
+    private final Pose intakePrep3 = new Pose(44.3, 35.3, Math.toRadians(180));
+    private final Pose blue3Intake = new Pose(8, 35.3, Math.toRadians(180));
 
 
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen;
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 600;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 590;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double MIN_VELOCITY = 1075;
@@ -253,8 +255,8 @@ public class BlueAutoPedro extends OpMode {
         OutakeMotorRight.setZeroPowerBehavior(BRAKE);
         OutakeMotorLeft.setZeroPowerBehavior(BRAKE);
 
-        OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
         OutakeMotorLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
+        OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER,new PIDFCoefficients(Kp, Ki, Kd, Kf));
 
         pushServo.setPosition(SERVO_REST_POSITION);
 
@@ -294,7 +296,17 @@ public class BlueAutoPedro extends OpMode {
         }
 
         // 2. Sequence Completion (Safety Stop)
-        if (launcherShotCount >= 3) {
+        if (third_iteration == false && launcherShotCount >= 3){
+            OutakeMotorRight.setVelocity(STOP_VELOCITY);
+            OutakeMotorLeft.setVelocity(STOP_VELOCITY);
+            pushServo.setPosition(SERVO_REST_POSITION);
+
+            // IMPORTANT: Turn off the intake when we are done!
+            IntakeStop();
+
+            isLauncherRunning = false;
+            return true; // Return TRUE to tell the main loop we are finished
+        } else if(third_iteration == true && launcherShotCount >= 2){
             OutakeMotorRight.setVelocity(STOP_VELOCITY);
             OutakeMotorLeft.setVelocity(STOP_VELOCITY);
             pushServo.setPosition(SERVO_REST_POSITION);
