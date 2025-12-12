@@ -25,7 +25,7 @@ public class RedAutoPedroFar extends OpMode {
     private final Pose startPose = new Pose(87.02, 8.97, Math.toRadians(270)); // Start Pose of our robot.
     private final Pose launchPose = new Pose(84.31, 16.06, Math.toRadians(246));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose intakePrep = new Pose(120,8.2, Math.toRadians(0));
-    private final Pose red1Intake = new Pose(137.6,8.2, Math.toRadians(0));
+    private final Pose red1Intake = new Pose(135,8.2, Math.toRadians(0));
     private final Pose intakePrep2 = new Pose(95,32.2, Math.toRadians(0));
     private final Pose red2Intake = new Pose(128.55, 32.2, Math.toRadians(0));
     private final Pose finalPose = new Pose(133.0, 11.26, Math.toRadians(180));
@@ -118,13 +118,13 @@ public class RedAutoPedroFar extends OpMode {
                 IntakeStop();
                 LauncherStop();
                 if(!first_iteration) {
-                    setPathState(CHIMERA_PATH_TWO);
+                    setPathState(CHIMERA_PATH_FIVE);
                     first_iteration = true;
                 } else if (!second_iteration) {
-                    setPathState(CHIMERA_PATH_FIVE);
+                    setPathState(CHIMERA_PATH_EIGHT);
                     second_iteration = true;
                 } else if (!third_iteration) {
-                    setPathState(CHIMERA_PATH_EIGHT);
+                    setPathState(CHIMERA_STOP);
                     third_iteration = true;
                 } else {
                     setPathState(CHIMERA_STOP);

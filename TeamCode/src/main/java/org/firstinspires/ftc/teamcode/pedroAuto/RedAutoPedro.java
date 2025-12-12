@@ -16,6 +16,9 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.Systems.Consts;
+import org.opencv.core.Mat;
+
 @Autonomous(name = "RedAutoPedro", group = "pedroAuto")
 public class RedAutoPedro extends OpMode {
     private Follower follower;
@@ -28,11 +31,12 @@ public class RedAutoPedro extends OpMode {
     private final Pose intakePrep2 = new Pose(100.38,61.35, Math.toRadians(0));
     private final Pose red2Intake = new Pose(135.02, 55.30, Math.toRadians(0));
     private final Pose intakePrep3 = new Pose(100.27, 37.14, Math.toRadians(0));
-    private final Pose red3intake = new Pose (135,36.73, Math.toRadians(0));
-    private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen;
+    private final Pose red3intake = new Pose(135,36.73, Math.toRadians(0));
+    private final Pose finalPose = new Pose(105.2, 75.3, Math.toRadians(228));
+    private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 600;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 575;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double SERVO_LAUNCH_POSITION = 0;
@@ -107,6 +111,9 @@ public class RedAutoPedro extends OpMode {
 
         pathTen = new Path(new BezierLine(red3intake, launchPose));
         pathTen.setLinearHeadingInterpolation(red3intake.getHeading(),launchPose.getHeading());
+
+        pathEleven = new Path(new BezierLine(launchPose, finalPose));
+        pathEleven.setLinearHeadingInterpolation(launchPose.getHeading(), finalPose.getHeading());
 
 
         //add final pos
@@ -210,7 +217,11 @@ public class RedAutoPedro extends OpMode {
                 }
                 break;
             case CHIMERA_STOP:
-                telemetry.addLine("Autonomous Complete");
+                if (!follower.isBusy()){
+                    follower.followPath(pathEleven);
+                }
+
+                    telemetry.addLine("Autonomous Complete");
                 IntakeStop();
             default:
                 break;
@@ -263,8 +274,8 @@ public class RedAutoPedro extends OpMode {
         OutakeMotorRight.setZeroPowerBehavior(FLOAT);
         OutakeMotorLeft.setZeroPowerBehavior(FLOAT);
 
-        OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
         OutakeMotorLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
+        OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
 
         pushServo.setPosition(SERVO_REST_POSITION);
 
@@ -309,7 +320,17 @@ public class RedAutoPedro extends OpMode {
         }
 
         // 2. Sequence Completion (Safety Stop)
-        if (launcherShotCount >= 3) {
+        if (third_iteration == false && launcherShotCount >= 3){
+            OutakeMotorRight.setVelocity(STOP_VELOCITY);
+            OutakeMotorLeft.setVelocity(STOP_VELOCITY);
+            pushServo.setPosition(SERVO_REST_POSITION);
+
+            // IMPORTANT: Turn off the intake when we are done!
+            IntakeStop();
+
+            isLauncherRunning = false;
+            return true; // Return TRUE to tell the main loop we are finished
+        } else if(third_iteration == true && launcherShotCount >= 2){
             OutakeMotorRight.setVelocity(STOP_VELOCITY);
             OutakeMotorLeft.setVelocity(STOP_VELOCITY);
             pushServo.setPosition(SERVO_REST_POSITION);
