@@ -22,16 +22,11 @@ public class Consts {
 
     // TODO Change Starting position. Temporarily set starting position to back launch
     // zone, (x,y) = (72,0)
-    public static final double RED_ALLIANCE_STARTING_X_COORDINATE = 104;
-    public static final double RED_ALLIANCE_STARTING_Y_COORDINATE = 60;
-    public static final double RED_ALLIANCE_STARTING_HEADING_POSITION = 180;
-
-    public static final double BLUE_ALLIANCE_STARTING_X_COORDINATE = 144;
-    public static final double BLUE_ALLIANCE_STARTING_Y_COORDINATE = 0;
-    public static final double BLUE_ALLIANCE_STARTING_HEADING_POSITION = 90;
     public enum AllianceColor {BLUE, RED}
-    public static Pose RED_STARTING_POSE = new Pose(RED_ALLIANCE_STARTING_X_COORDINATE, RED_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(RED_ALLIANCE_STARTING_HEADING_POSITION));
-    public static Pose BLUE_STARTING_POSE = new Pose(BLUE_ALLIANCE_STARTING_X_COORDINATE, BLUE_ALLIANCE_STARTING_Y_COORDINATE, Math.toRadians(BLUE_ALLIANCE_STARTING_HEADING_POSITION));
+    public static Pose RED_STARTING_POSE = new Pose(104, 60, Math.toRadians(180));
+    public static Pose BLUE_STARTING_POSE = new Pose(144, 0, Math.toRadians(90));
+    public static Pose RED_GOAL = new Pose(130.37, 127.64, Math.toRadians(45));
+    public static Pose BLUE_GOAL = new Pose(13.63, 127.64, Math.toRadians(135));
     public static double LAUNCHER_GOALTAG_ANGLE_SCALE = 15; // TUNE
     public static String[] DRIVE_MOTOR_NAMES = {"frontLeftMotor","frontRightMotor","backLeftMotor","backRightMotor"};
     public static PIDFCoefficients getPIDFCoefficients(double maxVelocity, double KpOffset, double KiOffset, double KdOffset, double KfOffset) {

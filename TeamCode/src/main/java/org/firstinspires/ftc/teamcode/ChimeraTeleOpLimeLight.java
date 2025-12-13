@@ -111,9 +111,8 @@ public class ChimeraTeleOpLimeLight extends LinearOpMode {
             telemetry.addData("Press 'GamePad1 Left Bumper'", "for RED");
             // This method is called repeatedly during the init phase
             allianceColor = Consts.AllianceColor.RED;
-            if (gamepad1.a) OneGamepadAControl = true;
-            if (gamepad1.b) OneGamepadAControl = false;
-            telemetry.addData("GamepadA Control ALL", OneGamepadAControl);
+            if (gamepad1.aWasPressed()) OneGamepadAControl = !OneGamepadAControl;
+            telemetry.addData("GamepadA Control ALL (press A to switch)", OneGamepadAControl);
             if (gamepad1.right_bumper)
             {
                 allianceColor = Consts.AllianceColor.BLUE;
@@ -220,15 +219,15 @@ public class ChimeraTeleOpLimeLight extends LinearOpMode {
         telemetry.addData("Status", "Running");
         while (opModeIsActive()) {
             limelight.LLUpdate();
-            telemetry.addData("Limelight Score", limelight.getLLScore());
-            if (limelight.getLLScore() == 0) rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
-            else if (limelight.getLLScore() < 2) {
+            telemetry.addData("Angle Degrees", limelight.getLLScore());
+            if (limelight.getLLScore() == 0) rgbIndicator.setColor(RGBIndicator.Color.BLACK);
+            else if (limelight.getLLScore() < 1.5) {
                 // GREEN
                 rgbIndicator.setColor(RGBIndicator.Color.GREEN);
-            } else if (limelight.getLLScore() < 6) {
+            } else if (limelight.getLLScore() < 5) {
                 // YELLOW
                 rgbIndicator.setColor(RGBIndicator.Color.YELLOW);
-            } else if (limelight.getLLScore() < 13) {
+            } else if (limelight.getLLScore() < 12.5) {
                 // ORANGE
                 rgbIndicator.setColor(RGBIndicator.Color.ORANGE);
             } else {
