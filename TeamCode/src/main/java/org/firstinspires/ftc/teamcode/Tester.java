@@ -1,13 +1,20 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.Systems.Consts.BLUE_GOAL;
+import static org.firstinspires.ftc.teamcode.Systems.Consts.RED_GOAL;
+import static org.firstinspires.ftc.teamcode.Systems.Consts.RED_STARTING_POSE;
+
 import com.bylazar.configurables.annotations.Configurable;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.telemetry.SelectableOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
+import org.firstinspires.ftc.teamcode.Systems.Consts;
 import org.firstinspires.ftc.teamcode.Vision.aprilTagIndicatorTest;
+import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
+import org.firstinspires.ftc.teamcode.pedroAuto.Tuning;
 
 @Configurable
 @TeleOp(name="Tester Selectable")
@@ -15,93 +22,86 @@ public class Tester extends SelectableOpMode {
     public Tester() {
         super("Select an OpMode", s -> {
             s.folder("Launchers Test", l -> {
-                l.add("Left PID Test", MaxVelocityPIDLeft::new);
-                l.add("Right PID Test", MaxVelocityPIDRight::new);
+                l.add("Max Velocity PID Test Tuner", MaxVelocityTest::new);
             });
             s.folder("Limelight and RGB Indicator", l -> {
                 l.add("April Tag Indicator Test", aprilTagIndicatorTest::new);
             });
+            s.folder("Pedro Pathing", l -> {
+                l.add("Pedro Velocity Values", TestVelocityValues::new);
+                l.add("Pedro Tuning", Tuning::new);
+            });
         });
     }
+    public static class TestVelocityValues extends LinearOpMode {
+        SimpleTeleOpDrive teleOpDrive;
+        double OutakeVelocity;
+        private Follower follower = Constants.createFollower(hardwareMap);
+        private Pose goalPose() {
+            double heading = follower.getHeading();
 
-    @TeleOp
-    public static class MaxVelocityPIDLeft extends LinearOpMode {
-        DcMotorEx motor;
-        double currentVelocity, maxVelocity;
-        @Override
-        public void runOpMode() throws InterruptedException {
-            motor = hardwareMap.get(DcMotorEx.class, "OutakeMotorLeft");
-            boolean startPID = false;
-            maxVelocity = 0;
-            motor.setDirection(DcMotorSimple.Direction.FORWARD);
-            while (opModeInInit()) {
-                if (startPID) {
-                    if (gamepad1.a) motor.setPower(1);
-                    if (gamepad1.b) motor.setPower(0);
-                    currentVelocity = motor.getVelocity();
-                    if (maxVelocity < currentVelocity) maxVelocity=currentVelocity;
-                    telemetry.addData("Max Velocity", maxVelocity);
-                    telemetry.addData("Current Velocity", currentVelocity);
-                } else {
-                    telemetry.addData("BUTTON TO START PID", "Gamepad 1 A");
-                    while (!gamepad1.a) idle();
-                    startPID = true;
-                }
-                telemetry.update();
+            // Normalize heading to [0, 2π)
+            while (heading < 0) heading += 2 * Math.PI;
+            while (heading >= 2 * Math.PI) heading -= 2 * Math.PI;
+
+            // Facing generally "up" the field (toward red side)
+            if (heading > Math.PI / 2 && heading < 3 * Math.PI / 2) {
+                return RED_GOAL;
             }
-            waitForStart();
-            motor.setPower(0);
-            double Kf = 32767/maxVelocity;
-            double Kp = 0.1*Kf;
-            double Ki = 0.1*Kp;
-            double Kd = 0.1*Ki;
-            telemetry.addData("Max Velocity", maxVelocity);
-            telemetry.addData("PID", new PIDFCoefficients(Kp,Ki,Kd,Kf));
-            telemetry.addData("Kp", Kp);
-            telemetry.addData("Ki", Ki);
-            telemetry.addData("Kd", Kd);
-            telemetry.addData("Kf", Kf);
-            telemetry.update();
+            return BLUE_GOAL;
         }
-    }
-    @TeleOp
-    public static class MaxVelocityPIDRight extends LinearOpMode {
-        DcMotorEx motor;
-        double currentVelocity, maxVelocity;
+        private double distance() {
+            Pose curPose = follower.getPose();
+            double dx = goalPose().getX() - curPose.getX();
+            double dy = goalPose().getY() - curPose.getY();
+            double distance = Math.hypot(dx, dy);
+            return distance;
+        }
         @Override
         public void runOpMode() throws InterruptedException {
-            motor = hardwareMap.get(DcMotorEx.class, "OutakeMotorRight");
-            boolean startPID = false;
-            maxVelocity = 0;
-            motor.setDirection(DcMotorSimple.Direction.REVERSE);
-            while (opModeInInit()) {
-                if (startPID) {
-                    if (gamepad1.a) motor.setPower(1);
-                    if (gamepad1.b) motor.setPower(0);
-                    currentVelocity = motor.getVelocity();
-                    if (maxVelocity < currentVelocity) maxVelocity=currentVelocity;
-                    telemetry.addData("Max Velocity", maxVelocity);
-                    telemetry.addData("Current Velocity", currentVelocity);
-                } else {
-                    telemetry.addData("BUTTON TO START PID", "Gamepad 1 A");
-                    while (!gamepad1.a) idle();
-                    startPID = true;
+            teleOpDrive = new SimpleTeleOpDrive(hardwareMap);
+            follower.setStartingPose(RED_STARTING_POSE);
+            waitForStart();
+
+            while (opModeIsActive()) {
+                OutakeVelocity = 0;
+                follower.update();
+                teleOpDrive.MoveDriveTrain(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
+                teleOpDrive.Intake.setPower(gamepad1.x?1:0);
+                if (gamepad1.a) {
+                    teleOpDrive.SetOutakeVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
+                    OutakeVelocity = Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
                 }
+                if (gamepad1.a) {
+                    teleOpDrive.SetOutakeVelocity(Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
+                    OutakeVelocity = Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+                }
+                if (gamepad1.b) {
+                    teleOpDrive.SetOutakeVelocity(0);
+                    OutakeVelocity=0;
+                }
+                if (gamepad1.right_bumper) {
+                    OutakeVelocity+=50;
+                    teleOpDrive.SetOutakeVelocity(OutakeVelocity);
+                }
+                if (gamepad1.left_bumper) {
+                    OutakeVelocity-=50;
+                    teleOpDrive.SetOutakeVelocity(OutakeVelocity);
+                }
+                telemetry.addData("Outake Velocity Set To:", OutakeVelocity);
+                telemetry.addData("Left Outake Velocity", teleOpDrive.LeftOutake.getVelocity());
+                telemetry.addData("Right Outake Velocity", teleOpDrive.RightOutake.getVelocity());
+                telemetry.addLine("");
+                telemetry.addData("Pose X", follower.getPose().getX());
+                telemetry.addData("Pose Y", follower.getPose().getY());
+                telemetry.addData("Pose Heading", follower.getHeading());
+                telemetry.addLine("");
+                telemetry.addLine("");
+                telemetry.addLine("VELOCITY TABLE ENTRY:");
+                telemetry.addLine("");
+                telemetry.addLine(distance() + ", " + OutakeVelocity);
                 telemetry.update();
             }
-            waitForStart();
-            motor.setPower(0);
-            double Kf = 32767/maxVelocity;
-            double Kp = 0.1*Kf;
-            double Ki = 0.1*Kp;
-            double Kd = 0.1*Ki;
-            telemetry.addData("Max Velocity", maxVelocity);
-            telemetry.addData("PID", new PIDFCoefficients(Kp,Ki,Kd,Kf));
-            telemetry.addData("Kp", Kp);
-            telemetry.addData("Ki", Ki);
-            telemetry.addData("Kd", Kd);
-            telemetry.addData("Kf", Kf);
-            telemetry.update();
         }
     }
 }
