@@ -36,7 +36,7 @@ public class RedAutoPedro extends OpMode {
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 575;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 900;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double SERVO_LAUNCH_POSITION = 0;
@@ -274,11 +274,11 @@ public class RedAutoPedro extends OpMode {
         OutakeMotorRight.setZeroPowerBehavior(FLOAT);
         OutakeMotorLeft.setZeroPowerBehavior(FLOAT);
 
-        OutakeMotorLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
-        OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
+        //OutakeMotorLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
+        //OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
 
-        // OutakeMotorLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.leftPIDF);
-        // OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.rightPIDF);
+        OutakeMotorLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.leftPIDF);
+        OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.rightPIDF);
 
         pushServo.setPosition(SERVO_REST_POSITION);
 
@@ -333,7 +333,7 @@ public class RedAutoPedro extends OpMode {
 
             isLauncherRunning = false;
             return true; // Return TRUE to tell the main loop we are finished
-        } else if(third_iteration == true && launcherShotCount >= 2){
+        } else if(third_iteration == true && launcherShotCount >= 1){
             OutakeMotorRight.setVelocity(STOP_VELOCITY);
             OutakeMotorLeft.setVelocity(STOP_VELOCITY);
             pushServo.setPosition(SERVO_REST_POSITION);
