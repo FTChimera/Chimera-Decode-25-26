@@ -19,8 +19,8 @@ import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 
 
-@TeleOp(name = "ChimeraTeleOpLimeLight",group = "AbsolutePriority")// Name and Group
-public class ChimeraTeleOpLimeLight extends LinearOpMode {
+@TeleOp(name = "ChimeraTeleOp",group = "AbsolutePriority")// Name and Group
+public class ChimeraTeleOp extends LinearOpMode {
     public LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
     double  setTargetVelocity;
     double setMinVelocity = 0;
