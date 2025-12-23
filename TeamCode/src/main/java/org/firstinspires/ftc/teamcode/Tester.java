@@ -8,6 +8,7 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.telemetry.SelectableOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -35,8 +36,8 @@ public class Tester extends SelectableOpMode {
     }
     public static class TestVelocityValues extends LinearOpMode {
         SimpleTeleOpDrive teleOpDrive;
-        double OutakeVelocity;
-        private Follower follower = Constants.createFollower(hardwareMap);
+        double OutakeVelocity;  
+        private Follower follower;
         private Pose goalPose() {
             double heading = follower.getHeading();
 
@@ -59,7 +60,9 @@ public class Tester extends SelectableOpMode {
         }
         @Override
         public void runOpMode() throws InterruptedException {
+            sleep(2000);
             teleOpDrive = new SimpleTeleOpDrive(hardwareMap);
+            follower = Constants.createFollower(hardwareMap);
             follower.setStartingPose(RED_STARTING_POSE);
             waitForStart();
 
