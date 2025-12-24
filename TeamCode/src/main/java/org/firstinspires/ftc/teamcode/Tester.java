@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.Systems.Consts.AUTO_RED_STARTING_POSE;
 import static org.firstinspires.ftc.teamcode.Systems.Consts.BLUE_GOAL;
 import static org.firstinspires.ftc.teamcode.Systems.Consts.RED_GOAL;
 
@@ -35,7 +36,7 @@ public class Tester extends SelectableOpMode {
     }
     public static class TestVelocityValues extends LinearOpMode {
         SimpleTeleOpDrive teleOpDrive;
-        double OutakeVelocity;  
+        double OutakeVelocity;
         private Follower follower;
         private Pose goalPose() {
             double heading = follower.getHeading();
@@ -62,31 +63,31 @@ public class Tester extends SelectableOpMode {
             sleep(2000);
             teleOpDrive = new SimpleTeleOpDrive(hardwareMap);
             follower = Constants.createFollower(hardwareMap);
-            follower.setStartingPose(Consts.AUTO_RED_STARTING_POSE);
+            follower.setStartingPose(AUTO_RED_STARTING_POSE);
             waitForStart();
 
             while (opModeIsActive()) {
-                OutakeVelocity = 0;
                 follower.update();
                 teleOpDrive.MoveDriveTrain(gamepad1.left_stick_y,gamepad1.left_stick_x,gamepad1.right_stick_x);
                 teleOpDrive.Intake.setPower(gamepad1.x?1:0);
-                if (gamepad1.a) {
+                if (gamepad1.aWasPressed()) {
                     teleOpDrive.SetOutakeVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
                     OutakeVelocity = Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
                 }
-                if (gamepad1.a) {
+                if (gamepad1.yWasPressed()) {
                     teleOpDrive.SetOutakeVelocity(Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
                     OutakeVelocity = Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
                 }
-                if (gamepad1.b) {
+                if (gamepad1.bWasReleased()) {
                     teleOpDrive.SetOutakeVelocity(0);
                     OutakeVelocity=0;
                 }
-                if (gamepad1.right_bumper) {
+                if (gamepad1.dpadUpWasPressed()) {teleOpDrive.push(OutakeVelocity-100);}
+                if (gamepad1.rightBumperWasPressed()) {
                     OutakeVelocity+=50;
                     teleOpDrive.SetOutakeVelocity(OutakeVelocity);
                 }
-                if (gamepad1.left_bumper) {
+                if (gamepad1.leftBumperWasPressed()) {
                     OutakeVelocity-=50;
                     teleOpDrive.SetOutakeVelocity(OutakeVelocity);
                 }
