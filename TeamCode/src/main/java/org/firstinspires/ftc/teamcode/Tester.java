@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.teamcode.Systems.Consts.BLUE_GOAL;
 import static org.firstinspires.ftc.teamcode.Systems.Consts.RED_GOAL;
-import static org.firstinspires.ftc.teamcode.Systems.Consts.RED_STARTING_POSE;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.follower.Follower;
@@ -63,7 +62,7 @@ public class Tester extends SelectableOpMode {
             sleep(2000);
             teleOpDrive = new SimpleTeleOpDrive(hardwareMap);
             follower = Constants.createFollower(hardwareMap);
-            follower.setStartingPose(RED_STARTING_POSE);
+            follower.setStartingPose(Consts.AUTO_RED_STARTING_POSE);
             waitForStart();
 
             while (opModeIsActive()) {

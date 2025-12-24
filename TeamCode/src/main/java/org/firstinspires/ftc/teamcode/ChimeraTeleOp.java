@@ -181,7 +181,7 @@ public class ChimeraTeleOp extends LinearOpMode {
         if (allianceColor == Consts.AllianceColor.RED)
         {
             // Starting position Red Goal
-            startingPose = Consts.RED_STARTING_POSE;
+            startingPose = Consts.TELEOP_RED_STARTING_POSE;
             follower.setStartingPose(startingPose);
             follower.update();
             telemetry.addData("Alliance Color", "Red");
@@ -189,14 +189,14 @@ public class ChimeraTeleOp extends LinearOpMode {
         }
         else if(allianceColor == Consts.AllianceColor.BLUE)
         {
-            startingPose = Consts.BLUE_STARTING_POSE;
+            startingPose = Consts.TELEOP_BLUE_STARTING_POSE;
             follower.setStartingPose(startingPose);
             follower.update();
             telemetry.addData("Alliance Color", "Blue");
             telemetry.addData("Starting Pose", follower.getPose());
         } else {
             // Starting position Red Goal
-            startingPose = Consts.RED_STARTING_POSE;
+            startingPose = Consts.TELEOP_RED_STARTING_POSE;
             follower.setStartingPose(startingPose);
             follower.update();
             telemetry.addData("Alliance Color", "Red");

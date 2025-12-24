@@ -3,15 +3,19 @@ package org.firstinspires.ftc.teamcode;
 import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.FORWARD;
 import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 
+import static java.lang.Thread.sleep;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Systems.Consts;
 
 public class SimpleTeleOpDrive {
     public DcMotor frontLeft,frontRight,backLeft,backRight,Intake;
     public DcMotorEx LeftOutake,RightOutake;
+    public Servo pushServo;
 
     HardwareMap hardwareMap;
 
@@ -25,6 +29,7 @@ public class SimpleTeleOpDrive {
         Intake = hardwareMap.get(DcMotor.class, "intakeMotor");
         RightOutake = hardwareMap.get(DcMotorEx.class, "OutakeMotorRight");
         LeftOutake = hardwareMap.get(DcMotorEx.class, "OutakeMotorLeft");
+        pushServo = hardwareMap.servo.get("pushServo");
 
         frontLeft.setDirection(FORWARD);
         frontRight.setDirection(FORWARD);
@@ -37,7 +42,19 @@ public class SimpleTeleOpDrive {
         LeftOutake.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.leftPIDF);
         RightOutake.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.rightPIDF);
     }
+    public void push(double OutakeMin) throws InterruptedException {
+        pushServo.setPosition(Consts.SERVO_LAUNCH_POSITION);
+        sleep(Consts.SLEEP_BEFORE_RESET_SERVO_POSITION);
+        pushServo.setPosition(Consts.SERVO_REST_POSITION);
 
+        if ((LeftOutake.getVelocity() >= OutakeMin) && (RightOutake.getVelocity() >= OutakeMin))
+        {
+            //Step 7. position servo into launch position
+            pushServo.setPosition(Consts.SERVO_LAUNCH_POSITION);
+            sleep(Consts.SLEEP_BEFORE_RESET_SERVO_POSITION);
+            pushServo.setPosition(Consts.SERVO_REST_POSITION);
+        }
+    }
     public void MoveDriveTrain(double gamepady, double gamepadx, double gamepadrx) {
         double y = -gamepady;
         double x = gamepadx * 1.1;
