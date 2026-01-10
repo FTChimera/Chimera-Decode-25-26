@@ -15,7 +15,13 @@ public class Consts {
     );
     // TODO Change Starting position. Temporarily set starting position to back launch
     // zone, (x,y) = (72,0)
-    public enum AllianceColor {BLUE, RED}
+    public enum AllianceColor {
+        BLUE, RED;
+
+        public AllianceColor switchColors() {
+            return this == RED ? BLUE : RED;
+        }
+    }
     public static Pose TELEOP_RED_STARTING_POSE = new Pose(105.2, 75.3, Math.toRadians(228));
     public static Pose TELEOP_BLUE_STARTING_POSE = new Pose(35.1, 79.7, Math.toRadians(312));
     public static Pose AUTO_RED_STARTING_POSE = new Pose(128.13, 110.81, Math.toRadians(0));

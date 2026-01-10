@@ -3,12 +3,16 @@ package org.firstinspires.ftc.teamcode2.Systems;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.List;
 
 public class LimelightSystem {
+    public LimelightSystem(HardwareMap hwMap) {
+        limelight1 = hwMap.get(Limelight3A.class, "limelight");
+    }
     private static int changePipeline(int curPipe, boolean isRed) {
         // CHANGE PIPELINES
         switch (curPipe) {
@@ -28,9 +32,7 @@ public class LimelightSystem {
     }
 
     private static double calculateDistanceCurve(double x) {
-        return 24.81797
-                + (-34825000 - 24.81797)
-                / (1 + Math.pow(x / 2.298814e-10, 0.6433497));
+        return 0;
     }
 
     private static boolean isDisconnected(LLResult newR) {
@@ -42,8 +44,8 @@ public class LimelightSystem {
     public Limelight3A limelight1;
     public Pose3D botpose;
     public LLResult result;
-    public void setDevice(Limelight3A device) {limelight1=device;}
-    public void startLLWithPipeline(int pipeline){limelight1.start();limelight1.pipelineSwitch(pipeline);}
+    public void start(int pipeline) {startLLWithPipeline(pipeline);}
+    private void startLLWithPipeline(int pipeline){limelight1.start();limelight1.pipelineSwitch(pipeline);}
     public int pipelineChange(Consts.AllianceColor allianceColor){int newPipe = changePipeline(limelight1.getLatestResult().getPipelineIndex(), allianceColor==Consts.AllianceColor.RED);limelight1.pipelineSwitch(newPipe);return newPipe;}
     public void LLUpdate() {
         result = limelight1.getLatestResult();
