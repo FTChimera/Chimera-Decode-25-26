@@ -13,18 +13,20 @@ public class Consts {
     public static double SERVO_LAUNCH_POSITION = 0.5;
     public static double SERVO_REST_POSITION = 1;
     public static int SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
-    public static double maxVelocityLeftOutakeMotor = 1680;
-    public static double maxVelocityRightOutakeMotor = 1800;
+    public static double maxVelocityLeftOutakeMotor = 1800;
+    public static double maxVelocityRightOutakeMotor = 1920;
     public static PIDFCoefficients leftPIDF = getPIDFCoefficients(maxVelocityLeftOutakeMotor,
-            1.5, 1, 1, -3);
+            1.5, 1, 1.5, -3);
     public static PIDFCoefficients rightPIDF = getPIDFCoefficients(maxVelocityRightOutakeMotor,
-            2, 1, 1, -3);
+            2, 1, 1.5, -3);
 
     // TODO Change Starting position. Temporarily set starting position to back launch
     // zone, (x,y) = (72,0)
     public enum AllianceColor {BLUE, RED}
-    public static Pose RED_STARTING_POSE = new Pose(104, 60, Math.toRadians(180));
-    public static Pose BLUE_STARTING_POSE = new Pose(144, 0, Math.toRadians(90));
+    public static Pose TELEOP_RED_STARTING_POSE = new Pose(105.2, 75.3, Math.toRadians(228));
+    public static Pose TELEOP_BLUE_STARTING_POSE = new Pose(35.1, 79.7, Math.toRadians(312));
+    public static Pose AUTO_RED_STARTING_POSE = new Pose(128.13, 110.81, Math.toRadians(0)); // Start Pose of our robot.
+    public static Pose AUTO_BLUE_STARTING_POSE = new Pose(15.75, 111.27, Math.toRadians(180));
     public static Pose RED_GOAL = new Pose(130.37, 127.64, Math.toRadians(45));
     public static Pose BLUE_GOAL = new Pose(13.63, 127.64, Math.toRadians(135));
     public static double LAUNCHER_GOALTAG_ANGLE_SCALE = 15; // TUNE

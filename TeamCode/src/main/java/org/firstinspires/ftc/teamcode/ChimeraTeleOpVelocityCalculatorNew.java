@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
+import static org.firstinspires.ftc.teamcode.VelocityCalculator.Type.POSE;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -19,8 +20,8 @@ import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 
 
-@TeleOp(name = "ChimeraTeleOpLimeLight",group = "AbsolutePriority")// Name and Group
-public class ChimeraTeleOpLimeLight extends LinearOpMode {
+@TeleOp(name = "Velocity Calc TeleOp Test",group = "AbsolutePriority")// Name and Group
+public class ChimeraTeleOpVelocityCalculatorNew extends LinearOpMode {
     public LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
     double  setTargetVelocity;
     double setMinVelocity = 0;
@@ -31,7 +32,19 @@ public class ChimeraTeleOpLimeLight extends LinearOpMode {
     // zone, (x,y) = (72,0)
     Consts.AllianceColor allianceColor;
     RGBIndicator rgbIndicator;
-    boolean OneGamepadAControl;
+    VelocityCalculator velocityCalculator;
+    boolean OneGamepadAControl=false, useVelocityCalculator=true;
+    public void velocityCalcSetMotors(DcMotorEx leftOutakeMotor, DcMotorEx rightOutakeMotor, Servo pushServo) {
+        setTargetVelocity = velocityCalculator.getVelocity();
+        setMinVelocity = velocityCalculator.shotTable[0][1];
+        if (setTargetVelocity==setMinVelocity) setMinVelocity -= 100;
+        if (setTargetVelocity<setMinVelocity) setMinVelocity -= setTargetVelocity-100;
+        leftOutakeMotor.setVelocity(setMinVelocity);
+        rightOutakeMotor.setVelocity(setMinVelocity);
+        leftOutakeMotor.setVelocity(setTargetVelocity);
+        rightOutakeMotor.setVelocity(setTargetVelocity);
+        pushServo.setPosition(Consts.SERVO_REST_POSITION);
+    }
 
     public double findAngleToRotate() {
         // return allianceColor==Consts.AllianceColor.RED? Math.atan2( (Consts.Y_Coordinate_Red_Goal - curPose.getY()), (Consts.X_Coordinate_Red_Goal - curPose.getX()) ):Math.atan2( (Consts.Y_Coordinate_Blue_Goal - curPose.getY()), (Consts.X_Coordinate_Blue_Goal - curPose.getX()) );
@@ -112,7 +125,9 @@ public class ChimeraTeleOpLimeLight extends LinearOpMode {
             // This method is called repeatedly during the init phase
             allianceColor = Consts.AllianceColor.RED;
             if (gamepad1.aWasPressed()) OneGamepadAControl = !OneGamepadAControl;
+            if (gamepad1.bWasPressed()) useVelocityCalculator = !useVelocityCalculator;
             telemetry.addData("GamepadA Control ALL (press A to switch)", OneGamepadAControl);
+            telemetry.addData("VelocityCalculator (press B to switch)", useVelocityCalculator);
             if (gamepad1.right_bumper)
             {
                 allianceColor = Consts.AllianceColor.BLUE;
@@ -129,7 +144,12 @@ public class ChimeraTeleOpLimeLight extends LinearOpMode {
             }
             telemetry.update();
         }
-
+        velocityCalculator = new VelocityCalculator(
+                allianceColor== Consts.AllianceColor.RED?
+                        Consts.TELEOP_RED_STARTING_POSE:
+                        Consts.TELEOP_BLUE_STARTING_POSE,
+                POSE
+        );
         // Declare our motors
         // Make sure your ID's match your configuration
         DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
@@ -181,7 +201,7 @@ public class ChimeraTeleOpLimeLight extends LinearOpMode {
         if (allianceColor == Consts.AllianceColor.RED)
         {
             // Starting position Red Goal
-            startingPose = Consts.RED_STARTING_POSE;
+            startingPose = Consts.TELEOP_RED_STARTING_POSE;
             follower.setStartingPose(startingPose);
             follower.update();
             telemetry.addData("Alliance Color", "Red");
@@ -189,14 +209,14 @@ public class ChimeraTeleOpLimeLight extends LinearOpMode {
         }
         else if(allianceColor == Consts.AllianceColor.BLUE)
         {
-            startingPose = Consts.BLUE_STARTING_POSE;
+            startingPose = Consts.TELEOP_BLUE_STARTING_POSE;
             follower.setStartingPose(startingPose);
             follower.update();
             telemetry.addData("Alliance Color", "Blue");
             telemetry.addData("Starting Pose", follower.getPose());
         } else {
             // Starting position Red Goal
-            startingPose = Consts.RED_STARTING_POSE;
+            startingPose = Consts.TELEOP_RED_STARTING_POSE;
             follower.setStartingPose(startingPose);
             follower.update();
             telemetry.addData("Alliance Color", "Red");
@@ -291,7 +311,8 @@ public class ChimeraTeleOpLimeLight extends LinearOpMode {
             telemetry.addData("Target Velocity", setTargetVelocity);
             telemetry.addData("Min Velocity", setMinVelocity);
             if (gamepad2.a || (OneGamepadAControl&&gamepad1.a)){
-                RunGamepadA(leftOutakeMotor,rightOutakeMotor,pushServo);
+                if (!useVelocityCalculator) RunGamepadA(leftOutakeMotor,rightOutakeMotor,pushServo);
+                else velocityCalcSetMotors(leftOutakeMotor,rightOutakeMotor,pushServo);
             }
 
             // Step 6. Check if the velocity of the motors is more than the min velocity
@@ -309,7 +330,7 @@ public class ChimeraTeleOpLimeLight extends LinearOpMode {
 
             intakeMotor.setPower(gamepad2.x||(OneGamepadAControl&&gamepad1.x)?1:0);
 
-            if(gamepad2.y || (OneGamepadAControl&&gamepad1.y)) {
+            if((gamepad2.y || (OneGamepadAControl&&gamepad1.y)) && !useVelocityCalculator) {
                 setMinVelocity = Consts.MIN_VELOCITY_FRONT_LAUNCH_ZONE;
                 setTargetVelocity = Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
 
