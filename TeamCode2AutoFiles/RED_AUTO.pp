@@ -146,7 +146,7 @@
         "heading": "linear",
         "reverse": false,
         "startDeg": 90,
-        "endDeg": 50
+        "endDeg": 65.6
       },
       "controlPoints": [
         {
@@ -168,7 +168,7 @@
         "y": 36,
         "heading": "linear",
         "reverse": false,
-        "startDeg": 50,
+        "startDeg": 65.6,
         "endDeg": 0
       },
       "controlPoints": [],
@@ -203,7 +203,7 @@
         "heading": "linear",
         "reverse": false,
         "startDeg": 0,
-        "endDeg": 50
+        "endDeg": 65.6
       },
       "controlPoints": [],
       "color": "#ABDB67",
@@ -220,8 +220,8 @@
         "y": 36,
         "heading": "linear",
         "reverse": false,
-        "startDeg": 50,
-        "endDeg": 50
+        "startDeg": 65.6,
+        "endDeg": 65.6
       },
       "controlPoints": [],
       "color": "#6DBBB9",
@@ -303,5 +303,5 @@
     "onionNextPointOnly": false
   },
   "version": "1.2.1",
-  "timestamp": "2026-01-11T02:25:06.132Z"
+  "timestamp": "2026-01-11T03:16:51.728Z"
 }

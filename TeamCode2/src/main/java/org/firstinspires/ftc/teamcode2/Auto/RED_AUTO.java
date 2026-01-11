@@ -74,7 +74,7 @@ public class RED_AUTO extends OpMode {
     private final Pose back_launchPose = new Pose(
             84,
             12,
-            Math.toRadians(50)
+            Math.toRadians(Math.atan(2.2))
     );
 
     private final Pose set3Pose = new Pose(
@@ -92,7 +92,7 @@ public class RED_AUTO extends OpMode {
     private final Pose endPose = new Pose(
             84,
             36,
-            Math.toRadians(50)
+            Math.toRadians(Math.atan(2.2))
     );
 
     private Path launchPath;
