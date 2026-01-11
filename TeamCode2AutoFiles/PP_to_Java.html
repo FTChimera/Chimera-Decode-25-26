@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pedro .pp → FTC Java Auto</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #0b1020;
+            color: #e5e7eb;
+            padding: 20px;
+        }
+        h1 { color: #60a5fa; }
+        textarea {
+            width: 100%;
+            height: 700px;
+            background: #020617;
+            color: #e5e7eb;
+            border: 1px solid #334155;
+            padding: 12px;
+            white-space: pre;
+        }
+        button {
+            background: #60a5fa;
+            border: none;
+            padding: 8px 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Pedro Pathing (.pp) → Java Generator</h1>
+
+<details>
+    <summary><strong>Settings</strong></summary>
+    <div style="margin: 10px 0; padding: 10px; border: 1px solid #334155; background: #020617;">
+        <label>Package Name:<br>
+        <input type="text" id="packageName" placeholder="org.firstinspires.ftc.teamcode.pedroPathing" style="width: 100%; margin: 5px 0; padding: 5px; background: #0b1020; color: #e5e7eb; border: 1px solid #334155;"></label><br>
+        
+        <label>Class Name:<br>
+        <input type="text" id="className" placeholder="Autonomous" style="width: 100%; margin: 5px 0; padding: 5px; background: #0b1020; color: #e5e7eb; border: 1px solid #334155;"></label><br>
+        
+        <label>OpMode Name:<br>
+        <input type="text" id="opModeName" placeholder="Auto" style="width: 100%; margin: 5px 0; padding: 5px; background: #0b1020; color: #e5e7eb; border: 1px solid #334155;"></label><br>
+        
+        <label>OpMode Group:<br>
+        <input type="text" id="opModeGroup" placeholder="Pedro" style="width: 100%; margin: 5px 0; padding: 5px; background: #0b1020; color: #e5e7eb; border: 1px solid #334155;"></label><br>
+        
+        <label>Extra Imports (one per line):<br>
+        <textarea id="extraImports" placeholder="com.qualcomm.robotcore.hardware.DcMotor;
+com.qualcomm.robotcore.hardware.Servo;" style="width: 100%; height: 80px; margin: 5px 0; padding: 5px; background: #0b1020; color: #e5e7eb; border: 1px solid #334155; resize: vertical;"></textarea></label><br>
+        
+        <button onclick="saveSettings()" style="background: #10b981; margin-right: 10px;">Save Settings</button>
+        <button onclick="resetSettings()" style="background: #ef4444;">Reset to Defaults</button>
+    </div>
+</details>
+
+<input type="file" id="fileInput" accept=".pp,.json">
+<br><br>
+<button onclick="generate()">Generate Java</button>
+
+<h2>Generated Java</h2>
+<textarea id="output"></textarea>
+
+<script>
+let data = null;
+
+const defaultSettings = {
+    packageName: "org.firstinspires.ftc.teamcode.pedroPathing",
+    className: "Autonomous",
+    opModeName: "Auto",
+    opModeGroup: "Pedro",
+    extraImports: ""
+};
+
+// Load settings on page load
+window.addEventListener('load', loadSettings);
+
+document.getElementById("fileInput").addEventListener("change", e => {
+    const reader = new FileReader();
+    reader.onload = () => {
+        data = JSON.parse(reader.result);
+    };
+    reader.readAsText(e.target.files[0]);
+});
+
+function loadSettings() {
+    const savedSettings = localStorage.getItem('pedroPathingSettings');
+    const settings = savedSettings ? JSON.parse(savedSettings) : defaultSettings;
+    
+    document.getElementById('packageName').value = settings.packageName;
+    document.getElementById('className').value = settings.className;
+    document.getElementById('opModeName').value = settings.opModeName;
+    document.getElementById('opModeGroup').value = settings.opModeGroup;
+    document.getElementById('extraImports').value = settings.extraImports;
+}
+
+function saveSettings() {
+    const settings = {
+        packageName: document.getElementById('packageName').value,
+        className: document.getElementById('className').value,
+        opModeName: document.getElementById('opModeName').value,
+        opModeGroup: document.getElementById('opModeGroup').value,
+        extraImports: document.getElementById('extraImports').value
+    };
+    
+    localStorage.setItem('pedroPathingSettings', JSON.stringify(settings));
+    alert('Settings saved!');
+}
+
+function resetSettings() {
+    if (confirm('Reset all settings to defaults?')) {
+        localStorage.removeItem('pedroPathingSettings');
+        loadSettings();
+        alert('Settings reset to defaults!');
+    }
+}
+
+function getSettings() {
+    return {
+        packageName: document.getElementById('packageName').value || defaultSettings.packageName,
+        className: document.getElementById('className').value || defaultSettings.className,
+        opModeName: document.getElementById('opModeName').value || defaultSettings.opModeName,
+        opModeGroup: document.getElementById('opModeGroup').value || defaultSettings.opModeGroup,
+        extraImports: document.getElementById('extraImports').value || defaultSettings.extraImports
+    };
+}
+
+function deg(v) {
+    return v !== undefined ? `Math.toRadians(${v})` : "0";
+}
+
+function sanitize(name) {
+    return name.toLowerCase().replace(/[^a-z0-9]/g, "_");
+}
+
+function generate() {
+    if (!data) {
+        alert("Upload a .pp file first");
+        return;
+    }
+
+    const linesById = {};
+    data.lines.forEach(l => linesById[l.id] = l);
+
+    let poses = [];
+    let paths = [];
+    let build = [];
+    let follow = [];
+
+    // Track created poses and paths to avoid duplicates
+    const createdPoses = new Map(); // name -> {x, y, heading, varName}
+    const createdPaths = new Map(); // name -> {fromPose, toPose, varName}
+
+    // Start pose
+    poses.push(
+`    private final Pose startPose = new Pose(
+        ${data.startPoint.x},
+        ${data.startPoint.y},
+        ${deg(data.startPoint.startDeg)}
+    );`
+    );
+
+    let lastPose = "startPose";
+    let pathIndex = 0;
+
+    data.sequence.forEach((step, i) => {
+        if (step.kind !== "path") return;
+
+        const line = linesById[step.lineId];
+        const basePoseName = sanitize(line.name) + "Pose";
+        const basePathName = sanitize(line.name) + "Path";
+
+        // Check if this pose already exists
+        let poseName;
+        const poseKey = `${line.endPoint.x}_${line.endPoint.y}_${line.endPoint.endDeg || 0}`;
+        const existingPose = Array.from(createdPoses.values()).find(p => 
+            p.x === line.endPoint.x && p.y === line.endPoint.y && p.heading === (line.endPoint.endDeg || 0)
+        );
+
+        if (existingPose) {
+            // Reuse existing identical pose
+            poseName = existingPose.varName;
+        } else {
+            // Create new pose, add suffix if name collision
+            let suffix = "";
+            let counter = 1;
+            while (createdPoses.has(basePoseName + suffix)) {
+                suffix = "_" + counter;
+                counter++;
+            }
+            poseName = basePoseName + suffix;
+            
+            createdPoses.set(poseName, {
+                x: line.endPoint.x,
+                y: line.endPoint.y,
+                heading: line.endPoint.endDeg || 0,
+                varName: poseName
+            });
+
+            poses.push(
+`    private final Pose ${poseName} = new Pose(
+        ${line.endPoint.x},
+        ${line.endPoint.y},
+        ${deg(line.endPoint.endDeg)}
+    );`
+            );
+        }
+
+        // Create control point poses if they exist
+        let controlPointPoses = [];
+        if (line.controlPoints && line.controlPoints.length > 0) {
+            line.controlPoints.forEach((cp, cpIndex) => {
+                const controlPoseName = `${sanitize(line.name)}ControlPoint${cpIndex + 1}`;
+                
+                // Check if this control point pose already exists
+                const existingControlPose = Array.from(createdPoses.values()).find(p => 
+                    p.x === cp.x && p.y === cp.y && p.heading === 0
+                );
+                
+                if (existingControlPose) {
+                    controlPointPoses.push(existingControlPose.varName);
+                } else {
+                    // Create unique name for control point if collision exists
+                    let suffix = "";
+                    let counter = 1;
+                    while (createdPoses.has(controlPoseName + suffix)) {
+                        suffix = "_" + counter;
+                        counter++;
+                    }
+                    const finalControlPoseName = controlPoseName + suffix;
+                    
+                    createdPoses.set(finalControlPoseName, {
+                        x: cp.x,
+                        y: cp.y,
+                        heading: 0,
+                        varName: finalControlPoseName
+                    });
+                    
+                    poses.push(
+`    private final Pose ${finalControlPoseName} = new Pose(
+        ${cp.x},
+        ${cp.y},
+        0
+    );`
+                    );
+                    controlPointPoses.push(finalControlPoseName);
+                }
+            });
+        }
+
+        // Check if this path already exists
+        let pathName;
+        const pathSignature = {
+            fromPose: lastPose,
+            toPose: poseName,
+            controlPoints: controlPointPoses
+        };
+        
+        const existingPath = Array.from(createdPaths.values()).find(p => 
+            p.fromPose === lastPose && 
+            p.toPose === poseName &&
+            JSON.stringify(p.controlPoints) === JSON.stringify(pathSignature.controlPoints)
+        );
+
+        if (existingPath) {
+            // Reuse existing identical path
+            pathName = existingPath.varName;
+        } else {
+            // Create new path, add suffix if name collision
+            let suffix = "";
+            let counter = 1;
+            while (createdPaths.has(basePathName + suffix)) {
+                suffix = "_" + counter;
+                counter++;
+            }
+            pathName = basePathName + suffix;
+            
+            createdPaths.set(pathName, pathSignature);
+            createdPaths.get(pathName).varName = pathName;
+
+            paths.push(`    private Path ${pathName};`);
+
+            // Generate path creation code based on whether control points exist
+            let pathCreation;
+            if (controlPointPoses.length > 0) {
+                // Use BezierCurve with control point poses
+                const controlPointsStr = controlPointPoses.join(",\n                ");
+                    
+                pathCreation = `        ${pathName} = new Path(
+            new BezierCurve(${lastPose},
+                ${controlPointsStr},
+                ${poseName})
+        );`;
+            } else {
+                // Use simple BezierLine
+                pathCreation = `        ${pathName} = new Path(
+            new BezierLine(${lastPose}, ${poseName})
+        );`;
+            }
+
+            build.push(
+`${pathCreation}
+        ${pathName}.setLinearHeadingInterpolation(
+            ${lastPose}.getHeading(),
+            ${poseName}.getHeading()
+        );`
+            );
+        }
+
+        follow.push(
+`        case ${pathIndex}:
+            follower.followPath(${pathName});
+            setPathState(${pathIndex + 1});
+            break;`
+        );
+
+        lastPose = poseName;
+        pathIndex++;
+    });
+
+    const settings = getSettings();
+    
+    // Process extra imports
+    let extraImportsStr = "";
+    if (settings.extraImports.trim()) {
+        const imports = settings.extraImports.split('\n')
+            .map(imp => imp.trim())
+            .filter(imp => imp && !imp.startsWith('//'))
+            .map(imp => imp.startsWith('import ') ? imp : `import ${imp}`)
+            .map(imp => imp.endsWith(';') ? imp : `${imp};`)
+            .join('\n');
+        if (imports) {
+            extraImportsStr = `\n${imports}`;
+        }
+    }
+
+    const java = `
+package ${settings.packageName};
+
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.BezierCurve;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.Path;
+import com.pedropathing.util.Timer;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;${extraImportsStr}
+
+@Autonomous(name = "${settings.opModeName}", group = "${settings.opModeGroup}")
+public class ${settings.className} extends OpMode {
+
+    private Follower follower;
+    private Timer pathTimer;
+    private int pathState;
+
+${poses.join("\n\n")}
+
+${paths.join("\n")}
+
+    public void buildPaths() {
+${build.join("\n\n")}
+    }
+
+    public void autonomousPathUpdate() {
+        if (follower.isBusy()) return;
+
+        switch (pathState) {
+${follow.join("\n\n")}
+        }
+    }
+
+    public void setPathState(int state) {
+        pathState = state;
+        pathTimer.resetTimer();
+    }
+
+    @Override
+    public void init() {
+        pathTimer = new Timer();
+        follower = Constants.createFollower(hardwareMap);
+        buildPaths();
+        follower.setStartingPose(startPose);
+    }
+
+    @Override
+    public void loop() {
+        follower.update();
+        autonomousPathUpdate();
+
+        telemetry.addData("Path State", pathState);
+        telemetry.addData("X", follower.getPose().getX());
+        telemetry.addData("Y", follower.getPose().getY());
+        telemetry.addData("Heading", follower.getPose().getHeading());
+        telemetry.update();
+    }
+}
+`.trim();
+
+    document.getElementById("output").value = java;
+}
+</script>
+
+</body>
+</html>
