@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode2.Auto;
 
+import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 import static java.lang.Thread.sleep;
 
 import com.pedropathing.follower.Follower;
@@ -130,7 +131,6 @@ public class RED_AUTO extends OpMode {
     private Path set3Path;
     private Path intake3Path;
     private Path back_launchPath_1;
-
     public void buildPaths() {
         launchPath = new Path(
                 new BezierLine(startPose, launchPose)
@@ -216,7 +216,6 @@ public class RED_AUTO extends OpMode {
                 set3Pose.getHeading(),
                 intake3Pose.getHeading()
         );
-
         back_launchPath_1 = new Path(
                 new BezierLine(intake3Pose, back_launchPose)
         );
@@ -320,6 +319,12 @@ public class RED_AUTO extends OpMode {
         follower = Constants.createFollower(hardwareMap);
         intakeMotor = hardwareMap.dcMotor.get("intake");
         launcherMotor = hardwareMap.get(DcMotorEx.class, "launcher");
+        //SET DIRECTION FOR MOTORS
+        launcherMotor.setZeroPowerBehavior(FLOAT);
+        launcherMotor.setPIDFCoefficients(
+                DcMotor.RunMode.RUN_USING_ENCODER,
+                Consts.LaunchPIDF
+        );
         buildPaths();
         follower.setStartingPose(startPose);
         setPathState(PathState.LAUNCH);
@@ -332,7 +337,7 @@ public class RED_AUTO extends OpMode {
     public void loop() {
         follower.update();
         try {
-            autonomousPathUpdate(pathState==PathState.END);
+            autonomousPathUpdate(false);
         } catch (InterruptedException e) {
             telemetry.addData("COULD NOT RUN PATH UPDATE", e.getMessage());
         }
@@ -340,6 +345,11 @@ public class RED_AUTO extends OpMode {
             launcherMotor.setPower(0);
             intakeMotor.setPower(0);
             setPathState(PathState.END);
+            try {
+                autonomousPathUpdate(true);
+            } catch (InterruptedException e) {
+                telemetry.addData("COULD NOT RUN PATH UPDATE", e.getMessage());
+            }
         }
         telemetry.addData("Path State", pathState);
         telemetry.addData("X", follower.getPose().getX());

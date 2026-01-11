@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode2.Auto;
 
+import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
+import static java.lang.Thread.sleep;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.BezierCurve;
@@ -8,14 +11,36 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+import org.firstinspires.ftc.teamcode2.Systems.Consts;
 import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
 @Autonomous(name = "Blue Auto", group = "Pedro Auto")
 public class BLUE_AUTO extends OpMode {
+    DcMotor intakeMotor;
+    DcMotorEx launcherMotor;
 
     private Follower follower;
+    private Timer autonomousTimer;
     private Timer pathTimer;
-    private int pathState;
+    private PathState pathState;
+    public enum PathState {
+        IDLE,
+        LAUNCH,
+        SET1,
+        INTAKE1,
+        LAUNCH_1,
+        SET2,
+        INTAKE2,
+        EMPTY_GATE,
+        BACK_LAUNCH,
+        SET3,
+        INTAKE3,
+        BACK_LAUNCH_1,
+        END
+    }
 
     private final Pose startPose = new Pose(
             15.75,
@@ -74,7 +99,7 @@ public class BLUE_AUTO extends OpMode {
     private final Pose back_launchPose = new Pose(
             60,
             12,
-            Math.toRadians(180 - Math.atan(2.2))
+            Math.toRadians(180-Math.atan(2.2))
     );
 
     private final Pose set3Pose = new Pose(
@@ -92,7 +117,7 @@ public class BLUE_AUTO extends OpMode {
     private final Pose endPose = new Pose(
             60,
             36,
-            Math.toRadians(180 - Math.atan(2.2))
+            Math.toRadians(180-Math.atan(2.2))
     );
 
     private Path launchPath;
@@ -106,8 +131,6 @@ public class BLUE_AUTO extends OpMode {
     private Path set3Path;
     private Path intake3Path;
     private Path back_launchPath_1;
-    private Path endPath;
-
     public void buildPaths() {
         launchPath = new Path(
                 new BezierLine(startPose, launchPose)
@@ -193,7 +216,6 @@ public class BLUE_AUTO extends OpMode {
                 set3Pose.getHeading(),
                 intake3Pose.getHeading()
         );
-
         back_launchPath_1 = new Path(
                 new BezierLine(intake3Pose, back_launchPose)
         );
@@ -201,83 +223,91 @@ public class BLUE_AUTO extends OpMode {
                 intake3Pose.getHeading(),
                 back_launchPose.getHeading()
         );
-
-        endPath = new Path(
-                new BezierLine(back_launchPose, endPose)
-        );
-        endPath.setLinearHeadingInterpolation(
-                back_launchPose.getHeading(),
-                endPose.getHeading()
-        );
     }
 
-    public void autonomousPathUpdate() {
-        if (follower.isBusy()) return;
+    public void autonomousPathUpdate(boolean goToEnd) throws InterruptedException {
+        if (follower.isBusy() && !goToEnd) return;
 
         switch (pathState) {
-            case 0:
+            case LAUNCH:
                 follower.followPath(launchPath);
-                setPathState(1);
+                runLauncherSequence(false);
+                setPathState(PathState.SET1);
                 break;
 
-            case 1:
+            case SET1:
                 follower.followPath(set1Path);
-                setPathState(2);
+                intake(true);
+                setPathState(PathState.INTAKE1);
                 break;
 
-            case 2:
+            case INTAKE1:
                 follower.followPath(intake1Path);
-                setPathState(3);
+                intake(false);
+                setPathState(PathState.LAUNCH_1);
                 break;
 
-            case 3:
+            case LAUNCH_1:
                 follower.followPath(launchPath_1);
-                setPathState(4);
+                runLauncherSequence(false);
+                setPathState(PathState.SET2);
                 break;
 
-            case 4:
+            case SET2:
                 follower.followPath(set2Path);
-                setPathState(5);
+                intake(true);
+                setPathState(PathState.INTAKE2);
                 break;
 
-            case 5:
+            case INTAKE2:
                 follower.followPath(intake2Path);
-                setPathState(6);
+                intake(false);
+                setPathState(PathState.EMPTY_GATE);
                 break;
 
-            case 6:
+            case EMPTY_GATE:
                 follower.followPath(empty_gatePath);
-                setPathState(7);
+                setPathState(PathState.BACK_LAUNCH);
                 break;
 
-            case 7:
+            case BACK_LAUNCH:
                 follower.followPath(back_launchPath);
-                setPathState(8);
+                runLauncherSequence(true);
+                setPathState(PathState.SET3);
                 break;
 
-            case 8:
+            case SET3:
                 follower.followPath(set3Path);
-                setPathState(9);
+                intake(true);
+                setPathState(PathState.INTAKE3);
                 break;
 
-            case 9:
+            case INTAKE3:
                 follower.followPath(intake3Path);
-                setPathState(10);
+                intake(false);
+                setPathState(PathState.BACK_LAUNCH_1);
                 break;
 
-            case 10:
+            case BACK_LAUNCH_1:
                 follower.followPath(back_launchPath_1);
-                setPathState(11);
+                if (autonomousTimer.getElapsedTimeSeconds() > 25) {
+                    launchOneBall(true);
+                } else {
+                    runLauncherSequence(true);
+                }
+                setPathState(PathState.END);
                 break;
 
-            case 11:
-                follower.followPath(endPath);
-                setPathState(12);
+            case END:
+                follower.followPath(
+                        new Path(new BezierLine(follower.getPose(), endPose))
+                );
+                setPathState(PathState.IDLE);
                 break;
         }
     }
 
-    public void setPathState(int state) {
+    public void setPathState(PathState state) {
         pathState = state;
         pathTimer.resetTimer();
     }
@@ -285,20 +315,76 @@ public class BLUE_AUTO extends OpMode {
     @Override
     public void init() {
         pathTimer = new Timer();
+        autonomousTimer = new Timer();
         follower = Constants.createFollower(hardwareMap);
+        intakeMotor = hardwareMap.get(DcMotor.class, "intake");
+        launcherMotor = hardwareMap.get(DcMotorEx.class, "launcher");
+        //SET DIRECTION FOR MOTORS
+        launcherMotor.setZeroPowerBehavior(FLOAT);
+        launcherMotor.setPIDFCoefficients(
+                DcMotor.RunMode.RUN_USING_ENCODER,
+                Consts.LaunchPIDF
+        );
         buildPaths();
         follower.setStartingPose(startPose);
+        setPathState(PathState.LAUNCH);
     }
-
+    @Override
+    public void start() {
+        autonomousTimer.resetTimer();
+    }
     @Override
     public void loop() {
         follower.update();
-        autonomousPathUpdate();
-
+        try {
+            autonomousPathUpdate(false);
+        } catch (InterruptedException e) {
+            telemetry.addData("COULD NOT RUN PATH UPDATE", e.getMessage());
+        }
+        if (autonomousTimer.getElapsedTimeSeconds() > 28 && pathState != PathState.END) {
+            launcherMotor.setPower(0);
+            intakeMotor.setPower(0);
+            setPathState(PathState.END);
+            try {
+                autonomousPathUpdate(true);
+            } catch (InterruptedException e) {
+                telemetry.addData("COULD NOT RUN PATH UPDATE", e.getMessage());
+            }
+        }
         telemetry.addData("Path State", pathState);
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
         telemetry.addData("Heading", follower.getPose().getHeading());
         telemetry.update();
+    }
+
+    public void intake(boolean runIntake) {
+        intakeMotor.setPower(runIntake?1:0);
+    }
+
+    public void runLauncherSequence(boolean back) throws InterruptedException {
+        launcherMotor.setVelocity(back?
+                Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE:
+                Consts.MIN_VELOCITY_FRONT_LAUNCH_ZONE);
+        launcherMotor.setVelocity(back?
+                Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE:
+                Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
+        // Add push logic here for 3 balls
+        // Don't forget to check for end time as this method will take time
+        sleep(200);
+        launcherMotor.setVelocity(Consts.STOP_VELOCITY);
+    }
+
+    public void launchOneBall(boolean back) throws InterruptedException {
+        launcherMotor.setVelocity(back?
+                Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE:
+                Consts.MIN_VELOCITY_FRONT_LAUNCH_ZONE);
+        launcherMotor.setVelocity(back?
+                Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE:
+                Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
+        // Add push logic here for 1 ball
+        // No need to check for end time as this method will be quick and already called within time limits
+        sleep(200);
+        launcherMotor.setVelocity(Consts.STOP_VELOCITY);
     }
 }
