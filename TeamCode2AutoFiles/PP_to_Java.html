@@ -149,6 +149,7 @@ function generate() {
     let paths = [];
     let build = [];
     let follow = [];
+    let enumValues = [];
 
     // Track created poses and paths to avoid duplicates
     const createdPoses = new Map(); // name -> {x, y, heading, varName}
@@ -310,16 +311,42 @@ function generate() {
             );
         }
 
+        // Generate enum value for this path
+        const enumName = sanitize(line.name).toUpperCase();
+        let finalEnumName = enumName;
+        let counter = 1;
+        while (enumValues.includes(finalEnumName)) {
+            finalEnumName = `${enumName}_${counter}`;
+            counter++;
+        }
+        enumValues.push(finalEnumName);
+
         follow.push(
-`        case ${pathIndex}:
+`        case ${finalEnumName}:
             follower.followPath(${pathName});
-            setPathState(${pathIndex + 1});
+            setPathState(PathState.IDLE);
             break;`
         );
 
         lastPose = poseName;
         pathIndex++;
     });
+
+    // Set up the correct next states for each enum case
+    for (let i = 0; i < follow.length; i++) {
+        const nextState = i < follow.length - 1 ? `PathState.${enumValues[i + 1]}` : "PathState.IDLE";
+        follow[i] = follow[i].replace("setPathState(PathState.IDLE)", `setPathState(${nextState})`);
+    }
+
+    // Complete the enum declaration
+    let enumDeclaration = "";
+    if (enumValues.length > 0) {
+        enumDeclaration = `,
+        ${enumValues.join(',\n        ')}`;
+    }
+
+    // Determine initial state
+    const initialState = enumValues.length > 0 ? enumValues[0] : 'IDLE';
 
     const settings = getSettings();
     
@@ -354,7 +381,11 @@ public class ${settings.className} extends OpMode {
 
     private Follower follower;
     private Timer pathTimer;
-    private int pathState;
+    private PathState pathState;
+
+    public enum PathState {
+        IDLE${enumDeclaration}
+    }
 
 ${poses.join("\n\n")}
 
@@ -372,7 +403,7 @@ ${follow.join("\n\n")}
         }
     }
 
-    public void setPathState(int state) {
+    public void setPathState(PathState state) {
         pathState = state;
         pathTimer.resetTimer();
     }
@@ -383,6 +414,7 @@ ${follow.join("\n\n")}
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
+        setPathState(PathState.${initialState});
     }
 
     @Override

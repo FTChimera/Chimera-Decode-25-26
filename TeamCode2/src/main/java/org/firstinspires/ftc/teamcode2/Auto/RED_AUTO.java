@@ -8,14 +8,34 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
 @Autonomous(name = "Red Auto", group = "Pedro Auto")
 public class RED_AUTO extends OpMode {
+    DcMotor intakeMotor;
+    DcMotorEx launcherMotor;
 
     private Follower follower;
+    private Timer autonomousTimer;
     private Timer pathTimer;
-    private int pathState;
+    private PathState pathState;
+    public enum PathState {
+        IDLE,
+        LAUNCH,
+        SET_1,
+        INTAKE1,
+        LAUNCH_1,
+        SET2,
+        INTAKE2,
+        EMPTY_GATE_0,
+        BACK_LAUNCH,
+        SET3,
+        INTAKE3,
+        BACK_LAUNCH_1,
+        END
+    }
 
     private final Pose startPose = new Pose(
             128.13,
@@ -36,7 +56,7 @@ public class RED_AUTO extends OpMode {
     );
 
     private final Pose intake1Pose = new Pose(
-            134,
+            129,
             84,
             0
     );
@@ -48,13 +68,13 @@ public class RED_AUTO extends OpMode {
     );
 
     private final Pose intake2Pose = new Pose(
-            136,
+            125,
             60,
             0
     );
 
     private final Pose empty_gate_0Pose = new Pose(
-            134,
+            131,
             72,
             Math.toRadians(90)
     );
@@ -84,7 +104,7 @@ public class RED_AUTO extends OpMode {
     );
 
     private final Pose intake3Pose = new Pose(
-            136,
+            132,
             36,
             0
     );
@@ -106,7 +126,6 @@ public class RED_AUTO extends OpMode {
     private Path set3Path;
     private Path intake3Path;
     private Path back_launchPath_1;
-    private Path endPath;
 
     public void buildPaths() {
         launchPath = new Path(
@@ -201,83 +220,83 @@ public class RED_AUTO extends OpMode {
                 intake3Pose.getHeading(),
                 back_launchPose.getHeading()
         );
-
-        endPath = new Path(
-                new BezierLine(back_launchPose, endPose)
-        );
-        endPath.setLinearHeadingInterpolation(
-                back_launchPose.getHeading(),
-                endPose.getHeading()
-        );
     }
 
-    public void autonomousPathUpdate() {
-        if (follower.isBusy()) return;
+    public void autonomousPathUpdate(boolean goToEnd) {
+        if (follower.isBusy() && !goToEnd) return;
 
         switch (pathState) {
-            case 0:
+            case LAUNCH:
                 follower.followPath(launchPath);
-                setPathState(1);
+                setPathState(PathState.SET_1);
                 break;
 
-            case 1:
+            case SET_1:
                 follower.followPath(set_1Path);
-                setPathState(2);
+                intake(true);
+                setPathState(PathState.INTAKE1);
                 break;
 
-            case 2:
+            case INTAKE1:
                 follower.followPath(intake1Path);
-                setPathState(3);
+                intake(false);
+                setPathState(PathState.LAUNCH_1);
                 break;
 
-            case 3:
+            case LAUNCH_1:
                 follower.followPath(launchPath_1);
-                setPathState(4);
+                setPathState(PathState.SET2);
                 break;
 
-            case 4:
+            case SET2:
                 follower.followPath(set2Path);
-                setPathState(5);
+                intake(true);
+                setPathState(PathState.INTAKE2);
                 break;
 
-            case 5:
+            case INTAKE2:
                 follower.followPath(intake2Path);
-                setPathState(6);
+                intake(false);
+                setPathState(PathState.EMPTY_GATE_0);
                 break;
 
-            case 6:
+            case EMPTY_GATE_0:
                 follower.followPath(empty_gate_0Path);
-                setPathState(7);
+                setPathState(PathState.BACK_LAUNCH);
                 break;
 
-            case 7:
+            case BACK_LAUNCH:
                 follower.followPath(back_launchPath);
-                setPathState(8);
+                setPathState(PathState.SET3);
                 break;
 
-            case 8:
+            case SET3:
                 follower.followPath(set3Path);
-                setPathState(9);
+                intake(true);
+                setPathState(PathState.INTAKE3);
                 break;
 
-            case 9:
+            case INTAKE3:
                 follower.followPath(intake3Path);
-                setPathState(10);
+                intake(false);
+                setPathState(PathState.BACK_LAUNCH_1);
                 break;
 
-            case 10:
+            case BACK_LAUNCH_1:
                 follower.followPath(back_launchPath_1);
-                setPathState(11);
+                setPathState(PathState.END);
                 break;
 
-            case 11:
-                follower.followPath(endPath);
-                setPathState(12);
+            case END:
+                follower.followPath(
+                        new Path(new BezierLine(follower.getPose(), endPose))
+                );
+                setPathState(PathState.IDLE);
                 break;
         }
     }
 
-    public void setPathState(int state) {
+    public void setPathState(PathState state) {
         pathState = state;
         pathTimer.resetTimer();
     }
@@ -285,20 +304,35 @@ public class RED_AUTO extends OpMode {
     @Override
     public void init() {
         pathTimer = new Timer();
+        autonomousTimer = new Timer();
         follower = Constants.createFollower(hardwareMap);
+        intakeMotor = hardwareMap.dcMotor.get("intake");
+        launcherMotor = hardwareMap.get(DcMotorEx.class, "launcher");
         buildPaths();
         follower.setStartingPose(startPose);
+        setPathState(PathState.LAUNCH);
     }
-
+    @Override
+    public void start() {
+        autonomousTimer.resetTimer();
+    }
     @Override
     public void loop() {
         follower.update();
-        autonomousPathUpdate();
-
+        autonomousPathUpdate(true);
+        if (autonomousTimer.getElapsedTimeSeconds() > 27 && pathState != PathState.END) {
+            launcherMotor.setPower(0);
+            intakeMotor.setPower(0);
+            setPathState(PathState.END);
+        }
         telemetry.addData("Path State", pathState);
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
         telemetry.addData("Heading", follower.getPose().getHeading());
         telemetry.update();
+    }
+
+    public void intake(boolean runIntake) {
+        intakeMotor.setPower(runIntake?1:0);
     }
 }

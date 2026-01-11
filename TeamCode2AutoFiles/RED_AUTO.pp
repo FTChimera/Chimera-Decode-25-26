@@ -46,7 +46,7 @@
       "id": "mk8wkkwa-o4mxp9",
       "name": "INTAKE1",
       "endPoint": {
-        "x": 134,
+        "x": 129,
         "y": 84,
         "heading": "tangential",
         "reverse": false
@@ -98,7 +98,7 @@
       "id": "mk8wug1d-tvm2q3",
       "name": "INTAKE2",
       "endPoint": {
-        "x": 136,
+        "x": 125,
         "y": 60,
         "heading": "tangential",
         "reverse": false
@@ -114,7 +114,7 @@
       "id": "mk934iwj-edupzx",
       "name": "EMPTY_GATE_0",
       "endPoint": {
-        "x": 134,
+        "x": 131,
         "y": 72,
         "heading": "linear",
         "reverse": false,
@@ -182,7 +182,7 @@
       "id": "mk8xac90-2pd2eg",
       "name": "INTAKE3",
       "endPoint": {
-        "x": 136,
+        "x": 132,
         "y": 36,
         "heading": "tangential",
         "reverse": false
@@ -303,5 +303,5 @@
     "onionNextPointOnly": false
   },
   "version": "1.2.1",
-  "timestamp": "2026-01-11T03:16:51.728Z"
+  "timestamp": "2026-01-11T18:12:12.739Z"
 }
