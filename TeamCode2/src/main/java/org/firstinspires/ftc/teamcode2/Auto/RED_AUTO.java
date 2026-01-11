@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode2.Auto;
 
+import static java.lang.Thread.sleep;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.BezierCurve;
@@ -10,6 +12,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+import org.firstinspires.ftc.teamcode2.Systems.Consts;
 import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
 @Autonomous(name = "Red Auto", group = "Pedro Auto")
@@ -222,12 +226,13 @@ public class RED_AUTO extends OpMode {
         );
     }
 
-    public void autonomousPathUpdate(boolean goToEnd) {
+    public void autonomousPathUpdate(boolean goToEnd) throws InterruptedException {
         if (follower.isBusy() && !goToEnd) return;
 
         switch (pathState) {
             case LAUNCH:
                 follower.followPath(launchPath);
+                runLauncherSequence(false);
                 setPathState(PathState.SET_1);
                 break;
 
@@ -245,6 +250,7 @@ public class RED_AUTO extends OpMode {
 
             case LAUNCH_1:
                 follower.followPath(launchPath_1);
+                runLauncherSequence(false);
                 setPathState(PathState.SET2);
                 break;
 
@@ -267,6 +273,7 @@ public class RED_AUTO extends OpMode {
 
             case BACK_LAUNCH:
                 follower.followPath(back_launchPath);
+                runLauncherSequence(true);
                 setPathState(PathState.SET3);
                 break;
 
@@ -284,6 +291,11 @@ public class RED_AUTO extends OpMode {
 
             case BACK_LAUNCH_1:
                 follower.followPath(back_launchPath_1);
+                if (autonomousTimer.getElapsedTimeSeconds() > 25) {
+                    launchOneBall(true);
+                } else {
+                    runLauncherSequence(true);
+                }
                 setPathState(PathState.END);
                 break;
 
@@ -319,8 +331,12 @@ public class RED_AUTO extends OpMode {
     @Override
     public void loop() {
         follower.update();
-        autonomousPathUpdate(true);
-        if (autonomousTimer.getElapsedTimeSeconds() > 27 && pathState != PathState.END) {
+        try {
+            autonomousPathUpdate(pathState==PathState.END);
+        } catch (InterruptedException e) {
+            telemetry.addData("COULD NOT RUN PATH UPDATE", e.getMessage());
+        }
+        if (autonomousTimer.getElapsedTimeSeconds() > 28 && pathState != PathState.END) {
             launcherMotor.setPower(0);
             intakeMotor.setPower(0);
             setPathState(PathState.END);
@@ -334,5 +350,31 @@ public class RED_AUTO extends OpMode {
 
     public void intake(boolean runIntake) {
         intakeMotor.setPower(runIntake?1:0);
+    }
+
+    public void runLauncherSequence(boolean back) throws InterruptedException {
+        launcherMotor.setVelocity(back?
+                Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE:
+                Consts.MIN_VELOCITY_FRONT_LAUNCH_ZONE);
+        launcherMotor.setVelocity(back?
+                Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE:
+                Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
+        // Add push logic here for 3 balls
+        // Don't forget to check for end time as this method will take time
+        sleep(200);
+        launcherMotor.setVelocity(Consts.STOP_VELOCITY);
+    }
+
+    public void launchOneBall(boolean back) throws InterruptedException {
+        launcherMotor.setVelocity(back?
+                Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE:
+                Consts.MIN_VELOCITY_FRONT_LAUNCH_ZONE);
+        launcherMotor.setVelocity(back?
+                Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE:
+                Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
+        // Add push logic here for 1 ball
+        // No need to check for end time as this method will be quick and already called within time limits
+        sleep(200);
+        launcherMotor.setVelocity(Consts.STOP_VELOCITY);
     }
 }
