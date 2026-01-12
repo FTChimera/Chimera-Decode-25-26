@@ -39,9 +39,9 @@ public class RedAutoPedro extends OpMode {
     final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 900;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double SERVO_LAUNCH_POSITION = 0;
+    final double SERVO_LAUNCH_POSITION = 0.6;
     final double SERVO_REST_POSITION = 1;
-    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 500;
+    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 800;
     final int MAX_RPM_WAIT_TIME_SECONDS = 1000;
     final int CHIMERA_LAUNCH = 1;
     final int CHIMERA_LAUNCH_INTAKE = 2;
@@ -359,8 +359,6 @@ public class RedAutoPedro extends OpMode {
                     // Keep intake off for the very first shot (assuming it's pre-loaded)
                     IntakeStop();
                 }
-                // --------------------
-
                 double currentVelR = OutakeMotorRight.getVelocity();
                 double currentVelL = OutakeMotorLeft.getVelocity();
                 double targetThreshold = TARGET_VELOCITY_BACK_LAUNCH_ZONE - TARGET_VELOCITY_TOLERANCE;
