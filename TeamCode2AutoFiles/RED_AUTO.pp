@@ -1,7 +1,7 @@
 {
   "startPoint": {
-    "x": 128.13,
-    "y": 110.81,
+    "x": 123.5,
+    "y": 122.8,
     "heading": "linear",
     "startDeg": 90,
     "endDeg": 180
@@ -13,7 +13,7 @@
         "x": 110,
         "y": 110,
         "heading": "linear",
-        "startDeg": 0,
+        "startDeg": 37.5,
         "endDeg": 45
       },
       "controlPoints": [],
@@ -303,5 +303,5 @@
     "onionNextPointOnly": false
   },
   "version": "1.2.1",
-  "timestamp": "2026-01-11T18:12:12.739Z"
+  "timestamp": "2026-01-14T00:43:27.990Z"
 }

@@ -253,6 +253,18 @@ public class ChimeraTeleOp extends LinearOpMode {
                 isLaunching = false; // Reset launch state if manual stop is pressed
             }
 
+            // Custom Launch Velocity (Use Bumper of +- 50 RPM)
+            if (gamepad2.right_bumper || (OneGamepadAControl && gamepad1.right_bumper)) {
+                setTargetVelocity += 50;
+                leftOutakeMotor.setVelocity(setTargetVelocity);
+                rightOutakeMotor.setVelocity(setTargetVelocity);
+            }
+            if (gamepad2.left_bumper || (OneGamepadAControl && gamepad1.left_bumper)) {
+                setTargetVelocity -= 50;
+                leftOutakeMotor.setVelocity(setTargetVelocity);
+                rightOutakeMotor.setVelocity(setTargetVelocity);
+            }
+
             // Intake (Gamepad X)
             intakeMotor.setPower(gamepad2.x || (OneGamepadAControl && gamepad1.x) ? 1 : 0);
 

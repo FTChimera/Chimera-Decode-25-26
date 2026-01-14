@@ -155,12 +155,17 @@ function generate() {
     const createdPoses = new Map(); // name -> {x, y, heading, varName}
     const createdPaths = new Map(); // name -> {fromPose, toPose, varName}
 
+    // Get the first line's start degree
+    const firstPathStep = data.sequence.find(step => step.kind === "path");
+    const firstLine = firstPathStep ? linesById[firstPathStep.lineId] : null;
+    const startDegree = firstLine && firstLine.endPoint && firstLine.endPoint.startDeg !== undefined ? firstLine.endPoint.startDeg : data.startPoint.startDeg;
+
     // Start pose
     poses.push(
-`    private final Pose startPose = new Pose(
+`    public final Pose startPose = new Pose(
         ${data.startPoint.x},
         ${data.startPoint.y},
-        ${deg(data.startPoint.startDeg)}
+        ${deg(startDegree)}
     );`
     );
 
@@ -202,7 +207,7 @@ function generate() {
             });
 
             poses.push(
-`    private final Pose ${poseName} = new Pose(
+`    public final Pose ${poseName} = new Pose(
         ${line.endPoint.x},
         ${line.endPoint.y},
         ${deg(line.endPoint.endDeg)}
@@ -241,7 +246,7 @@ function generate() {
                     });
                     
                     poses.push(
-`    private final Pose ${finalControlPoseName} = new Pose(
+`    public final Pose ${finalControlPoseName} = new Pose(
         ${cp.x},
         ${cp.y},
         0
@@ -282,7 +287,7 @@ function generate() {
             createdPaths.set(pathName, pathSignature);
             createdPaths.get(pathName).varName = pathName;
 
-            paths.push(`    private Path ${pathName};`);
+            paths.push(`    public Path ${pathName};`);
 
             // Generate path creation code based on whether control points exist
             let pathCreation;
