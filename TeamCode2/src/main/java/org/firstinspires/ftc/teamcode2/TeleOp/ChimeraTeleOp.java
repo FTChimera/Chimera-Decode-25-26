@@ -90,11 +90,16 @@ public class ChimeraTeleOp extends OpMode {
         }
         if (gamepad2.right_bumper || oneGamepadControl&&gamepad1.right_bumper) {
             pushServo.setPosition(Consts.SERVO_UP_POSITION);
+        } else if (gamepad2.left_bumper || oneGamepadControl&&gamepad1.left_bumper) {
+            runPushServoOnce();
         } else {
             pushServo.setPosition(Consts.SERVO_DOWN_POSITION);
         }
-        if (gamepad2.left_bumper || oneGamepadControl&&gamepad1.left_bumper) {
-            runPushServoOnce();
+        // Fine tune launcher velocity
+        if (gamepad2.dpad_right || oneGamepadControl&&gamepad1.dpad_right) {
+            launcher.setVelocity(launcher.getVelocity()+50);
+        } else if (gamepad2.dpad_left || oneGamepadControl&&gamepad1.dpad_left) {
+            launcher.setVelocity(launcher.getVelocity()-50);
         }
     }
 
