@@ -25,7 +25,7 @@ public class RedAutoPedro extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherShotCount = 0, launcherStage = 0;
     private final Pose startPose = new Pose(128.13, 110.81, Math.toRadians(0)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(90.1, 86.3, Math.toRadians(228));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose launchPose = new Pose(83.4, 83.3, Math.toRadians(228));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose intakePrep = new Pose(100,85, Math.toRadians(0));
     private final Pose red1Intake = new Pose(128, 84, Math.toRadians(0));
     private final Pose intakePrep2 = new Pose(100.38,61.35, Math.toRadians(0));
