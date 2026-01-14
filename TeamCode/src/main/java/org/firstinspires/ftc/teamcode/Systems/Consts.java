@@ -10,7 +10,7 @@ public class Consts {
     public static double MIN_VELOCITY_BACK_LAUNCH_ZONE = 400;// Set target velocity from back launch zone
     public static double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
-    public static double SERVO_LAUNCH_POSITION = 0.6;
+    public static double SERVO_LAUNCH_POSITION = 0.5;
     public static double SERVO_REST_POSITION = 1;
     public static int SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
     public static double maxVelocityLeftOutakeMotor = 1800;

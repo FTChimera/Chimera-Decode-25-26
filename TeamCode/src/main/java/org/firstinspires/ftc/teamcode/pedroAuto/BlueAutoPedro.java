@@ -24,7 +24,7 @@ public class BlueAutoPedro extends OpMode {
     private final Pose startPose = new Pose(20.1, 122.2, Math.toRadians(322)); // Start Pose of our robot.
     private final Pose launchPose = new Pose(58.9, 85.1, Math.toRadians(320));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose intakePrep = new Pose(50,84, Math.toRadians(180));
-    private final Pose blue1Intake = new Pose(15.51, 84, Math.toRadians(180));
+    private final Pose blue1Intake = new Pose(16.5, 84, Math.toRadians(180));
     private final Pose intakePrep2 = new Pose(42.4,60.1, Math.toRadians(180));
     private final Pose blue2Intake = new Pose(15.75, 60.1, Math.toRadians(180));
     private final Pose intakePrep3 = new Pose(44.3, 35.3, Math.toRadians(180));
@@ -35,12 +35,12 @@ public class BlueAutoPedro extends OpMode {
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 900;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 850;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double MIN_VELOCITY = 1075;
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
-    final double SERVO_LAUNCH_POSITION = 0.6;
+    final double SERVO_LAUNCH_POSITION = 0.5;
     final int SERVO_REST_POSITION = 1;
     final int SLEEP_BEFORE_RESET_SERVO_POSITION = 800;
     final int MAX_RPM_WAIT_TIME_SECONDS = 1000;
