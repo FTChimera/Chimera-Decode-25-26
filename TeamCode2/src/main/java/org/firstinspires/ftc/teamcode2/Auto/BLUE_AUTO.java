@@ -45,7 +45,7 @@ public class BLUE_AUTO extends OpMode {
     private final Pose startPose = new Pose(
             15.75,
             111.27,
-            Math.toRadians(90)
+            Math.toRadians(180)
     );
 
     private final Pose launchPose = new Pose(

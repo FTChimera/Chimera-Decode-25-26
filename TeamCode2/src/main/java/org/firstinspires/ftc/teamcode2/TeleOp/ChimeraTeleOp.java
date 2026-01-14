@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode2.Systems.Consts;
 import org.firstinspires.ftc.teamcode2.Systems.LimelightSystem;
@@ -15,7 +14,7 @@ import org.firstinspires.ftc.teamcode2.Systems.TeleOpDriveControl;
 @TeleOp(name="ChimeraTeleOp", group="AbsolutePriority")
 public class ChimeraTeleOp extends OpMode {
     TeleOpDriveControl drive;
-    DcMotor intake;DcMotorEx launcher;
+    DcMotor intake;DcMotorEx launcher;Servo pushServo;
     LimelightSystem limelight;
     Consts.AllianceColor allianceColor;boolean oneGamepadControl = false;
     RGBIndicator rgbIndicator;
@@ -27,8 +26,9 @@ public class ChimeraTeleOp extends OpMode {
         allianceColor = Consts.AllianceColor.RED;
 
         drive = new TeleOpDriveControl(hardwareMap);
-        intake = hardwareMap.get(DcMotor.class, "intake");
+        intake = hardwareMap.dcMotor.get("intake");
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
+        pushServo = hardwareMap.servo.get("push");
 
         // SET DIRECTION FOR MOTORS
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -38,7 +38,7 @@ public class ChimeraTeleOp extends OpMode {
     @Override
     public void init_loop() {
         telemetry.addData("Alliance Color (press Bumpers to switch)", allianceColor);
-        telemetry.addData("One Gamepad contol (press A to switch)", oneGamepadControl);
+        telemetry.addData("One Gamepad control (press A to switch)", oneGamepadControl);
         if (gamepad1.right_bumper) allianceColor = Consts.AllianceColor.BLUE; rgbIndicator.setColor(RGBIndicator.Color.BLUE);
         if (gamepad1.left_bumper) allianceColor = Consts.AllianceColor.RED; rgbIndicator.setColor(RGBIndicator.Color.RED);
         if (gamepad1.aWasPressed()) oneGamepadControl = !oneGamepadControl;
@@ -88,6 +88,20 @@ public class ChimeraTeleOp extends OpMode {
         if (gamepad2.b || oneGamepadControl&&gamepad1.b) {
             launcher.setVelocity(Consts.STOP_VELOCITY);
         }
+        if (gamepad2.right_bumper || oneGamepadControl&&gamepad1.right_bumper) {
+            pushServo.setPosition(Consts.SERVO_UP_POSITION);
+        } else {
+            pushServo.setPosition(Consts.SERVO_DOWN_POSITION);
+        }
+        if (gamepad2.left_bumper || oneGamepadControl&&gamepad1.left_bumper) {
+            runPushServoOnce();
+        }
+    }
+
+    private void runPushServoOnce() {
+        pushServo.setPosition(Consts.SERVO_UP_POSITION);
+        // Sleep for some time to allow the servo to reach the down position
+        pushServo.setPosition(Consts.SERVO_DOWN_POSITION);
     }
 
 }
