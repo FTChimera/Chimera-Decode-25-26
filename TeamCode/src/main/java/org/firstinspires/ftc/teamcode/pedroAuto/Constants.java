@@ -55,6 +55,8 @@ public class Constants {
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
 
+
+    public static final double VELOCITY_SCALING_FACTOR = 1.2;
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
             .rightFrontMotorName("frontRightMotor")
@@ -65,8 +67,8 @@ public class Constants {
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .xVelocity(59.25861989419292)
-            .yVelocity(49.53692626953125);
+            .xVelocity(59.25861989419292*VELOCITY_SCALING_FACTOR)
+            .yVelocity(49.53692626953125*VELOCITY_SCALING_FACTOR);
 
 
 
