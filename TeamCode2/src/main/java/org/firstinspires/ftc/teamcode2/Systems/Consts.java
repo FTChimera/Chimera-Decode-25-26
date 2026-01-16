@@ -25,8 +25,6 @@ public class Consts {
             return this == RED ? BLUE : RED;
         }
     }
-    public static Pose TELEOP_RED_STARTING_POSE = new Pose(84, 36, Math.toRadians(50));
-    public static Pose TELEOP_BLUE_STARTING_POSE = new Pose(35.1, 79.7, Math.toRadians(312));
     public static Pose RED_GOAL = new Pose(130.37, 127.64, Math.toRadians(45));
     public static Pose BLUE_GOAL = new Pose(13.63, 127.64, Math.toRadians(135));
 }

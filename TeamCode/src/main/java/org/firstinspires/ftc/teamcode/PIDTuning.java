@@ -58,18 +58,16 @@ public class PIDTuning extends OpMode {
                 gamepad1.left_stick_x,
                 gamepad1.right_stick_x
         );
+        // Apply PIDF dynamically
+        PIDFCoefficients leftPID = new PIDFCoefficients(leftP, leftI, leftD, leftF);
+        PIDFCoefficients rightPID = new PIDFCoefficients(rightP, rightI, rightD, rightF);
+
 
         handleCoefficientSelection();
-        handlePIDAdjustment();
+        handlePIDAdjustment(leftPID, rightPID);
         handleVelocityAdjustment();
 
-        // Apply PIDF dynamically
-        PIDFCoefficients leftPID =
-                new PIDFCoefficients(leftP, leftI, leftD, leftF);
-        PIDFCoefficients rightPID =
-                new PIDFCoefficients(rightP, rightI, rightD, rightF);
 
-        teleOpDrive.updatePIDFCoefficients(leftPID, rightPID);
 
         maxLeftVelocity = Math.max(
                 maxLeftVelocity,
@@ -100,15 +98,17 @@ public class PIDTuning extends OpMode {
         lastY = gamepad1.y;
     }
 
-    private void handlePIDAdjustment() {
+    private void handlePIDAdjustment(PIDFCoefficients leftPID, PIDFCoefficients rightPID) {
         double step = gamepad1.left_bumper ? 0.0001 :
                 gamepad1.right_bumper ? 0.01 : 0.001;
 
         if (gamepad1.dpad_up && !lastUp) {
             adjustCurrent(step);
+            teleOpDrive.updatePIDFCoefficients(leftPID, rightPID);
         }
         if (gamepad1.dpad_down && !lastDown) {
             adjustCurrent(-step);
+            teleOpDrive.updatePIDFCoefficients(leftPID, rightPID);
         }
 
         lastUp = gamepad1.dpad_up;
