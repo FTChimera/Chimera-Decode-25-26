@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior;
+
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.opMode;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -12,6 +17,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Systems.Consts;
 import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
@@ -115,7 +122,7 @@ public class ChimeraTeleOp extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
         rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
-
+        // telemetry = new MultipleTelemetry(opmode.telemetry, FtcDashboard.getInstance().getTelemetry());
         // --- INIT LOOP ---
         while (opModeInInit()) {
             telemetry.addData("Press 'GamePad1 Right Bumper'", "for BLUE");
@@ -255,12 +262,12 @@ public class ChimeraTeleOp extends LinearOpMode {
 
             // Custom Launch Velocity (Use Bumper of +- 50 RPM)
             if (gamepad2.rightBumperWasPressed() || (OneGamepadAControl && gamepad1.rightBumperWasPressed())) {
-                setTargetVelocity += 50;
+                setTargetVelocity += 25;
                 leftOutakeMotor.setVelocity(setTargetVelocity);
                 rightOutakeMotor.setVelocity(setTargetVelocity);
             }
             if (gamepad2.leftBumperWasPressed() || (OneGamepadAControl && gamepad1.leftBumperWasPressed())) {
-                setTargetVelocity -= 50;
+                setTargetVelocity -= 25;
                 leftOutakeMotor.setVelocity(setTargetVelocity);
                 rightOutakeMotor.setVelocity(setTargetVelocity);
             }

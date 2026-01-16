@@ -62,9 +62,12 @@ public class PIDTuning extends OpMode {
         PIDFCoefficients leftPID = new PIDFCoefficients(leftP, leftI, leftD, leftF);
         PIDFCoefficients rightPID = new PIDFCoefficients(rightP, rightI, rightD, rightF);
 
+        if (gamepad1.right_stick_button) {
+            teleOpDrive.updatePIDFCoefficients(leftPID, rightPID);
+        }
 
         handleCoefficientSelection();
-        handlePIDAdjustment(leftPID, rightPID);
+        handlePIDAdjustment();
         handleVelocityAdjustment();
 
 
@@ -98,17 +101,15 @@ public class PIDTuning extends OpMode {
         lastY = gamepad1.y;
     }
 
-    private void handlePIDAdjustment(PIDFCoefficients leftPID, PIDFCoefficients rightPID) {
+    private void handlePIDAdjustment() {
         double step = gamepad1.left_bumper ? 0.0001 :
                 gamepad1.right_bumper ? 0.01 : 0.001;
 
         if (gamepad1.dpad_up && !lastUp) {
             adjustCurrent(step);
-            teleOpDrive.updatePIDFCoefficients(leftPID, rightPID);
         }
         if (gamepad1.dpad_down && !lastDown) {
             adjustCurrent(-step);
-            teleOpDrive.updatePIDFCoefficients(leftPID, rightPID);
         }
 
         lastUp = gamepad1.dpad_up;
@@ -135,6 +136,7 @@ public class PIDTuning extends OpMode {
         teleOpDrive.SetOutakeVelocity(targetVelocity);
     }
 
+    // language: java
     private void telemetryOutput() {
         telemetry.addLine("==== PID TUNING ====");
         telemetry.addData("Left P I D F",
@@ -153,6 +155,15 @@ public class PIDTuning extends OpMode {
         telemetry.addData("Max Left Velocity", maxLeftVelocity);
         telemetry.addData("Max Right Velocity", maxRightVelocity);
 
+        telemetry.addLine("Controls:");
+        telemetry.addLine("A/B/X/Y : Left P / I / D / F");
+        telemetry.addLine("DPAD Left/Right : Right P / I");
+        telemetry.addLine("Left Stick Button : Right D");
+        telemetry.addLine("Right Stick Button : Right F (also applies PIDF)");
+        telemetry.addLine("DPAD Up/Down : Increase / Decrease selected coeff");
+        telemetry.addLine("Left Bumper = tiny step, (default) = medium, Right Bumper = large step");
+        telemetry.addLine("RT / LT : Increase / Decrease target velocity");
         telemetry.update();
     }
+
 }
