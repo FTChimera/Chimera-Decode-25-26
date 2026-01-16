@@ -25,7 +25,7 @@ public class RedAutoPedro extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherShotCount = 0, launcherStage = 0;
     private final Pose startPose = new Pose(128.13, 110.81, Math.toRadians(0)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(83.4, 83.3, Math.toRadians(228));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose launchPose = new Pose(97.1, 97.2, Math.toRadians(226));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose intakePrep = new Pose(100,85, Math.toRadians(0));
     private final Pose red1Intake = new Pose(128, 84, Math.toRadians(0));
     private final Pose intakePrep2 = new Pose(100.38,61.35, Math.toRadians(0));
@@ -36,12 +36,12 @@ public class RedAutoPedro extends OpMode {
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 
     final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 900;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 850;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double SERVO_LAUNCH_POSITION = 0.6;
+    final double SERVO_LAUNCH_POSITION = 0.5;
     final double SERVO_REST_POSITION = 1;
-    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 800;
+    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 875;
     final int MAX_RPM_WAIT_TIME_SECONDS = 1000;
     final int CHIMERA_LAUNCH = 1;
     final int CHIMERA_LAUNCH_INTAKE = 2;
@@ -345,6 +345,9 @@ public class RedAutoPedro extends OpMode {
             return true; // Return TRUE to tell the main loop we are finished
         }
 
+        telemetry.addData("Left Outake Velocity", OutakeMotorLeft.getVelocity());
+        telemetry.addData("Right Outake Velocity", OutakeMotorRight.getVelocity());
+
         // 3. The Shot Logic State Machine
         switch (launcherStage) {
             case 0: // STAGE: RECOVERING RPM & FEEDING
@@ -362,6 +365,7 @@ public class RedAutoPedro extends OpMode {
                 double currentVelR = OutakeMotorRight.getVelocity();
                 double currentVelL = OutakeMotorLeft.getVelocity();
                 double targetThreshold = TARGET_VELOCITY_BACK_LAUNCH_ZONE - TARGET_VELOCITY_TOLERANCE;
+
 
                 // Check time for Fail-Safe
                 double timeWaiting = launcherTimer.getElapsedTimeSeconds();

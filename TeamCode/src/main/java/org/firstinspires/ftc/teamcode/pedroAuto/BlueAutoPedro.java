@@ -19,14 +19,15 @@ import org.firstinspires.ftc.teamcode.Systems.Consts;
 @Autonomous(name = "BlueAutoPedro", group = "pedroAuto")
 public class BlueAutoPedro extends OpMode {
     private Follower follower;
-    private Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
+    public Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherShotCount = 0, launcherStage = 0;
     private final Pose startPose = new Pose(20.1, 122.2, Math.toRadians(322)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(58.9, 85.1, Math.toRadians(320));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-    private final Pose intakePrep = new Pose(50,84, Math.toRadians(180));
-    private final Pose blue1Intake = new Pose(16.5, 84, Math.toRadians(180));
-    private final Pose intakePrep2 = new Pose(42.4,60.1, Math.toRadians(180));
-    private final Pose blue2Intake = new Pose(15.75, 60.1, Math.toRadians(180));
+    private final Pose launchPose = new Pose(48.1, 95.6, Math.toRadians(320));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose intakePrep = new Pose(55,85, Math.toRadians(180));
+    private final Pose blue1Intake = new Pose(25.5, 85, Math.toRadians(180));
+    private final Pose intakePrep2 = new Pose(50,61.35, Math.toRadians(180));
+    private final Pose blue2Intake = new Pose(21, 57.6, Math.toRadians(180));
+    //private final Pose launchPosePrep = new Pose(24.1, 57.5, Math.toRadians(200)) Use later
     private final Pose intakePrep3 = new Pose(44.3, 35.3, Math.toRadians(180));
     private final Pose blue3Intake = new Pose(8, 35.3, Math.toRadians(180));
     private final Pose finalPose = new Pose(35.1, 79.7, Math.toRadians(312));
@@ -42,7 +43,7 @@ public class BlueAutoPedro extends OpMode {
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
     final double SERVO_LAUNCH_POSITION = 0.5;
     final int SERVO_REST_POSITION = 1;
-    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 800;
+    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 875;
     final int MAX_RPM_WAIT_TIME_SECONDS = 1000;
     final int CHIMERA_LAUNCH = 1;
     final int CHIMERA_LAUNCH_INTAKE = 2;
