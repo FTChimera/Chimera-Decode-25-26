@@ -11,13 +11,25 @@ import org.firstinspires.ftc.teamcode2.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode2.Systems.RGBIndicator;
 import org.firstinspires.ftc.teamcode2.Systems.TeleOpDriveControl;
 
+import com.pedropathing.util.Timer;
+
 @TeleOp(name="ChimeraTeleOp", group="AbsolutePriority")
 public class ChimeraTeleOp extends OpMode {
     TeleOpDriveControl drive;
     DcMotor intake;DcMotorEx launcher;Servo pushServo;
+    Timer pushServo_timer;
     LimelightSystem limelight;
     Consts.AllianceColor allianceColor;boolean oneGamepadControl = false;
     RGBIndicator rgbIndicator;
+
+    public void resetTimer(Timer timer) {
+        if (timer != null) {
+            timer.resetTimer();
+        } else {
+            timer = new Timer();
+            timer.resetTimer();
+        }
+    }
 
     @Override
     public void init() {
@@ -105,7 +117,11 @@ public class ChimeraTeleOp extends OpMode {
 
     private void runPushServoOnce() {
         pushServo.setPosition(Consts.SERVO_UP_POSITION);
+        resetTimer(pushServo_timer);
         // Sleep for some time to allow the servo to reach the down position
+        while (pushServo_timer.getElapsedTimeSeconds()/1000 < Consts.SLEEP_BEFORE_RESET_SERVO_POSITION) {
+            // Do nothing, just wait
+        }
         pushServo.setPosition(Consts.SERVO_DOWN_POSITION);
     }
 

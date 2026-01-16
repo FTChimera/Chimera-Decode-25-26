@@ -58,18 +58,19 @@ public class PIDTuning extends OpMode {
                 gamepad1.left_stick_x,
                 gamepad1.right_stick_x
         );
+        // Apply PIDF dynamically
+        PIDFCoefficients leftPID = new PIDFCoefficients(leftP, leftI, leftD, leftF);
+        PIDFCoefficients rightPID = new PIDFCoefficients(rightP, rightI, rightD, rightF);
+
+        if (gamepad1.right_stick_button) {
+            teleOpDrive.updatePIDFCoefficients(leftPID, rightPID);
+        }
 
         handleCoefficientSelection();
         handlePIDAdjustment();
         handleVelocityAdjustment();
 
-        // Apply PIDF dynamically
-        PIDFCoefficients leftPID =
-                new PIDFCoefficients(leftP, leftI, leftD, leftF);
-        PIDFCoefficients rightPID =
-                new PIDFCoefficients(rightP, rightI, rightD, rightF);
 
-        teleOpDrive.updatePIDFCoefficients(leftPID, rightPID);
 
         maxLeftVelocity = Math.max(
                 maxLeftVelocity,
@@ -135,6 +136,7 @@ public class PIDTuning extends OpMode {
         teleOpDrive.SetOutakeVelocity(targetVelocity);
     }
 
+    // language: java
     private void telemetryOutput() {
         telemetry.addLine("==== PID TUNING ====");
         telemetry.addData("Left P I D F",
@@ -153,6 +155,15 @@ public class PIDTuning extends OpMode {
         telemetry.addData("Max Left Velocity", maxLeftVelocity);
         telemetry.addData("Max Right Velocity", maxRightVelocity);
 
+        telemetry.addLine("Controls:");
+        telemetry.addLine("A/B/X/Y : Left P / I / D / F");
+        telemetry.addLine("DPAD Left/Right : Right P / I");
+        telemetry.addLine("Left Stick Button : Right D");
+        telemetry.addLine("Right Stick Button : Right F (also applies PIDF)");
+        telemetry.addLine("DPAD Up/Down : Increase / Decrease selected coeff");
+        telemetry.addLine("Left Bumper = tiny step, (default) = medium, Right Bumper = large step");
+        telemetry.addLine("RT / LT : Increase / Decrease target velocity");
         telemetry.update();
     }
+
 }
