@@ -13,12 +13,14 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode2.Auto.BLUE_AUTO;
 import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO;
 import org.firstinspires.ftc.teamcode2.Systems.Consts;
 import org.firstinspires.ftc.teamcode2.Systems.LimelightSystem;
+import org.firstinspires.ftc.teamcode2.Systems.PIDFController;
 import org.firstinspires.ftc.teamcode2.Systems.RGBIndicator;
 import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
@@ -32,10 +34,17 @@ public class Pedro_TeleOp extends OpMode {
     * FIGURE OUT HOW TO COMPLETE TELEOP
     */
     private LimelightSystem limelight;
+    private PIDFController ll_PIDF = new PIDFController(
+            new PIDFCoefficients(
+                    0.03, 0.0, 0.0, 0.5
+            ), -1,1,10
+    );
     private RGBIndicator rgbIndicator;
     private Follower follower;
     private Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;
     private boolean automatedDrive=false, launcherOn=false;
+    private long lastTimeNs,nowNs;
+    double dt;
     private enum LaunchingState {
         IDLE,
         GOING_UP,
@@ -136,16 +145,30 @@ public class Pedro_TeleOp extends OpMode {
             automatedDrive = false;
         }
         // Auto Alignment using Limelight
+        nowNs = System.nanoTime();
+        dt = (nowNs - lastTimeNs) / 1e9;
+        lastTimeNs = nowNs;
+
+        // Manual-stick override: if driver is giving significant rotation input, reset PID
+        if (Math.abs(gamepad1.right_stick_x) > 0.12) {
+            ll_PIDF.reset();
+        }
         if (gamepad1.x) {
+            double error = limelight.tx;
+            double rotationCmd = ll_PIDF.update(error, dt);
             follower.setTeleOpDrive(
                     0,
                     0,
-                    limelight.tx * Consts.AUTO_ALLIGNMENT_TURN_SCALAR, // Proportional control for turning
+                    rotationCmd, // Proportional control for turning
                     true
             );
+        } else {
+            // Not auto-aiming, ensure PID state cleared so integral doesn't accumulate unseen error
+            // (optional: only reset on button release if you want integral to persist)
+            ll_PIDF.reset();
         }
         // Launcher and Intake
-        if (gamepad1.left_bumper) {
+        if (gamepad1.leftBumperWasPressed()) {
             // Run launcher
             if (!launcherOn) {
                 // Set launcher velocity based on launch zone
@@ -194,7 +217,12 @@ public class Pedro_TeleOp extends OpMode {
             launchingState = LaunchingState.IDLE;
             Servo_timer.resetTimer();
         }
-
+        // INCREASE/DECREASE LAUNCHER VELOCITY
+        if (gamepad1.dpad_up) {
+            launcher.setVelocity(launcher.getVelocity()+25);
+        } else if (gamepad1.dpad_down) {
+            launcher.setVelocity(launcher.getVelocity()-25);
+        }
         intake.setPower(Math.max(Math.min(gamepad1.left_trigger - gamepad1.right_trigger *1.1,1),-1)); //Counteract imperfect intake power
 
         telemetryM.debug("Angle (in degrees)", limelight.tx); // LLScore is negative/positive
