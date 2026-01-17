@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.pedroAuto;
 import static android.os.SystemClock.sleep;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
+import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -16,19 +18,16 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Systems.Consts;
 
-@Autonomous(name = "BlueAutoPedroFar", group = "pedroAuto")
-public class BlueAutoPedroFar extends OpMode {
+
+@Autonomous(name = "RedAutoFarPark", group = "pedroAuto")
+public class RedAutoFarPark extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherShotCount = 0, launcherStage = 0;
-    private final Pose startPose = new Pose(56.2, 8.2, Math.toRadians(270)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(56.7, 17.2, Math.toRadians(290));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-    private final Pose intakePrep = new Pose(44.5,34.8, Math.toRadians(180));
-    private final Pose blue1Intake = new Pose(21, 34.8, Math.toRadians(180));
-    private final Pose finalpose = new Pose(35.1, 16.4, Math.toRadians(90));
-
-
-    private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen;
+    private final Pose startPose = new Pose(87.02, 8.97, Math.toRadians(270)); // Start Pose of our robot.
+    private final Pose launchPose = new Pose(86.2, 15.9, Math.toRadians(245));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose finalPose = new Pose(107.7, 9.1, Math.toRadians(90));
+    private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight;
 
     final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1150;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_TOLERANCE = 15;
@@ -53,10 +52,11 @@ public class BlueAutoPedroFar extends OpMode {
     boolean third_iteration = false;
     boolean isLauncherRunning = false;
 
-    final double Kp = 300;
-    final double Ki = 0.0;
-    final double Kd = 0.0;
-    final double Kf = 10;
+
+    final double Kp = 3.2767;
+    final double Ki = 0.32767;
+    final double Kd = 0.032767;
+    final double Kf = 32.767;
 
     DcMotorEx OutakeMotorLeft, OutakeMotorRight;
     DcMotor intakeMotor;
@@ -68,18 +68,10 @@ public class BlueAutoPedroFar extends OpMode {
         pathOne = new Path(new BezierLine(startPose, launchPose));
         pathOne.setLinearHeadingInterpolation(startPose.getHeading(), launchPose.getHeading());
 
-        pathTwo = new Path(new BezierLine(launchPose, intakePrep));
-        pathTwo.setLinearHeadingInterpolation(launchPose.getHeading(), intakePrep.getHeading());
+        pathTwo = new Path(new BezierLine(launchPose, finalPose));
+        pathTwo.setLinearHeadingInterpolation(launchPose.getHeading(), finalPose.getHeading());
 
-        pathThree = new Path(new BezierLine(intakePrep, blue1Intake));
-        pathThree.setLinearHeadingInterpolation(intakePrep.getHeading(), blue1Intake.getHeading());
-
-        pathFour = new Path(new BezierLine(blue1Intake, launchPose));
-        pathFour.setLinearHeadingInterpolation(blue1Intake.getHeading(), launchPose.getHeading());
-
-        pathFive = new Path(new BezierLine(launchPose, finalpose));
-        pathFive.setLinearHeadingInterpolation(launchPose.getHeading(), finalpose.getHeading());
-
+/// delete if ready
     }
     public void autonomousPathUpdate() {
         switch (pathState) {
@@ -100,9 +92,6 @@ public class BlueAutoPedroFar extends OpMode {
                 if(!first_iteration) {
                     setPathState(CHIMERA_PATH_TWO);
                     first_iteration = true;
-                } else if (!second_iteration) {
-                    setPathState(CHIMERA_PATH_FIVE);
-                    second_iteration = true;
                 } else {
                     setPathState(CHIMERA_STOP);
                 }
@@ -112,26 +101,6 @@ public class BlueAutoPedroFar extends OpMode {
                 if (!follower.isBusy()) {
                     Intake();
                     follower.followPath(pathTwo);
-                    setPathState(CHIMERA_PATH_THREE);
-                }
-                break;
-            case CHIMERA_PATH_THREE:
-                if (!follower.isBusy()) {
-                    follower.followPath(pathThree);
-                    setPathState(CHIMERA_PATH_FOUR);
-                }
-                break;
-            case CHIMERA_PATH_FOUR:
-                if (!follower.isBusy()) {
-                    follower.followPath(pathFour);
-                    setPathState(CHIMERA_LAUNCH);
-                    IntakeStop();
-                }
-                break;
-            case CHIMERA_PATH_FIVE:
-                if (!follower.isBusy()) {
-                    Intake();
-                    follower.followPath(pathFive);
                     setPathState(CHIMERA_STOP);
                 }
                 break;
@@ -170,8 +139,8 @@ public class BlueAutoPedroFar extends OpMode {
     public void init() {
 
         pathTimer = new Timer();
-        opmodeTimer = new Timer();
         launcherTimer = new Timer();
+        opmodeTimer = new Timer();
 
         opmodeTimer.resetTimer();
 
@@ -189,6 +158,9 @@ public class BlueAutoPedroFar extends OpMode {
 
         OutakeMotorRight.setZeroPowerBehavior(BRAKE);
         OutakeMotorLeft.setZeroPowerBehavior(BRAKE);
+
+        //OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
+        //OutakeMotorLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
 
         OutakeMotorLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.leftPIDF);
         OutakeMotorRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.rightPIDF);
@@ -213,9 +185,9 @@ public class BlueAutoPedroFar extends OpMode {
         setPathState(0);
     }
 
+    /** We do not use this because everything should automatically disable **/
     @Override
     public void stop() {}
-
     public boolean runLauncherSequence() {
         // 1. Initialization (Start the flywheels)
         if (!isLauncherRunning) {
@@ -308,8 +280,8 @@ public class BlueAutoPedroFar extends OpMode {
         OutakeMotorRight.setVelocity(STOP_VELOCITY);
         OutakeMotorLeft.setVelocity(STOP_VELOCITY);
         pushServo.setPosition(SERVO_REST_POSITION);//Resets the pushServo position
-        //
-        // sleep(200);
+
+        //sleep(400);
     }
     public void Intake() {
         intakeMotor.setPower(1);

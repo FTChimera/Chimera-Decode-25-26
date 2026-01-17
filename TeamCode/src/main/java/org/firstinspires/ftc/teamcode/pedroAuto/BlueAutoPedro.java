@@ -338,7 +338,7 @@ public class BlueAutoPedro extends OpMode {
                 // --- INTAKE LOGIC ---
                 // If we are on Shot 2 (index 1) or Shot 3 (index 2), we need to feed the ring.
                 // We do this while waiting for the motors to spin up.
-                if (launcherShotCount > 1) {
+                if (launcherShotCount > 0) {
                     Intake();
                 } else {
                     // Keep intake off for the very first shot (assuming it's pre-loaded)
