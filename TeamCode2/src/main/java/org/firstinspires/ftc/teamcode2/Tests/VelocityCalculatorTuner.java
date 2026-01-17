@@ -1,38 +1,30 @@
-package org.firstinspires.ftc.teamcode2.TeleOp;
+package org.firstinspires.ftc.teamcode2.Tests;
 
+import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO;
 import org.firstinspires.ftc.teamcode2.Systems.Consts;
 import org.firstinspires.ftc.teamcode2.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode2.Systems.RGBIndicator;
 import org.firstinspires.ftc.teamcode2.Systems.TeleOpDriveControl;
+import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
 import com.pedropathing.util.Timer;
 
-@TeleOp(name="ChimeraTeleOp", group="AbsolutePriority")
-public class ChimeraTeleOp extends OpMode {
-    /*
-     * Note that all variables here are updated.
-     * Make sure that every constant final variable is kept in Consts.java
-     *
-     * ALSO NOTE: THE WHILE LOOP USED FOR WAITING FOR SERVO TO RESET POSITION
-     * WILL CAUSE ISSUES AS THE DRIVING AND LAUNCHER DOES NOT UPDATE DURING THIS TIME.
-     * THIS IS A TEMPORARY SOLUTION AND SHOULD BE REPLACED WITH A NON-BLOCKING
-     * APPROACH IN THE FUTURE.
-     *
-     * ALSO ALSO NOTE: THIS PROGRAM WILL BE REPLACED BY THE PEDRO PATHING TELEOP AND MAY BE INTEGRATED INTO
-     * A SINGLE FILE WITH CONFIGURATION OPTIONS TO CHOOSE BETWEEN PEDRO PATHING OR REGULAR TELEOP.
-     */
+@TeleOp(name="Velocity Calc Tuner", group="Tests")
+public class VelocityCalculatorTuner extends OpMode {
     TeleOpDriveControl drive;
     DcMotor intake;DcMotorEx launcher;Servo pushServo;
+    boolean oneGamepadControl = true; // For testing with single gamepad
     Timer pushServo_timer;
     LimelightSystem limelight;
-    Consts.AllianceColor allianceColor;boolean oneGamepadControl = false;
     RGBIndicator rgbIndicator;
+    Follower follower;
 
     public void resetTimer(Timer timer) {
         if (timer != null) {
@@ -47,7 +39,7 @@ public class ChimeraTeleOp extends OpMode {
     public void init() {
         limelight = new LimelightSystem(hardwareMap);
         rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
-        allianceColor = Consts.AllianceColor.RED; // Default to RED
+        follower = Constants.createFollower(hardwareMap);
 
         drive = new TeleOpDriveControl(hardwareMap);
         intake = hardwareMap.dcMotor.get("intake");
@@ -61,17 +53,31 @@ public class ChimeraTeleOp extends OpMode {
 
     @Override
     public void init_loop() {
-        telemetry.addData("Alliance Color (press Bumpers to switch)", allianceColor);
-        telemetry.addData("One Gamepad control (press A to switch)", oneGamepadControl);
-        if (gamepad1.right_bumper) allianceColor = Consts.AllianceColor.BLUE; rgbIndicator.setColor(RGBIndicator.Color.BLUE);
-        if (gamepad1.left_bumper) allianceColor = Consts.AllianceColor.RED; rgbIndicator.setColor(RGBIndicator.Color.RED);
-        if (gamepad1.aWasPressed()) oneGamepadControl = !oneGamepadControl;
-        telemetry.update();
+        telemetry.addData("Angle Degrees", limelight.tx); // LLScore is negative/positive
+        telemetry.addLine("Go to RED starting pose.");
+        if (limelight.isDisconnected) {
+            rgbIndicator.setColor(RGBIndicator.Color.BLACK); // Limelight not looking at target
+        }
+        else if (limelight.getLLScore() < 1.5) {
+            // GREEN
+            rgbIndicator.setColor(RGBIndicator.Color.GREEN);
+        } else if (limelight.getLLScore() < 5) {
+            // YELLOW
+            rgbIndicator.setColor(RGBIndicator.Color.YELLOW);
+        } else if (limelight.getLLScore() < 12.5) {
+            // ORANGE
+            rgbIndicator.setColor(RGBIndicator.Color.ORANGE);
+        } else {
+            // OFF
+            rgbIndicator.setColor(RGBIndicator.Color.BLACK);
+        }
+       telemetry.update();
     }
 
     @Override
     public void start() {
-        // run pedro follower set starting pose
+        follower.setStartingPose(RED_AUTO.endPose);
+        follower.startTeleopDrive();
         limelight.start(0);
     }
 
@@ -80,12 +86,27 @@ public class ChimeraTeleOp extends OpMode {
         limelight.LLUpdate();
         telemetry.addData("Angle Degrees", limelight.tx); // LLScore is negative/positive
         telemetry.addData("Launcher Velocity", launcher.getVelocity());
-        rgbIndicator.updateUsingLL(limelight);
+        if (limelight.isDisconnected) {
+            rgbIndicator.setColor(RGBIndicator.Color.BLACK); // Limelight not looking at target
+        }
+        else if (limelight.getLLScore() < 1) {
+            // GREEN
+            rgbIndicator.setColor(RGBIndicator.Color.GREEN);
+        } else if (limelight.getLLScore() < 5) {
+            // YELLOW
+            rgbIndicator.setColor(RGBIndicator.Color.YELLOW);
+        } else if (limelight.getLLScore() < 12.5) {
+            // ORANGE
+            rgbIndicator.setColor(RGBIndicator.Color.ORANGE);
+        } else {
+            // OFF
+            rgbIndicator.setColor(RGBIndicator.Color.BLACK);
+        }
 
-        drive.move(gamepad1, Consts.DRIVE_SCALAR); // TODO: use Pedro Pathing drive control
+        drive.move(gamepad1, 1.0); // TODO: use Pedro Pathing drive control
         // Maybe add button to go to fine-tuned launch zone positions for front and back
-        if (oneGamepadControl) intake.setPower((Math.max(Math.min(gamepad1.left_trigger - gamepad1.right_trigger *1.1,1),-1)));
-        else intake.setPower((Math.max(Math.min(gamepad2.left_trigger - gamepad2.right_trigger *1.1,1),-1))); //Counteract imperfect intake power
+        if (oneGamepadControl) intake.setPower(gamepad1.x?1.0:0.0);
+        else intake.setPower((Math.max(Math.min(gamepad2.left_stick_y *1.1,1),-1))); //Counteract imperfect intake power
         if (gamepad2.a || oneGamepadControl&&gamepad1.a) {
             launcher.setVelocity(Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE);
             launcher.setVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
