@@ -34,6 +34,7 @@ public class Pedro_TeleOp extends OpMode {
     * FIGURE OUT HOW TO COMPLETE TELEOP
     */
     private LimelightSystem limelight;
+    // TUNE LL_PIDF VALUES FOR AUTO-ALIGNMENT
     private PIDFController ll_PIDF = new PIDFController(
             new PIDFCoefficients(
                     0.03, 0.0, 0.0, 0.5
@@ -139,6 +140,21 @@ public class Pedro_TeleOp extends OpMode {
             automatedDrive = true;
         }
 
+        // Parking Aid
+        if (gamepad1.yWasPressed()) {
+            // Follow path to the parking zone
+            Pose parkingPose = allianceColor == Consts.AllianceColor.RED ?
+                    Consts.RED_PARKING : Consts.BLUE_PARKING;
+            Path pathToParking = new Path(
+                    new BezierLine(follower.getPose(), parkingPose)
+            );
+            pathToParking.setLinearHeadingInterpolation(
+                    follower.getHeading(),
+                    follower.getHeading()
+            );
+            automatedDrive = true;
+        }
+
         //Stop automated following if the follower is done
         if (automatedDrive && (gamepad1.bWasPressed() || !follower.isBusy())) {
             follower.startTeleopDrive();
@@ -223,8 +239,8 @@ public class Pedro_TeleOp extends OpMode {
         } else if (gamepad1.dpad_down) {
             launcher.setVelocity(launcher.getVelocity()-25);
         }
+        // INTAKE CONTROL
         intake.setPower(Math.max(Math.min(gamepad1.left_trigger - gamepad1.right_trigger *1.1,1),-1)); //Counteract imperfect intake power
-
         telemetryM.debug("Angle (in degrees)", limelight.tx); // LLScore is negative/positive
         telemetryM.debug("Launcher Velocity", launcher.getVelocity());
         telemetryM.debug("Servo data" + launchingState);

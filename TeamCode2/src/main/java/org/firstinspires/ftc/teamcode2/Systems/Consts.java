@@ -12,8 +12,8 @@ public class Consts {
     public static final double SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
     public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1200;// Set target velocity from back launch zone
     public static double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 1000;// Set target velocity from front launch zone
-    public static double MIN_VELOCITY_BACK_LAUNCH_ZONE = 400;// Set target velocity from back launch zone
-    public static double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
+    public static double MIN_VELOCITY_BACK_LAUNCH_ZONE = 1050;// Set target velocity from back launch zone
+    public static double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 890;// Set target velocity from back launch zone
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     public static PIDFCoefficients LaunchPIDF = new PIDFCoefficients(
             0,0,0,0
@@ -33,4 +33,6 @@ public class Consts {
     public static Pose RED_SHOOTING_BACK = new Pose(45, 98, Math.toRadians(0));
     public static Pose BLUE_SHOOTING_FRONT = new Pose(60, 85, Math.toRadians(180));
     public static Pose BLUE_SHOOTING_BACK = new Pose(100, 40, Math.toRadians(180));
+    public static Pose RED_PARKING = new Pose((double) 270/7, (double) 234/7);
+    public static Pose BLUE_PARKING = new Pose((double) 738/7, (double) 234/7);
 }
