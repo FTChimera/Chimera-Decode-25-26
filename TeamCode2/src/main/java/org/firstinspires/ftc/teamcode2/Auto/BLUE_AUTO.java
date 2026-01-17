@@ -99,7 +99,7 @@ public class BLUE_AUTO extends OpMode {
     private final Pose back_launchPose = new Pose(
             60,
             12,
-            Math.toRadians(180-Math.atan(2.2))
+            Math.toRadians(114.4439547804)
     );
 
     private final Pose set3Pose = new Pose(
@@ -114,10 +114,10 @@ public class BLUE_AUTO extends OpMode {
             0
     );
 
-    private final Pose endPose = new Pose(
+    public static final Pose endPose = new Pose(
             60,
             36,
-            Math.toRadians(180-Math.atan(2.2))
+            Math.toRadians(114.4439547804)
     );
 
     private Path launchPath;

@@ -64,5 +64,23 @@ public class RGBIndicator {
         if (col==Color.VIOLET) rgb.setPosition(VIOLET_PWM);
         if (col==Color.WHITE) rgb.setPosition(WHITE_PWM);
     }
+    public void updateUsingLL(LimelightSystem ll) {
+        if (ll.isDisconnected) {
+            this.setColor(RGBIndicator.Color.BLACK); // Limelight not looking at target
+        }
+        else if (ll.getLLScore() < 1.5) {
+            // GREEN
+            this.setColor(RGBIndicator.Color.GREEN);
+        } else if (ll.getLLScore() < 5) {
+            // YELLOW
+            this.setColor(RGBIndicator.Color.YELLOW);
+        } else if (ll.getLLScore() < 12.5) {
+            // ORANGE
+            this.setColor(RGBIndicator.Color.ORANGE);
+        } else {
+            // OFF
+            this.setColor(RGBIndicator.Color.BLACK);
+        }
+    }
 
 }

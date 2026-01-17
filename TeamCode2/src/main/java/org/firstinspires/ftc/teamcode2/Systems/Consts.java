@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 
 public class Consts {
+    public static final double DRIVE_SCALAR = 1.0; // Scalar for drive power
+    public static final double AUTO_ALLIGNMENT_TURN_SCALAR = 0.03; // Scalar for turning in auto-alignment
     public static final double SERVO_UP_POSITION = 0.9;
     public static final double SERVO_DOWN_POSITION = 0;
     public static final double SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
@@ -27,4 +29,8 @@ public class Consts {
     }
     public static Pose RED_GOAL = new Pose(130.37, 127.64, Math.toRadians(45));
     public static Pose BLUE_GOAL = new Pose(13.63, 127.64, Math.toRadians(135));
+    public static Pose RED_SHOOTING_FRONT = new Pose(85, 40, Math.toRadians(0));
+    public static Pose RED_SHOOTING_BACK = new Pose(45, 98, Math.toRadians(0));
+    public static Pose BLUE_SHOOTING_FRONT = new Pose(60, 85, Math.toRadians(180));
+    public static Pose BLUE_SHOOTING_BACK = new Pose(100, 40, Math.toRadians(180));
 }

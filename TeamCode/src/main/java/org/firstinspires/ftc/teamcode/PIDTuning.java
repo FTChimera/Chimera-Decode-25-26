@@ -130,7 +130,8 @@ public class PIDTuning extends OpMode {
     }
 
     private void handleVelocityAdjustment() {
-        targetVelocity += (gamepad1.right_trigger - gamepad1.left_trigger) * 50;
+        targetVelocity += (gamepad1.leftStickButtonWasPressed()?-1:0) * 25;
+        targetVelocity += (gamepad1.rightStickButtonWasPressed()?1:0) * 25;
         targetVelocity = Math.max(0, targetVelocity);
 
         teleOpDrive.SetOutakeVelocity(targetVelocity);
@@ -162,7 +163,7 @@ public class PIDTuning extends OpMode {
         telemetry.addLine("Right Stick Button : Right F (also applies PIDF)");
         telemetry.addLine("DPAD Up/Down : Increase / Decrease selected coeff");
         telemetry.addLine("Left Bumper = tiny step, (default) = medium, Right Bumper = large step");
-        telemetry.addLine("RT / LT : Increase / Decrease target velocity");
+        telemetry.addLine("Rstick button / Lstick button : Decrease / Increase target velocity");
         telemetry.update();
     }
 

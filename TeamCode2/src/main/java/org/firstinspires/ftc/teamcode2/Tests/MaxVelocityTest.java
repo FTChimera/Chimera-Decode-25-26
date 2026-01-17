@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import org.firstinspires.ftc.teamcode2.Systems.Consts;
 
-@TeleOp
+@TeleOp(name="Max Velocity Test", group="Tests")
 public class MaxVelocityTest extends LinearOpMode {
     DcMotorEx motor;
     double currentVelocity;
