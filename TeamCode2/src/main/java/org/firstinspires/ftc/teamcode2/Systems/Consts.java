@@ -6,15 +6,18 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 public class Consts {
     public static final double DRIVE_SCALAR = 1.0; // Scalar for drive power
-    public static final double AUTO_ALLIGNMENT_TURN_SCALAR = 0.03; // Scalar for turning in auto-alignment
+    public static final double AUTO_ALIGNMENT_TURN_SCALAR = 0.03; // Scalar for turning in auto-alignment
     public static final double SERVO_UP_POSITION = 0.9;
     public static final double SERVO_DOWN_POSITION = 0;
     public static final double SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
+    public static final double SLEEP_BEFORE_SECOND_ITERATION = 400;
+    public static final double VELOCITY_TOLERANCE = 100;
     public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1200;// Set target velocity from back launch zone
     public static double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 1000;// Set target velocity from front launch zone
     public static double MIN_VELOCITY_BACK_LAUNCH_ZONE = 1050;// Set target velocity from back launch zone
     public static double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 890;// Set target velocity from back launch zone
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
+    public static int[] BALL_NUM_INTAKE_NEEDED = {3};
     public static PIDFCoefficients LaunchPIDF = new PIDFCoefficients(
             0,0,0,0
     );

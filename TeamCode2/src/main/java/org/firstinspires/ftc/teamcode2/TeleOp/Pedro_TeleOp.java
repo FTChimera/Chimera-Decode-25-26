@@ -26,7 +26,7 @@ import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
 
 @Configurable
-@TeleOp
+@TeleOp(name = "Pedro_TeleOp", group = "TeleOp")
 public class Pedro_TeleOp extends OpMode {
     /*
     * Note that all variables here are updated.
@@ -211,16 +211,14 @@ public class Pedro_TeleOp extends OpMode {
         if (launchingState==LaunchingState.GOING_UP) {
             // This is the Fire logic.
             // Wait until the launcher reaches past the Min velocity
-            if (IsBackLaunchZoneCloser()) {
-                if (launcher.getVelocity() < Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE) return;
-            } else {
-                if (launcher.getVelocity() < Consts.MIN_VELOCITY_FRONT_LAUNCH_ZONE) return;
+            if (launcher.getVelocity() >= Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE && IsBackLaunchZoneCloser()
+            || launcher.getVelocity() >= Consts.MIN_VELOCITY_FRONT_LAUNCH_ZONE && !IsBackLaunchZoneCloser()) {
+                pushServo.setPosition(Consts.SERVO_UP_POSITION);
+                launchingState = LaunchingState.LAUNCHING;
+                Servo_timer.resetTimer();
             }
-            pushServo.setPosition(Consts.SERVO_UP_POSITION);
-            launchingState = LaunchingState.LAUNCHING;
-            Servo_timer.resetTimer();
-        }
 
+        }
         if (launchingState==LaunchingState.LAUNCHING) {
             if (Servo_timer.getElapsedTimeSeconds()/1000 >= Consts.SLEEP_BEFORE_RESET_SERVO_POSITION) {
                 launchingState = LaunchingState.GOING_DOWN;

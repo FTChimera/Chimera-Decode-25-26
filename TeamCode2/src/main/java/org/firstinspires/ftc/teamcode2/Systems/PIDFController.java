@@ -21,10 +21,7 @@ public class PIDFController {
     /**
      * Construct a PIDF controller.
      *
-     * @param kP proportional gain
-     * @param kI integral gain
-     * @param kD derivative gain
-     * @param kF feedforward gain (multiplies setpoint velocity)
+     * @param coefficients PIDF coefficients
      * @param minOutput minimum output after clamping
      * @param maxOutput maximum output after clamping
      * @param integralLimit absolute limit for the integral term
