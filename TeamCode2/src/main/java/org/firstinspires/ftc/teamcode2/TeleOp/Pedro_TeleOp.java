@@ -142,6 +142,13 @@ public class Pedro_TeleOp extends OpMode {
 
         // Parking Aid
         if (gamepad1.yWasPressed()) {
+            // To be fully inside the parking zone, the heading should only be either 0,90,180,270
+            // First, find which heading is closer.
+            double heading = Math.toDegrees(follower.getHeading());
+            heading = heading / 90; // make values we want integers and the rest are floating-point numbers
+            heading = Math.round(heading); // round to nearest integer
+            heading = heading * 90; // go back to before
+            heading = heading % 360; // Apply modulo operator to convert 360 to 0.
             // Follow path to the parking zone
             Pose parkingPose = allianceColor == Consts.AllianceColor.RED ?
                     Consts.RED_PARKING : Consts.BLUE_PARKING;
@@ -150,7 +157,7 @@ public class Pedro_TeleOp extends OpMode {
             );
             pathToParking.setLinearHeadingInterpolation(
                     follower.getHeading(),
-                    follower.getHeading()
+                    heading
             );
             automatedDrive = true;
         }
@@ -232,9 +239,9 @@ public class Pedro_TeleOp extends OpMode {
             Servo_timer.resetTimer();
         }
         // INCREASE/DECREASE LAUNCHER VELOCITY
-        if (gamepad1.dpad_up) {
+        if (gamepad1.dpadUpWasPressed()) {
             launcher.setVelocity(launcher.getVelocity()+25);
-        } else if (gamepad1.dpad_down) {
+        } else if (gamepad1.dpadDownWasPressed()) {
             launcher.setVelocity(launcher.getVelocity()-25);
         }
         // INTAKE CONTROL
