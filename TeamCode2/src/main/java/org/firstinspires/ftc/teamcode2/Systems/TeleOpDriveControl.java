@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode2.Systems;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import static org.firstinspires.ftc.teamcode2.pedroPathing.Constants.driveConstants;
 
 public class TeleOpDriveControl {
     public DcMotor lf, rf, lb, rb;
@@ -13,10 +14,10 @@ public class TeleOpDriveControl {
         this.lb = hwMap.get(DcMotor.class, "blm");
         this.rb = hwMap.get(DcMotor.class, "brm");
 
-        lf.setDirection(DcMotor.Direction.FORWARD);
-        rf.setDirection(DcMotor.Direction.REVERSE);
-        lb.setDirection(DcMotor.Direction.FORWARD);
-        rb.setDirection(DcMotor.Direction.REVERSE);
+        lf.setDirection(driveConstants.leftFrontMotorDirection);
+        rf.setDirection(driveConstants.rightFrontMotorDirection);
+        lb.setDirection(driveConstants.leftRearMotorDirection);
+        rb.setDirection(driveConstants.rightRearMotorDirection);
     }
 
 
