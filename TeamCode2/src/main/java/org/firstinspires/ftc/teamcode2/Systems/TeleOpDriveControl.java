@@ -9,10 +9,10 @@ public class TeleOpDriveControl {
     public DcMotor lf, rf, lb, rb;
 
     public TeleOpDriveControl(HardwareMap hwMap) {
-        this.lf = hwMap.get(DcMotor.class, "flm");
-        this.rf = hwMap.get(DcMotor.class, "frm");
-        this.lb = hwMap.get(DcMotor.class, "blm");
-        this.rb = hwMap.get(DcMotor.class, "brm");
+        this.lf = hwMap.get(DcMotor.class, driveConstants.leftFrontMotorName);
+        this.rf = hwMap.get(DcMotor.class, driveConstants.rightFrontMotorName);
+        this.lb = hwMap.get(DcMotor.class, driveConstants.leftRearMotorName);
+        this.rb = hwMap.get(DcMotor.class, driveConstants.rightRearMotorName);
 
         lf.setDirection(driveConstants.leftFrontMotorDirection);
         rf.setDirection(driveConstants.rightFrontMotorDirection);
