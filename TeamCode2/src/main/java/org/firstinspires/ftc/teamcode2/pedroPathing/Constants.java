@@ -39,10 +39,10 @@ public class Constants {
             .rightRearMotorName("brm")
             .leftRearMotorName("blm")
             .leftFrontMotorName("flm")
-            .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             .xVelocity(0*VELOCITY_SCALING_FACTOR)
             .yVelocity(0*VELOCITY_SCALING_FACTOR);
     public static Follower createFollower(HardwareMap hardwareMap) {

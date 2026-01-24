@@ -18,14 +18,15 @@ public class DriveAndIntake extends LinearOpMode {
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         waitForStart();
+        while (opModeIsActive()) {
+            driveControl.move(
+                    gamepad1, 0.7
+            );
 
-        driveControl.move(
-                gamepad1, 1.0
-        );
-
-        double intakeMove =
-                gamepad1.left_trigger - gamepad1.right_trigger;
-        intake.setPower(intakeMove);
+            double intakeMove =
+                    gamepad1.left_trigger - gamepad1.right_trigger;
+            intake.setPower(intakeMove);
+        }
     }
 
 }
