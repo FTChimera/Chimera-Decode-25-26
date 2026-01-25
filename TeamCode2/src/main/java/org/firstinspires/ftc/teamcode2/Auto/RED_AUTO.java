@@ -47,7 +47,7 @@ public class RED_AUTO extends OpMode {
     );
 
     public final Pose set_1Pose = new Pose(
-            102,
+            96,
             84,
             Math.toRadians(0)
     );
@@ -59,7 +59,7 @@ public class RED_AUTO extends OpMode {
     );
 
     public final Pose set2Pose = new Pose(
-            102,
+            96,
             60,
             Math.toRadians(0)
     );
@@ -95,7 +95,7 @@ public class RED_AUTO extends OpMode {
     );
 
     public final Pose set3Pose = new Pose(
-            102,
+            96,
             36,
             Math.toRadians(0)
     );
