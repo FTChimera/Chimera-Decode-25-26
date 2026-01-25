@@ -7,6 +7,12 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 public class Consts {
     public static final double DRIVE_SCALAR = 1.0; // Scalar for drive power
     public static final double AUTO_ALIGNMENT_TURN_SCALAR = 0.03; // Scalar for turning in auto-alignment
+    // TUNE LL_PIDF VALUES FOR AUTO-ALIGNMENT
+    public static PIDFCoefficients LimelightAutoAlignmentTurning =
+        new PIDFCoefficients(
+                0.03, 0.0, 0.0, 0.5
+        );
+
     public static final double SERVO_UP_POSITION = 0.9;
     public static final double SERVO_DOWN_POSITION = 0;
     public static final double SLEEP_BEFORE_RESET_SERVO_POSITION = 600;

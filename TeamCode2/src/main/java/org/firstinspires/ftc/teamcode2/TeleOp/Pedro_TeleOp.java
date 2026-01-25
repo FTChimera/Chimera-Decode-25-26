@@ -34,15 +34,12 @@ public class Pedro_TeleOp extends OpMode {
     * FIGURE OUT HOW TO COMPLETE TELEOP
     */
     private LimelightSystem limelight;
-    // TUNE LL_PIDF VALUES FOR AUTO-ALIGNMENT
-    private PIDFController ll_PIDF = new PIDFController(
-            new PIDFCoefficients(
-                    0.03, 0.0, 0.0, 0.5
-            ), -1,1,10
-    );
     private RGBIndicator rgbIndicator;
     private Follower follower;
     private Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;
+    private PIDFController ll_PIDF = new PIDFController(
+            -1,1,10
+    );
     private boolean automatedDrive=false, launcherOn=false;
     private long lastTimeNs,nowNs;
     double dt;
