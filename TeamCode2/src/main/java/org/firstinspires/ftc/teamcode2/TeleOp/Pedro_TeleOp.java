@@ -38,6 +38,7 @@ public class Pedro_TeleOp extends OpMode {
     private Follower follower;
     private Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;
     private PIDFController ll_PIDF = new PIDFController(
+            Consts.LimelightAutoAlignmentTurning,
             -1,1,10
     );
     private boolean automatedDrive=false, launcherOn=false;
