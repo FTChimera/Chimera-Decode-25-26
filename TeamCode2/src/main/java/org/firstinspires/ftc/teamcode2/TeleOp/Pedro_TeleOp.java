@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode2.TeleOp;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -13,7 +13,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode2.Auto.BLUE_AUTO;
@@ -50,7 +49,7 @@ public class Pedro_TeleOp extends OpMode {
         LAUNCHING,
         GOING_DOWN
     } private LaunchingState launchingState = LaunchingState.IDLE;
-    protected TelemetryManager telemetryM;
+    protected MultipleTelemetry telemetryM;
     public Pose startingPose;
     DcMotorEx launcher; DcMotor intake; Servo pushServo;
     Timer Servo_timer;
@@ -63,7 +62,10 @@ public class Pedro_TeleOp extends OpMode {
         Servo_timer = new Timer();
         follower = Constants.createFollower(hardwareMap);
         follower.update();
-        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+        telemetryM = new MultipleTelemetry(
+                telemetry,
+                FtcDashboard.getInstance().getTelemetry()
+        ); // telemetry and Panels telemetry are the same thing.
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         intake = hardwareMap.dcMotor.get("intake");
 
@@ -244,10 +246,10 @@ public class Pedro_TeleOp extends OpMode {
         }
         // INTAKE CONTROL
         intake.setPower(Math.max(Math.min(gamepad1.left_trigger - gamepad1.right_trigger *1.1,1),-1)); //Counteract imperfect intake power
-        telemetryM.debug("Angle (in degrees)", limelight.tx); // LLScore is negative/positive
-        telemetryM.debug("Launcher Velocity", launcher.getVelocity());
-        telemetryM.debug("Servo data" + launchingState);
-        if (launchingState != LaunchingState.IDLE) telemetryM.debug("Servo Timer (ms)", Servo_timer.getElapsedTimeSeconds()/1000);
+        telemetryM.addData("Angle (in degrees)", limelight.tx); // LLScore is negative/positive
+        telemetryM.addData("Launcher Velocity", launcher.getVelocity());
+        telemetryM.addData("Servo data", launchingState);
+        if (launchingState != LaunchingState.IDLE) telemetryM.addData("Servo Timer (ms)", Servo_timer.getElapsedTimeSeconds()/1000);
     }
     public boolean IsBackLaunchZoneCloser() {
         Pose backLaunchZone = allianceColor == Consts.AllianceColor.RED ?
