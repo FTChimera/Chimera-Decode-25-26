@@ -98,7 +98,7 @@
       "id": "mk8wug1d-tvm2q3",
       "name": "INTAKE2",
       "endPoint": {
-        "x": 125,
+        "x": 129,
         "y": 60,
         "heading": "tangential",
         "reverse": false
