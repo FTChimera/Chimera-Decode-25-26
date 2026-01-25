@@ -11,6 +11,7 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -51,14 +52,14 @@ public class Pedro_TeleOp extends OpMode {
     } private LaunchingState launchingState = LaunchingState.IDLE;
     protected MultipleTelemetry telemetryM;
     public Pose startingPose;
-    DcMotorEx launcher; DcMotor intake; Servo pushServo;
+    DcMotorEx launcher; DcMotor intake; CRServo pushServo;
     Timer Servo_timer;
 
     @Override
     public void init() {
         limelight = new LimelightSystem(hardwareMap);
         rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
-        pushServo = hardwareMap.servo.get("push");
+        pushServo = hardwareMap.get(CRServo.class, "push");
         Servo_timer = new Timer();
         follower = Constants.createFollower(hardwareMap);
         follower.update();
@@ -71,7 +72,7 @@ public class Pedro_TeleOp extends OpMode {
 
         launcher.setZeroPowerBehavior(FLOAT);
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.LaunchPIDF);
-        pushServo.setPosition(Consts.SERVO_DOWN_POSITION);
+        pushServo.setPower(Consts.SERVO_DOWN_POSITION);
     }
     @Override
     public void init_loop() {
@@ -220,7 +221,7 @@ public class Pedro_TeleOp extends OpMode {
             // Wait until the launcher reaches past the Min velocity
             if (launcher.getVelocity() >= Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE && IsBackLaunchZoneCloser()
             || launcher.getVelocity() >= Consts.MIN_VELOCITY_FRONT_LAUNCH_ZONE && !IsBackLaunchZoneCloser()) {
-                pushServo.setPosition(Consts.SERVO_UP_POSITION);
+                pushServo.setPower(Consts.SERVO_UP_POSITION);
                 launchingState = LaunchingState.LAUNCHING;
                 Servo_timer.resetTimer();
             }
@@ -234,7 +235,7 @@ public class Pedro_TeleOp extends OpMode {
         }
 
         if (launchingState==LaunchingState.GOING_DOWN) {
-            pushServo.setPosition(Consts.SERVO_DOWN_POSITION);
+            pushServo.setPower(Consts.SERVO_DOWN_POSITION);
             launchingState = LaunchingState.IDLE;
             Servo_timer.resetTimer();
         }

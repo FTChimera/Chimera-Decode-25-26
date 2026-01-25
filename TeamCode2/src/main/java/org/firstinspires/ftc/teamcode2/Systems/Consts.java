@@ -14,7 +14,7 @@ public class Consts {
         );
 
     public static final double SERVO_UP_POSITION = 0.9;
-    public static final double SERVO_DOWN_POSITION = 0;
+    public static final double SERVO_DOWN_POSITION = 0.5; // Use CR Servo
     public static final double SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
     public static final double SLEEP_BEFORE_SECOND_ITERATION = 400;
     public static final double VELOCITY_TOLERANCE = 100;

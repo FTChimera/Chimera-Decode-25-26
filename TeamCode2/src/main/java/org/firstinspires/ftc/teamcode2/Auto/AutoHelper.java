@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode2.Auto;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -21,7 +22,7 @@ public class AutoHelper {
     }
     public DcMotorEx launcher;
     public DcMotor intake;
-    Servo pushServo;
+    CRServo pushServo;
     public Timer launchSequenceTimer;
     public Timer ballLaunchTimer;
     private LaunchState launchState = LaunchState.IDLE;
@@ -35,7 +36,7 @@ public class AutoHelper {
     public AutoHelper(HardwareMap hardwareMap) {
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         intake = hardwareMap.get(DcMotor.class, "intake");
-        pushServo = hardwareMap.get(Servo.class, "pushServo");
+        pushServo = hardwareMap.get(CRServo.class, "pushServo");
 
         launcher.setZeroPowerBehavior(FLOAT);
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.LaunchPIDF);
@@ -88,13 +89,13 @@ public class AutoHelper {
                     }
                     if (ballLaunchTimer.getElapsedTimeSeconds()/1000 >= Consts.SLEEP_BEFORE_SECOND_ITERATION) {
                         IntakeStop();
-                        pushServo.setPosition(Consts.SERVO_UP_POSITION);
+                        pushServo.setPower(Consts.SERVO_UP_POSITION);
                         isServoLaunching = true;
                         ballLaunchTimer.resetTimer();
                     }
                 } else {
                     if (ballLaunchTimer.getElapsedTimeSeconds()/1000 >= Consts.SLEEP_BEFORE_RESET_SERVO_POSITION) {
-                        pushServo.setPosition(Consts.SERVO_DOWN_POSITION);
+                        pushServo.setPower(Consts.SERVO_DOWN_POSITION);
                         iterations++;
                         isServoLaunching = false;
                         ballLaunchTimer.resetTimer();
