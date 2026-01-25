@@ -35,7 +35,7 @@ public class RedAutoPedro extends OpMode {
     private final Pose finalPose = new Pose(105.2, 75.3, Math.toRadians(228));
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 
-    final double TARGET_VELOCITY = 953; // Set target velocity- in RPM(e.g., 3000 RPM)
+    final double TARGET_VELOCITY = 957; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double SERVO_LAUNCH_POSITION = 0.5;

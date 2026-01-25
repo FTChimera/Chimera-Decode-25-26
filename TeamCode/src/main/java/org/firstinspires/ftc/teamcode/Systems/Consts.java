@@ -5,8 +5,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 
 public class Consts {
-    public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1200;// Set target velocity from back launch zone
-    public static double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 990;// Set target velocity from front launch zone
+    public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1240;// Set target velocity from back launch zone
+    public static double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 1000;// Set target velocity from front launch zone
     public static double MIN_VELOCITY_BACK_LAUNCH_ZONE = 400;// Set target velocity from back launch zone
     public static double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
