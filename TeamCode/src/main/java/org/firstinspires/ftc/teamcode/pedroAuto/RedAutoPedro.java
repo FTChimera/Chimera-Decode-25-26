@@ -25,7 +25,7 @@ public class RedAutoPedro extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherShotCount = 0, launcherStage = 0;
     private final Pose startPose = new Pose(128.13, 110.81, Math.toRadians(0)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(97.1, 97.2, Math.toRadians(226));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose launchPose = new Pose(97.1, 97.2, Math.toRadians(225));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose intakePrep = new Pose(100,85, Math.toRadians(0));
     private final Pose red1Intake = new Pose(128, 84, Math.toRadians(0));
     private final Pose intakePrep2 = new Pose(100.38,61.35, Math.toRadians(0));
@@ -35,8 +35,7 @@ public class RedAutoPedro extends OpMode {
     private final Pose finalPose = new Pose(105.2, 75.3, Math.toRadians(228));
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 
-    final double TARGET_VELOCITY = 3000; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 850;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY = 953; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double SERVO_LAUNCH_POSITION = 0.5;
@@ -312,8 +311,8 @@ public class RedAutoPedro extends OpMode {
     public boolean runLauncherSequence() {
         // 1. Initialization (Start the flywheels)
         if (!isLauncherRunning) {
-            OutakeMotorRight.setVelocity(TARGET_VELOCITY_BACK_LAUNCH_ZONE);
-            OutakeMotorLeft.setVelocity(TARGET_VELOCITY_BACK_LAUNCH_ZONE);
+            OutakeMotorRight.setVelocity(TARGET_VELOCITY);
+            OutakeMotorLeft.setVelocity(TARGET_VELOCITY);
 
             isLauncherRunning = true;
             launcherShotCount = 0;
@@ -364,7 +363,7 @@ public class RedAutoPedro extends OpMode {
                 }
                 double currentVelR = OutakeMotorRight.getVelocity();
                 double currentVelL = OutakeMotorLeft.getVelocity();
-                double targetThreshold = TARGET_VELOCITY_BACK_LAUNCH_ZONE - TARGET_VELOCITY_TOLERANCE;
+                double targetThreshold = TARGET_VELOCITY - TARGET_VELOCITY_TOLERANCE;
 
 
                 // Check time for Fail-Safe

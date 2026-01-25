@@ -15,10 +15,8 @@ public class Consts {
     public static int SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
     public static double maxVelocityLeftOutakeMotor = 1800;
     public static double maxVelocityRightOutakeMotor = 1920;
-    public static PIDFCoefficients leftPIDF = getPIDFCoefficients(maxVelocityLeftOutakeMotor,
-            1.5, 1, 1.5, -3);
-    public static PIDFCoefficients rightPIDF = getPIDFCoefficients(maxVelocityRightOutakeMotor,
-            2, 1, 1.5, -3);
+    public static PIDFCoefficients leftPIDF = new PIDFCoefficients(99.6,3.4,3.4,2);
+    public static PIDFCoefficients rightPIDF = new PIDFCoefficients(99.8,3.3,3.2,2.4);
 
     // TODO Change Starting position. Temporarily set starting position to back launch
     // zone, (x,y) = (72,0)
