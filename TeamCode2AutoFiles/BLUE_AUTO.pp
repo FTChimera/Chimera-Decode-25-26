@@ -116,7 +116,7 @@
       "id": "mk94jgg7-rblm3z",
       "name": "EMPTY_GATE",
       "endPoint": {
-        "x": 10,
+        "x": 15,
         "y": 72,
         "heading": "linear",
         "reverse": false,
@@ -125,8 +125,8 @@
       },
       "controlPoints": [
         {
-          "x": 34,
-          "y": 72
+          "x": 36,
+          "y": 60
         },
         {
           "x": 24,
@@ -362,5 +362,5 @@
     "onionNextPointOnly": false
   },
   "version": "1.2.1",
-  "timestamp": "2026-01-25T03:29:55.519Z"
+  "timestamp": "2026-01-27T04:00:28.520Z"
 }
