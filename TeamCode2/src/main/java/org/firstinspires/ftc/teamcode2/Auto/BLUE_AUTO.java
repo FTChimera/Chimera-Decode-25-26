@@ -34,73 +34,73 @@ public class BLUE_AUTO extends OpMode {
         END
     }
 
-    public final Pose startPose = new Pose(
+    public static final Pose startPose = new Pose(
             20.5,
             122.8,
             Math.toRadians(142.5)
     );
 
-    public final Pose launchPose = new Pose(
+    public static final Pose launchPose = new Pose(
             36,
             108,
             Math.toRadians(135)
     );
 
-    public final Pose set1Pose = new Pose(
+    public static final Pose set1Pose = new Pose(
             48,
             84,
             Math.toRadians(180)
     );
 
-    public final Pose intake1Pose = new Pose(
+    public static final Pose intake1Pose = new Pose(
             15,
             84,
             0
     );
 
-    public final Pose set2Pose = new Pose(
+    public static final Pose set2Pose = new Pose(
             48,
             60,
             Math.toRadians(180)
     );
 
-    public final Pose intake2Pose = new Pose(
+    public static final Pose intake2Pose = new Pose(
             15,
             60,
             0
     );
 
-    public final Pose empty_gatePose = new Pose(
+    public static final Pose empty_gatePose = new Pose(
             10,
             72,
             Math.toRadians(90)
     );
 
-    public final Pose empty_gateControlPoint1 = new Pose(
+    public static final Pose empty_gateControlPoint1 = new Pose(
             34,
             72,
             0
     );
 
-    public final Pose empty_gateControlPoint2 = new Pose(
+    public static final Pose empty_gateControlPoint2 = new Pose(
             24,
             72,
             0
     );
 
-    public final Pose back_launchPose = new Pose(
+    public static final Pose back_launchPose = new Pose(
             60,
             12,
             Math.toRadians(114.444)
     );
 
-    public final Pose set3Pose = new Pose(
+    public static final Pose set3Pose = new Pose(
             48,
             36,
             Math.toRadians(180)
     );
 
-    public final Pose intake3Pose = new Pose(
+    public static final Pose intake3Pose = new Pose(
             15,
             36,
             0
