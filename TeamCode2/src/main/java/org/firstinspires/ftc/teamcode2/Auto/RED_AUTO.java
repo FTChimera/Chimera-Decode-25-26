@@ -41,8 +41,8 @@ public class RED_AUTO extends OpMode {
     );
 
     public static final Pose launchPose = new Pose(
-            110,
-            110,
+            108,
+            108,
             Math.toRadians(45)
     );
 
@@ -101,7 +101,7 @@ public class RED_AUTO extends OpMode {
     );
 
     public static final Pose intake3Pose = new Pose(
-            132,
+            129,
             36,
             0
     );
