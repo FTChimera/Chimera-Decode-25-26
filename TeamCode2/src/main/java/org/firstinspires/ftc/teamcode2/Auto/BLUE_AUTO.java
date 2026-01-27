@@ -71,7 +71,7 @@ public class BLUE_AUTO extends OpMode {
     );
 
     public static final Pose empty_gatePose = new Pose(
-            10,
+            15,
             72,
             Math.toRadians(90)
     );
