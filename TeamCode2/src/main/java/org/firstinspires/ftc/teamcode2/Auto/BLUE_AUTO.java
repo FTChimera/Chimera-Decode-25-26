@@ -77,8 +77,8 @@ public class BLUE_AUTO extends OpMode {
     );
 
     public static final Pose empty_gateControlPoint1 = new Pose(
-            34,
-            72,
+            36,
+            60,
             0
     );
 

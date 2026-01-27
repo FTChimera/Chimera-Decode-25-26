@@ -77,8 +77,8 @@ public class RED_AUTO extends OpMode {
     );
 
     public static final Pose empty_gate_0ControlPoint1 = new Pose(
-            110,
-            72,
+            108,
+            60,
             0
     );
 
