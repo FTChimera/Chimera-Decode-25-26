@@ -16,6 +16,7 @@ public class Red_Close extends OpMode {
     private Follower follower;
     private Timer pathTimer;
     private PathState pathState;
+    private AutoHelper autoHelper;
 
     public enum PathState {
         IDLE,
@@ -202,52 +203,58 @@ public class Red_Close extends OpMode {
         switch (pathState) {
             case LAUNCH:
                 follower.followPath(launchPath);
-                setPathState(PathState.SET_1);
+                if (autoHelper.runLauncherSequence(false, 3)) setPathState(PathState.SET_1);
                 break;
 
             case SET_1:
                 follower.followPath(set_1Path);
+                autoHelper.Intake();
                 setPathState(PathState.INTAKE1);
                 break;
 
             case INTAKE1:
                 follower.followPath(intake1Path);
+                autoHelper.IntakeStop();
                 setPathState(PathState.LAUNCH_1);
                 break;
 
             case LAUNCH_1:
                 follower.followPath(launchPath_1);
-                setPathState(PathState.SET2);
+                if (autoHelper.runLauncherSequence(false, 3)) setPathState(PathState.SET2);
                 break;
 
             case SET2:
                 follower.followPath(set2Path);
+                autoHelper.Intake();
                 setPathState(PathState.INTAKE2);
                 break;
 
             case INTAKE2:
                 follower.followPath(intake2Path);
+                autoHelper.IntakeStop();
                 setPathState(PathState.LAUNCHSET2);
                 break;
 
             case LAUNCHSET2:
                 follower.followPath(launchset2Path);
-                setPathState(PathState.SET3);
+                if (autoHelper.runLauncherSequence(false, 3)) setPathState(PathState.SET3);
                 break;
 
             case SET3:
                 follower.followPath(set3Path);
+                autoHelper.Intake();
                 setPathState(PathState.INTAKE3);
                 break;
 
             case INTAKE3:
                 follower.followPath(intake3Path);
+                autoHelper.IntakeStop();
                 setPathState(PathState.LAUNCH_2);
                 break;
 
             case LAUNCH_2:
                 follower.followPath(launchPath_2);
-                setPathState(PathState.END);
+                if (autoHelper.runLauncherSequence(false, 3)) setPathState(PathState.END);
                 break;
 
             case END:
@@ -265,6 +272,7 @@ public class Red_Close extends OpMode {
     @Override
     public void init() {
         pathTimer = new Timer();
+        autoHelper = new AutoHelper(hardwareMap);
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
