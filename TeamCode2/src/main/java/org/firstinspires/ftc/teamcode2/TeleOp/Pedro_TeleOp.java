@@ -18,8 +18,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode2.Auto.BLUE_AUTO;
-import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO;
+import org.firstinspires.ftc.teamcode2.Auto.BLUE_AUTO_ARCHIVE;
+import org.firstinspires.ftc.teamcode2.Auto.Blue_Close;
+import org.firstinspires.ftc.teamcode2.Auto.Blue_Far;
+import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO_ARCHIVE;
+import org.firstinspires.ftc.teamcode2.Auto.Red_Close;
+import org.firstinspires.ftc.teamcode2.Auto.Red_Far;
 import org.firstinspires.ftc.teamcode2.Systems.Consts;
 import org.firstinspires.ftc.teamcode2.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode2.Systems.PIDFController;
@@ -38,7 +42,7 @@ public class Pedro_TeleOp extends OpMode {
     private LimelightSystem limelight;
     private RGBIndicator rgbIndicator;
     private Follower follower;
-    private Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;
+    private Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;public Consts.Auto auto = Consts.Auto.RED_CLOSE;
     private PIDFController ll_PIDF = new PIDFController(
             Consts.LimelightAutoAlignmentTurning,
             -1,1,10
@@ -80,15 +84,20 @@ public class Pedro_TeleOp extends OpMode {
     }
     @Override
     public void init_loop() {
-        panelsTelemetry.addData("Alliance Color (press A to switch)", allianceColor);
+        panelsTelemetry.addData("Auto (press A to switch)", auto);
         if (gamepad1.aWasPressed()) {
-            allianceColor = allianceColor.switchColors();
+            auto = auto.next();
+            allianceColor = auto.getAllianceColor();
         }
         // Set starting pose based on alliance color
-        if (allianceColor == Consts.AllianceColor.RED) {
-            startingPose = RED_AUTO.endPose; // Auto end pose is TeleOp start pose
-        } else {
-            startingPose = BLUE_AUTO.endPose;
+        if (auto == Consts.Auto.RED_CLOSE) {
+            startingPose = Red_Close.endPose; // Auto end pose is TeleOp start pose
+        } else if (auto == Consts.Auto.BLUE_CLOSE) {
+            startingPose = Blue_Close.endPose;
+        } else if (auto == Consts.Auto.BLUE_FAR) {
+            startingPose = Blue_Far.endPose;
+        } else if (auto == Consts.Auto.RED_FAR) {
+            startingPose = Red_Far.endPose;
         }
 
         panelsTelemetry.addData("Starting Pose", startingPose);

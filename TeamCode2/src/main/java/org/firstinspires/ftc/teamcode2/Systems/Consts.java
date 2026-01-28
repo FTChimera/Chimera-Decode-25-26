@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode2.Systems;
 
+import static org.firstinspires.ftc.teamcode2.Systems.Consts.AllianceColor.BLUE;
+import static org.firstinspires.ftc.teamcode2.Systems.Consts.AllianceColor.RED;
+
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
@@ -34,6 +37,24 @@ public class Consts {
 
         public AllianceColor switchColors() {
             return this == RED ? BLUE : RED;
+        }
+    }
+    public enum Auto {
+        BLUE_CLOSE(BLUE),
+        BLUE_FAR(BLUE),
+        RED_CLOSE(RED),
+        RED_FAR(RED);
+
+        Auto(AllianceColor allianceColor) {
+
+        }
+        public Auto next() {
+            return values()[(this.ordinal() + 1) % values().length];
+        }
+        public AllianceColor getAllianceColor() {
+            return name().startsWith("BLUE")
+                    ? BLUE
+                    : RED;
         }
     }
     public static Pose RED_GOAL = new Pose(130.37, 127.64, Math.toRadians(45));

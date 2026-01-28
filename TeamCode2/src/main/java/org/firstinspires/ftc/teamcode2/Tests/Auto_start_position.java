@@ -8,14 +8,14 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode2.Auto.BLUE_AUTO;
-import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO;
+import org.firstinspires.ftc.teamcode2.Auto.BLUE_AUTO_ARCHIVE;
+import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO_ARCHIVE;
 import org.firstinspires.ftc.teamcode2.Systems.Consts;
 import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
 @Autonomous(name = "Auto Start Position Test", group = "Test")
 public class Auto_start_position extends OpMode {
-
+    // TODO LATER ADD SUPPORT FOR ALL 4/6 AUTOS
     private Follower follower;
     private Timer pathTimer;
     private PathState pathState;
@@ -38,9 +38,9 @@ public class Auto_start_position extends OpMode {
             Math.toRadians(45)
     );
 
-    public final Pose red_start_pose = RED_AUTO.startPose;
+    public final Pose red_start_pose = RED_AUTO_ARCHIVE.startPose;
 
-    public final Pose blue_start_pose = BLUE_AUTO.startPose;
+    public final Pose blue_start_pose = BLUE_AUTO_ARCHIVE.startPose;
 
     public Path launchPath;
     public Path startposePath;
