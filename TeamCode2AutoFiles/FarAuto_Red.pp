@@ -131,24 +131,6 @@
       "waitAfterName": ""
     },
     {
-      "id": "mkxag2ms-z7llyy",
-      "name": "LAUNCH",
-      "endPoint": {
-        "x": 84,
-        "y": 12,
-        "heading": "linear",
-        "reverse": false,
-        "startDeg": 0,
-        "endDeg": 65.5560452
-      },
-      "controlPoints": [],
-      "color": "#BDCCCB",
-      "waitBeforeMs": 0,
-      "waitAfterMs": 0,
-      "waitBeforeName": "",
-      "waitAfterName": ""
-    },
-    {
       "id": "mkxai7ou-2wm163",
       "name": "END",
       "endPoint": {
@@ -256,10 +238,6 @@
     },
     {
       "kind": "path",
-      "lineId": "mkxag2ms-z7llyy"
-    },
-    {
-      "kind": "path",
       "lineId": "mkxai7ou-2wm163"
     }
   ],
@@ -284,5 +262,5 @@
     "onionNextPointOnly": false
   },
   "version": "1.2.1",
-  "timestamp": "2026-01-28T00:32:59.590Z"
+  "timestamp": "2026-01-28T02:24:25.511Z"
 }
