@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
-@Autonomous(name = "Red Close Auto", group = "Pedro Auto")
+@Autonomous(name = "Red Close Auto", group = "Pedro Auto", preselectTeleOp = "Pedro_TeleOp")
 public class Red_Close extends OpMode {
 
     private Follower follower;

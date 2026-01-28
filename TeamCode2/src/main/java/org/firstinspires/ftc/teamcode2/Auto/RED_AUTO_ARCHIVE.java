@@ -7,10 +7,12 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
-@Autonomous(name = "Red Auto", group = "Pedro Auto", preselectTeleOp = "Pedro_TeleOp")
+@Disabled
+@Autonomous(name = "RED ARCHIVE", group = "Pedro Auto", preselectTeleOp = "Pedro_TeleOp")
 public class RED_AUTO_ARCHIVE extends OpMode {
 
     private Follower follower;
