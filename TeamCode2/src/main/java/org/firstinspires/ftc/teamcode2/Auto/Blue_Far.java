@@ -16,6 +16,7 @@ public class Blue_Far extends OpMode {
     private Follower follower;
     private Timer pathTimer;
     private PathState pathState;
+    private AutoHelper autoHelper;
 
     public enum PathState {
         IDLE,
@@ -26,7 +27,6 @@ public class Blue_Far extends OpMode {
         SET2,
         INTAKE2,
         LAUNCH_2,
-        LAUNCH_3,
         END
     }
 
@@ -79,7 +79,6 @@ public class Blue_Far extends OpMode {
     public Path set2Path;
     public Path intake2Path;
     public Path launchPath_2;
-    public Path launchPath_3;
     public Path endPath;
 
     public void buildPaths() {
@@ -139,14 +138,6 @@ public class Blue_Far extends OpMode {
                 launchPose.getHeading()
         );
 
-        launchPath_3 = new Path(
-                new BezierLine(launchPose, launchPose)
-        );
-        launchPath_3.setLinearHeadingInterpolation(
-                launchPose.getHeading(),
-                launchPose.getHeading()
-        );
-
         endPath = new Path(
                 new BezierLine(launchPose, endPose)
         );
@@ -162,42 +153,41 @@ public class Blue_Far extends OpMode {
         switch (pathState) {
             case LAUNCH:
                 follower.followPath(launchPath);
-                setPathState(PathState.SET1);
+                if (autoHelper.runLauncherSequence(true, 3)) setPathState(PathState.SET1);
                 break;
 
             case SET1:
                 follower.followPath(set1Path);
+                autoHelper.Intake();
                 setPathState(PathState.INTAKE1);
                 break;
 
             case INTAKE1:
                 follower.followPath(intake1Path);
+                autoHelper.IntakeStop();
                 setPathState(PathState.LAUNCH_1);
                 break;
 
             case LAUNCH_1:
                 follower.followPath(launchPath_1);
-                setPathState(PathState.SET2);
+                if (autoHelper.runLauncherSequence(true, 3)) setPathState(PathState.SET2);
                 break;
 
             case SET2:
                 follower.followPath(set2Path);
+                autoHelper.Intake();
                 setPathState(PathState.INTAKE2);
                 break;
 
             case INTAKE2:
                 follower.followPath(intake2Path);
+                autoHelper.IntakeStop();
                 setPathState(PathState.LAUNCH_2);
                 break;
 
             case LAUNCH_2:
                 follower.followPath(launchPath_2);
-                setPathState(PathState.LAUNCH_3);
-                break;
-
-            case LAUNCH_3:
-                follower.followPath(launchPath_3);
-                setPathState(PathState.END);
+                if (autoHelper.runLauncherSequence(true, 3)) setPathState(PathState.SET2);
                 break;
 
             case END:
@@ -215,6 +205,7 @@ public class Blue_Far extends OpMode {
     @Override
     public void init() {
         pathTimer = new Timer();
+        autoHelper = new AutoHelper(hardwareMap);
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
