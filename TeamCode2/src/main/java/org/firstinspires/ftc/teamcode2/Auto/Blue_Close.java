@@ -254,12 +254,12 @@ public class Blue_Close extends OpMode {
 
             case LAUNCH_2:
                 follower.followPath(launchPath_2);
-                setPathState(PathState.END);
+                if (autoHelper.runLauncherSequence(false, 3)) setPathState(PathState.END);
                 break;
 
             case END:
                 follower.followPath(endPath);
-                if (autoHelper.runLauncherSequence(false, 3)) setPathState(PathState.END);
+                setPathState(PathState.IDLE);
                 break;
         }
     }
