@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.pedroAuto;
 import static android.os.SystemClock.sleep;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
@@ -27,7 +28,7 @@ public class BlueAutoPedro extends OpMode {
     private final Pose blue1Intake = new Pose(25.5, 85, Math.toRadians(180));
     private final Pose intakePrep2 = new Pose(50,61.35, Math.toRadians(180));
     private final Pose blue2Intake = new Pose(21, 57.6, Math.toRadians(180));
-    //private final Pose launchPosePrep = new Pose(24.1, 57.5, Math.toRadians(200)) Use later
+    private final Pose launchControl = new Pose(34.4, 62.2, Math.toRadians(200));
     private final Pose intakePrep3 = new Pose(44.3, 35.3, Math.toRadians(180));
     private final Pose blue3Intake = new Pose(8, 35.3, Math.toRadians(180));
     private final Pose finalPose = new Pose(35.1, 79.7, Math.toRadians(312));
@@ -35,7 +36,7 @@ public class BlueAutoPedro extends OpMode {
 
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 
-    final double TARGET_VELOCITY = 940; // Set target velocity- in RPM(e.g., 3000 RPM)
+    final double TARGET_VELOCITY = 950; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double MIN_VELOCITY = 1075;
@@ -93,7 +94,7 @@ public class BlueAutoPedro extends OpMode {
         pathSix = new Path(new BezierLine(intakePrep2, blue2Intake));
         pathSix.setLinearHeadingInterpolation(intakePrep2.getHeading(), blue2Intake.getHeading());
 
-        pathSeven = new Path(new BezierLine(blue2Intake, launchPose));
+        pathSeven = new Path(new BezierCurve(blue2Intake, launchControl, launchPose));
         pathSeven.setLinearHeadingInterpolation(blue2Intake.getHeading(), launchPose.getHeading());
 
         pathEight = new Path(new BezierLine(launchPose, intakePrep3));

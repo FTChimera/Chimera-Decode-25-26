@@ -22,7 +22,7 @@ public class BlueAutoFarPark extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherShotCount = 0, launcherStage = 0;
     private final Pose startPose = new Pose(56.2, 8.2, Math.toRadians(270)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(56.7, 17.2, Math.toRadians(300));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose launchPose = new Pose(56.7, 17.2, Math.toRadians(294));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose finalpose = new Pose(37.4, 8.8, Math.toRadians(90));
 
 
