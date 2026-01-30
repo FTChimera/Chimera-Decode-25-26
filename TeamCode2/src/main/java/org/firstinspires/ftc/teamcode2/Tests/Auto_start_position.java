@@ -15,7 +15,6 @@ import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
 @Autonomous(name = "Auto Start Position Test", group = "Test")
 public class Auto_start_position extends OpMode {
-    // TODO LATER ADD SUPPORT FOR ALL 4/6 AUTOS
     private Follower follower;
     private Timer pathTimer;
     private PathState pathState;
@@ -44,7 +43,8 @@ public class Auto_start_position extends OpMode {
 
     public Path launchPath;
     public Path startposePath;
-    public Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;
+    public Consts.Auto autoPose = Consts.Auto.RED_CLOSE;
+    private Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;
 
     public void buildPaths() {
         launchPath = new Path(
