@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode2.TeleOp;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
@@ -11,13 +13,17 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode2.Auto.BLUE_AUTO;
-import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO;
+import org.firstinspires.ftc.teamcode2.Auto.BLUE_AUTO_ARCHIVE;
+import org.firstinspires.ftc.teamcode2.Auto.Blue_Close;
+import org.firstinspires.ftc.teamcode2.Auto.Blue_Far;
+import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO_ARCHIVE;
+import org.firstinspires.ftc.teamcode2.Auto.Red_Close;
+import org.firstinspires.ftc.teamcode2.Auto.Red_Far;
 import org.firstinspires.ftc.teamcode2.Systems.Consts;
 import org.firstinspires.ftc.teamcode2.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode2.Systems.PIDFController;
@@ -34,15 +40,13 @@ public class Pedro_TeleOp extends OpMode {
     * FIGURE OUT HOW TO COMPLETE TELEOP
     */
     private LimelightSystem limelight;
-    // TUNE LL_PIDF VALUES FOR AUTO-ALIGNMENT
-    private PIDFController ll_PIDF = new PIDFController(
-            new PIDFCoefficients(
-                    0.03, 0.0, 0.0, 0.5
-            ), -1,1,10
-    );
     private RGBIndicator rgbIndicator;
     private Follower follower;
-    private Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;
+    private Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;public Consts.Auto auto = Consts.Auto.RED_CLOSE;
+    private PIDFController ll_PIDF = new PIDFController(
+            Consts.LimelightAutoAlignmentTurning,
+            -1,1,10
+    );
     private boolean automatedDrive=false, launcherOn=false;
     private long lastTimeNs,nowNs;
     double dt;
@@ -52,42 +56,52 @@ public class Pedro_TeleOp extends OpMode {
         LAUNCHING,
         GOING_DOWN
     } private LaunchingState launchingState = LaunchingState.IDLE;
-    protected TelemetryManager telemetryM;
+    protected MultipleTelemetry telemetryM;
+    private TelemetryManager panelsTelemetry;
     public Pose startingPose;
-    DcMotorEx launcher; DcMotor intake; Servo pushServo;
+    DcMotorEx launcher; DcMotor intake; CRServo pushServo;
     Timer Servo_timer;
 
     @Override
     public void init() {
         limelight = new LimelightSystem(hardwareMap);
         rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
-        pushServo = hardwareMap.servo.get("push");
+        pushServo = hardwareMap.get(CRServo.class, "push");
         Servo_timer = new Timer();
         follower = Constants.createFollower(hardwareMap);
         follower.update();
-        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+        telemetryM = new MultipleTelemetry(
+                telemetry,
+                FtcDashboard.getInstance().getTelemetry()
+        ); // cannot combine panels telemetry with normal so need to send update from panels
+        panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         intake = hardwareMap.dcMotor.get("intake");
 
         launcher.setZeroPowerBehavior(FLOAT);
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.LaunchPIDF);
-        pushServo.setPosition(Consts.SERVO_DOWN_POSITION);
+        pushServo.setPower(Consts.SERVO_DOWN_POSITION);
     }
     @Override
     public void init_loop() {
-        telemetryM.addData("Alliance Color (press A to switch)", allianceColor);
+        panelsTelemetry.addData("Auto (press A to switch)", auto);
         if (gamepad1.aWasPressed()) {
-            allianceColor = allianceColor.switchColors();
+            auto = auto.next();
+            allianceColor = auto.getAllianceColor();
         }
         // Set starting pose based on alliance color
-        if (allianceColor == Consts.AllianceColor.RED) {
-            startingPose = RED_AUTO.endPose; // Auto end pose is TeleOp start pose
-        } else {
-            startingPose = BLUE_AUTO.endPose;
+        if (auto == Consts.Auto.RED_CLOSE) {
+            startingPose = Red_Close.endPose; // Auto end pose is TeleOp start pose
+        } else if (auto == Consts.Auto.BLUE_CLOSE) {
+            startingPose = Blue_Close.endPose;
+        } else if (auto == Consts.Auto.BLUE_FAR) {
+            startingPose = Blue_Far.endPose;
+        } else if (auto == Consts.Auto.RED_FAR) {
+            startingPose = Red_Far.endPose;
         }
 
-        telemetryM.addData("Starting Pose", startingPose);
-        telemetryM.update();
+        panelsTelemetry.addData("Starting Pose", startingPose);
+        panelsTelemetry.update(telemetryM);
     }
 
     @Override
@@ -108,7 +122,7 @@ public class Pedro_TeleOp extends OpMode {
         follower.update();
         limelight.LLUpdate();
         rgbIndicator.updateUsingLL(limelight);
-        telemetryM.update();
+        panelsTelemetry.update(telemetryM); // update both
 
         if (!automatedDrive) {
             //Make the last parameter false for field-centric
@@ -220,7 +234,7 @@ public class Pedro_TeleOp extends OpMode {
             // Wait until the launcher reaches past the Min velocity
             if (launcher.getVelocity() >= Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE && IsBackLaunchZoneCloser()
             || launcher.getVelocity() >= Consts.MIN_VELOCITY_FRONT_LAUNCH_ZONE && !IsBackLaunchZoneCloser()) {
-                pushServo.setPosition(Consts.SERVO_UP_POSITION);
+                pushServo.setPower(Consts.SERVO_UP_POSITION);
                 launchingState = LaunchingState.LAUNCHING;
                 Servo_timer.resetTimer();
             }
@@ -234,7 +248,7 @@ public class Pedro_TeleOp extends OpMode {
         }
 
         if (launchingState==LaunchingState.GOING_DOWN) {
-            pushServo.setPosition(Consts.SERVO_DOWN_POSITION);
+            pushServo.setPower(Consts.SERVO_DOWN_POSITION);
             launchingState = LaunchingState.IDLE;
             Servo_timer.resetTimer();
         }
@@ -246,10 +260,10 @@ public class Pedro_TeleOp extends OpMode {
         }
         // INTAKE CONTROL
         intake.setPower(Math.max(Math.min(gamepad1.left_trigger - gamepad1.right_trigger *1.1,1),-1)); //Counteract imperfect intake power
-        telemetryM.debug("Angle (in degrees)", limelight.tx); // LLScore is negative/positive
-        telemetryM.debug("Launcher Velocity", launcher.getVelocity());
-        telemetryM.debug("Servo data" + launchingState);
-        if (launchingState != LaunchingState.IDLE) telemetryM.debug("Servo Timer (ms)", Servo_timer.getElapsedTimeSeconds()/1000);
+        panelsTelemetry.addData("Angle (in degrees)", limelight.tx); // LLScore is negative/positive
+        panelsTelemetry.addData("Launcher Velocity", launcher.getVelocity());
+        panelsTelemetry.addData("Servo data", launchingState);
+        if (launchingState != LaunchingState.IDLE) panelsTelemetry.addData("Servo Timer (ms)", Servo_timer.getElapsedTimeSeconds()/1000);
     }
     public boolean IsBackLaunchZoneCloser() {
         Pose backLaunchZone = allianceColor == Consts.AllianceColor.RED ?

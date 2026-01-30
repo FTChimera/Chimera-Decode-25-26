@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO;
+import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO_ARCHIVE;
 import org.firstinspires.ftc.teamcode2.Systems.Consts;
 import org.firstinspires.ftc.teamcode2.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode2.Systems.RGBIndicator;
@@ -18,6 +18,7 @@ import com.pedropathing.util.Timer;
 
 @TeleOp(name="Velocity Calc Tuner", group="Tests")
 public class VelocityCalculatorTuner extends OpMode {
+    // TODO LATER USE 4/6 AUTOS START POSE
     TeleOpDriveControl drive;
     DcMotor intake;DcMotorEx launcher;Servo pushServo;
     boolean oneGamepadControl = true; // For testing with single gamepad
@@ -76,7 +77,7 @@ public class VelocityCalculatorTuner extends OpMode {
 
     @Override
     public void start() {
-        follower.setStartingPose(RED_AUTO.endPose);
+        follower.setStartingPose(RED_AUTO_ARCHIVE.endPose);
         follower.startTeleopDrive();
         limelight.start(0);
     }

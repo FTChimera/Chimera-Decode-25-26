@@ -1,25 +1,25 @@
 {
   "startPoint": {
-    "x": 20.5,
-    "y": 122.8,
+    "x": 57.408571428571435,
+    "y": 9.184285714285714,
     "heading": "linear",
     "startDeg": 90,
-    "endDeg": 180,
+    "endDeg": 0,
     "locked": false
   },
   "lines": [
     {
-      "id": "line-1zcnzkv32go",
+      "id": "line-20fpb5654pl",
       "name": "LAUNCH",
       "endPoint": {
-        "x": 36,
-        "y": 108,
+        "x": 60,
+        "y": 12,
         "heading": "linear",
-        "startDeg": 142.5,
-        "endDeg": 135
+        "startDeg": 90,
+        "endDeg": 114.4439548
       },
       "controlPoints": [],
-      "color": "#B66857",
+      "color": "#BBB7D9",
       "locked": false,
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
@@ -27,206 +27,122 @@
       "waitAfterName": ""
     },
     {
-      "id": "mk92epyz-4swzn4",
+      "id": "mkxa8xwq-5u1lho",
       "name": "SET1",
       "endPoint": {
         "x": 48,
-        "y": 84,
+        "y": 36,
         "heading": "linear",
         "reverse": false,
-        "startDeg": 135,
+        "startDeg": 114.4439548,
         "endDeg": 180
       },
       "controlPoints": [],
-      "color": "#BA59D5",
+      "color": "#577D78",
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
       "waitAfterName": ""
     },
     {
-      "id": "mk92ogrg-wiri56",
+      "id": "mkxaab5e-3jiayz",
       "name": "INTAKE1",
       "endPoint": {
-        "x": 15,
-        "y": 84,
+        "x": 18,
+        "y": 36,
         "heading": "tangential",
         "reverse": false
       },
       "controlPoints": [],
-      "color": "#96AA79",
+      "color": "#CCA776",
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
       "waitAfterName": ""
     },
     {
-      "id": "mk92phsq-siusz9",
+      "id": "mkxaaup3-c1oxm7",
       "name": "LAUNCH",
       "endPoint": {
-        "x": 36,
-        "y": 108,
+        "x": 60,
+        "y": 12,
         "heading": "linear",
         "reverse": false,
         "startDeg": 180,
-        "endDeg": 135
+        "endDeg": 114.4439548
       },
       "controlPoints": [],
-      "color": "#6D96DD",
+      "color": "#7ABA7D",
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
       "waitAfterName": ""
     },
     {
-      "id": "mk92rjds-gox0v5",
+      "id": "mkxabub1-z6weu7",
       "name": "SET2",
       "endPoint": {
         "x": 48,
         "y": 60,
         "heading": "linear",
         "reverse": false,
-        "startDeg": 135,
+        "startDeg": 114.4439548,
         "endDeg": 180
       },
       "controlPoints": [],
-      "color": "#AA755A",
+      "color": "#A9CD68",
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
       "waitAfterName": ""
     },
     {
-      "id": "mk92tq09-xnk7n7",
+      "id": "mkxacfdt-nfud5r",
       "name": "INTAKE2",
       "endPoint": {
-        "x": 15,
+        "x": 18,
         "y": 60,
         "heading": "tangential",
         "reverse": false
       },
       "controlPoints": [],
-      "color": "#A6B999",
+      "color": "#6C5D9B",
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
       "waitAfterName": ""
     },
     {
-      "id": "mk94jgg7-rblm3z",
-      "name": "EMPTY_GATE",
-      "endPoint": {
-        "x": 15,
-        "y": 72,
-        "heading": "linear",
-        "reverse": false,
-        "startDeg": 180,
-        "endDeg": 90
-      },
-      "controlPoints": [
-        {
-          "x": 36,
-          "y": 60
-        },
-        {
-          "x": 24,
-          "y": 72
-        }
-      ],
-      "color": "#6699DB",
-      "waitBeforeMs": 0,
-      "waitAfterMs": 0,
-      "waitBeforeName": "",
-      "waitAfterName": ""
-    },
-    {
-      "id": "mk94oi5b-cgqbjh",
-      "name": "BACK_LAUNCH",
+      "id": "mkxadmdh-1y2zl5",
+      "name": "LAUNCH",
       "endPoint": {
         "x": 60,
         "y": 12,
         "heading": "linear",
         "reverse": false,
-        "startDeg": 90,
-        "endDeg": 114.444
+        "startDeg": 180,
+        "endDeg": 114.4439548
       },
-      "controlPoints": [
-        {
-          "x": 24,
-          "y": 72
-        }
-      ],
-      "color": "#ADA698",
+      "controlPoints": [],
+      "color": "#59696B",
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
       "waitAfterName": ""
     },
     {
-      "id": "mk9503gu-zljt26",
-      "name": "SET3",
+      "id": "mkxai7ou-2wm163",
+      "name": "END",
       "endPoint": {
         "x": 48,
         "y": 36,
         "heading": "linear",
         "reverse": false,
-        "startDeg": 114.444,
-        "endDeg": 180
+        "startDeg": 114.4439548,
+        "endDeg": 135
       },
       "controlPoints": [],
-      "color": "#66A87A",
-      "waitBeforeMs": 0,
-      "waitAfterMs": 0,
-      "waitBeforeName": "",
-      "waitAfterName": ""
-    },
-    {
-      "id": "mk95fne2-19r46w",
-      "name": "INTAKE3",
-      "endPoint": {
-        "x": 15,
-        "y": 36,
-        "heading": "tangential",
-        "reverse": false
-      },
-      "controlPoints": [],
-      "color": "#B9DD9D",
-      "waitBeforeMs": 0,
-      "waitAfterMs": 0,
-      "waitBeforeName": "",
-      "waitAfterName": ""
-    },
-    {
-      "id": "mk95ilq9-13fh46",
-      "name": "BACK_LAUNCH",
-      "endPoint": {
-        "x": 60,
-        "y": 12,
-        "heading": "linear",
-        "reverse": false,
-        "startDeg": 180,
-        "endDeg": 114.444
-      },
-      "controlPoints": [],
-      "color": "#5A595D",
-      "waitBeforeMs": 0,
-      "waitAfterMs": 0,
-      "waitBeforeName": "",
-      "waitAfterName": ""
-    },
-    {
-      "id": "mk95jgim-p4f69p",
-      "name": "END",
-      "endPoint": {
-        "x": 60,
-        "y": 36,
-        "heading": "linear",
-        "reverse": false,
-        "startDeg": 114.444,
-        "endDeg": 114.444
-      },
-      "controlPoints": [],
-      "color": "#66C56A",
+      "color": "#BCC7D7",
       "waitBeforeMs": 0,
       "waitAfterMs": 0,
       "waitBeforeName": "",
@@ -236,109 +152,93 @@
   "shapes": [
     {
       "id": "triangle-1",
-      "name": "Red Goal",
-      "vertices": [
-        {
-          "x": 144,
-          "y": 70
-        },
-        {
-          "x": 144,
-          "y": 144
-        },
-        {
-          "x": 120,
-          "y": 144
-        },
-        {
-          "x": 138,
-          "y": 119
-        },
-        {
-          "x": 138,
-          "y": 70
-        }
-      ],
-      "color": "#dc2626",
-      "fillColor": "#ff6b6b"
-    },
-    {
-      "id": "triangle-2",
       "name": "Blue Goal",
       "vertices": [
+        {
+          "x": 0,
+          "y": 70
+        },
+        {
+          "x": 0,
+          "y": 144
+        },
+        {
+          "x": 24,
+          "y": 144
+        },
         {
           "x": 6,
           "y": 119
         },
         {
-          "x": 25,
-          "y": 144
-        },
-        {
-          "x": 0,
-          "y": 144
-        },
-        {
-          "x": 0,
-          "y": 70
-        },
-        {
-          "x": 7,
+          "x": 6,
           "y": 70
         }
       ],
       "color": "#2563eb",
       "fillColor": "#60a5fa"
+    },
+    {
+      "id": "triangle-2",
+      "name": "Red Goal",
+      "vertices": [
+        {
+          "x": 138,
+          "y": 119
+        },
+        {
+          "x": 119,
+          "y": 144
+        },
+        {
+          "x": 144,
+          "y": 144
+        },
+        {
+          "x": 144,
+          "y": 70
+        },
+        {
+          "x": 137,
+          "y": 70
+        }
+      ],
+      "color": "#dc2626",
+      "fillColor": "#ff6b6b"
     }
   ],
   "sequence": [
     {
       "kind": "path",
-      "lineId": "line-1zcnzkv32go"
+      "lineId": "line-20fpb5654pl"
     },
     {
       "kind": "path",
-      "lineId": "mk92epyz-4swzn4"
+      "lineId": "mkxa8xwq-5u1lho"
     },
     {
       "kind": "path",
-      "lineId": "mk92ogrg-wiri56"
+      "lineId": "mkxaab5e-3jiayz"
     },
     {
       "kind": "path",
-      "lineId": "mk92phsq-siusz9"
+      "lineId": "mkxaaup3-c1oxm7"
     },
     {
       "kind": "path",
-      "lineId": "mk92rjds-gox0v5"
+      "lineId": "mkxabub1-z6weu7"
     },
     {
       "kind": "path",
-      "lineId": "mk92tq09-xnk7n7"
+      "lineId": "mkxacfdt-nfud5r"
     },
     {
       "kind": "path",
-      "lineId": "mk94jgg7-rblm3z"
+      "lineId": "mkxadmdh-1y2zl5"
     },
     {
       "kind": "path",
-      "lineId": "mk94oi5b-cgqbjh"
-    },
-    {
-      "kind": "path",
-      "lineId": "mk9503gu-zljt26"
-    },
-    {
-      "kind": "path",
-      "lineId": "mk95fne2-19r46w"
-    },
-    {
-      "kind": "path",
-      "lineId": "mk95ilq9-13fh46"
-    },
-    {
-      "kind": "path",
-      "lineId": "mk95jgim-p4f69p"
+      "lineId": "mkxai7ou-2wm163"
     }
   ],
   "settings": {
@@ -346,8 +246,8 @@
     "yVelocity": 65,
     "aVelocity": 3.141592653589793,
     "kFriction": 0.1,
-    "rWidth": 16,
-    "rHeight": 16,
+    "rWidth": 17,
+    "rHeight": 17,
     "safetyMargin": 1,
     "maxVelocity": 40,
     "maxAcceleration": 30,
@@ -362,5 +262,5 @@
     "onionNextPointOnly": false
   },
   "version": "1.2.1",
-  "timestamp": "2026-01-27T04:00:28.520Z"
+  "timestamp": "2026-01-28T02:24:40.393Z"
 }

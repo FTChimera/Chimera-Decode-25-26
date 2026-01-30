@@ -10,13 +10,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
-@Autonomous(name = "Red Auto", group = "Pedro Auto", preselectTeleOp = "Pedro_TeleOp")
-public class RED_AUTO extends OpMode {
+@Autonomous(name = "Red Close Auto", group = "Pedro Auto", preselectTeleOp = "Pedro_TeleOp")
+public class Red_Close extends OpMode {
 
     private Follower follower;
     private Timer pathTimer;
     private PathState pathState;
-    private  AutoHelper autoHelper;
+    private AutoHelper autoHelper;
 
     public enum PathState {
         IDLE,
@@ -26,90 +26,71 @@ public class RED_AUTO extends OpMode {
         LAUNCH_1,
         SET2,
         INTAKE2,
-        EMPTY_GATE_0,
-        BACK_LAUNCH,
+        LAUNCHSET2,
         SET3,
         INTAKE3,
-        BACK_LAUNCH_1,
+        LAUNCH_2,
         END
     }
 
-    public final Pose startPose = new Pose(
+    public static final Pose startPose = new Pose(
             123.5,
             122.8,
-            Math.toRadians(37.5)
+            Math.toRadians(37)
     );
 
-    public final Pose launchPose = new Pose(
-            110,
-            110,
+    public static final Pose launchPose = new Pose(
+            108,
+            108,
             Math.toRadians(45)
     );
 
-    public final Pose set_1Pose = new Pose(
-            102,
+    public static final Pose set_1Pose = new Pose(
+            96,
             84,
             Math.toRadians(0)
     );
 
-    public final Pose intake1Pose = new Pose(
-            129,
+    public static final Pose intake1Pose = new Pose(
+            126,
             84,
             0
     );
 
-    public final Pose set2Pose = new Pose(
-            102,
+    public static final Pose set2Pose = new Pose(
+            96,
             60,
             Math.toRadians(0)
     );
 
-    public final Pose intake2Pose = new Pose(
-            125,
+    public static final Pose intake2Pose = new Pose(
+            126,
             60,
             0
     );
 
-    public final Pose empty_gate_0Pose = new Pose(
-            131,
-            72,
-            Math.toRadians(90)
-    );
-
-    public final Pose empty_gate_0ControlPoint1 = new Pose(
-            110,
-            72,
+    public static final Pose launchset2ControlPoint1 = new Pose(
+            108,
+            60,
             0
     );
 
-    public final Pose empty_gate_0ControlPoint2 = new Pose(
-            120,
-            72,
-            0
-    );
-
-    public final Pose back_launchPose = new Pose(
-            84,
-            12,
-            Math.toRadians(65.6)
-    );
-
-    public final Pose set3Pose = new Pose(
-            102,
+    public static final Pose set3Pose = new Pose(
+            96,
             36,
             Math.toRadians(0)
     );
 
-    public final Pose intake3Pose = new Pose(
-            132,
+    public static final Pose intake3Pose = new Pose(
+            126,
             36,
             0
     );
 
     public static final Pose endPose = new Pose(
-            84,
-            36,
-            Math.toRadians(65.6)
+            108,
+            72,
+            Math.toRadians(0)
     );
 
     public Path launchPath;
@@ -118,11 +99,10 @@ public class RED_AUTO extends OpMode {
     public Path launchPath_1;
     public Path set2Path;
     public Path intake2Path;
-    public Path empty_gate_0Path;
-    public Path back_launchPath;
+    public Path launchset2Path;
     public Path set3Path;
     public Path intake3Path;
-    public Path back_launchPath_1;
+    public Path launchPath_2;
     public Path endPath;
 
     public void buildPaths() {
@@ -174,32 +154,21 @@ public class RED_AUTO extends OpMode {
                 intake2Pose.getHeading()
         );
 
-        empty_gate_0Path = new Path(
+        launchset2Path = new Path(
                 new BezierCurve(intake2Pose,
-                        empty_gate_0ControlPoint1,
-                        empty_gate_0ControlPoint2,
-                        empty_gate_0Pose)
+                        launchset2ControlPoint1,
+                        launchPose)
         );
-        empty_gate_0Path.setLinearHeadingInterpolation(
+        launchset2Path.setLinearHeadingInterpolation(
                 intake2Pose.getHeading(),
-                empty_gate_0Pose.getHeading()
-        );
-
-        back_launchPath = new Path(
-                new BezierCurve(empty_gate_0Pose,
-                        empty_gate_0ControlPoint2,
-                        back_launchPose)
-        );
-        back_launchPath.setLinearHeadingInterpolation(
-                empty_gate_0Pose.getHeading(),
-                back_launchPose.getHeading()
+                launchPose.getHeading()
         );
 
         set3Path = new Path(
-                new BezierLine(back_launchPose, set3Pose)
+                new BezierLine(launchPose, set3Pose)
         );
         set3Path.setLinearHeadingInterpolation(
-                back_launchPose.getHeading(),
+                launchPose.getHeading(),
                 set3Pose.getHeading()
         );
 
@@ -211,19 +180,19 @@ public class RED_AUTO extends OpMode {
                 intake3Pose.getHeading()
         );
 
-        back_launchPath_1 = new Path(
-                new BezierLine(intake3Pose, back_launchPose)
+        launchPath_2 = new Path(
+                new BezierLine(intake3Pose, launchPose)
         );
-        back_launchPath_1.setLinearHeadingInterpolation(
+        launchPath_2.setLinearHeadingInterpolation(
                 intake3Pose.getHeading(),
-                back_launchPose.getHeading()
+                launchPose.getHeading()
         );
 
         endPath = new Path(
-                new BezierLine(back_launchPose, endPose)
+                new BezierLine(launchPose, endPose)
         );
         endPath.setLinearHeadingInterpolation(
-                back_launchPose.getHeading(),
+                launchPose.getHeading(),
                 endPose.getHeading()
         );
     }
@@ -234,10 +203,8 @@ public class RED_AUTO extends OpMode {
         switch (pathState) {
             case LAUNCH:
                 follower.followPath(launchPath);
-                if (autoHelper.runLauncherSequence(false, 3)) {
-                    setPathState(PathState.SET_1);
-                    break;
-                }
+                if (autoHelper.runLauncherSequence(false, 3)) setPathState(PathState.SET_1);
+                break;
 
             case SET_1:
                 follower.followPath(set_1Path);
@@ -253,10 +220,8 @@ public class RED_AUTO extends OpMode {
 
             case LAUNCH_1:
                 follower.followPath(launchPath_1);
-                if (autoHelper.runLauncherSequence(false, 3)) {
-                    setPathState(PathState.SET2);
-                    break;
-                }
+                if (autoHelper.runLauncherSequence(false, 3)) setPathState(PathState.SET2);
+                break;
 
             case SET2:
                 follower.followPath(set2Path);
@@ -267,20 +232,13 @@ public class RED_AUTO extends OpMode {
             case INTAKE2:
                 follower.followPath(intake2Path);
                 autoHelper.IntakeStop();
-                setPathState(PathState.EMPTY_GATE_0);
+                setPathState(PathState.LAUNCHSET2);
                 break;
 
-            case EMPTY_GATE_0:
-                follower.followPath(empty_gate_0Path);
-                setPathState(PathState.BACK_LAUNCH);
+            case LAUNCHSET2:
+                follower.followPath(launchset2Path);
+                if (autoHelper.runLauncherSequence(false, 3)) setPathState(PathState.SET3);
                 break;
-
-            case BACK_LAUNCH:
-                follower.followPath(back_launchPath);
-                if (autoHelper.runLauncherSequence(true, 3)) {
-                    setPathState(PathState.SET3);
-                    break;
-                }
 
             case SET3:
                 follower.followPath(set3Path);
@@ -291,15 +249,13 @@ public class RED_AUTO extends OpMode {
             case INTAKE3:
                 follower.followPath(intake3Path);
                 autoHelper.IntakeStop();
-                setPathState(PathState.BACK_LAUNCH_1);
+                setPathState(PathState.LAUNCH_2);
                 break;
 
-            case BACK_LAUNCH_1:
-                follower.followPath(back_launchPath_1);
-                if (autoHelper.runLauncherSequence(true, 3)) {
-                    setPathState(PathState.END);
-                    break;
-                }
+            case LAUNCH_2:
+                follower.followPath(launchPath_2);
+                if (autoHelper.runLauncherSequence(false, 3)) setPathState(PathState.END);
+                break;
 
             case END:
                 follower.followPath(endPath);
@@ -315,8 +271,8 @@ public class RED_AUTO extends OpMode {
 
     @Override
     public void init() {
-        autoHelper = new AutoHelper(hardwareMap);
         pathTimer = new Timer();
+        autoHelper = new AutoHelper(hardwareMap);
         follower = Constants.createFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);

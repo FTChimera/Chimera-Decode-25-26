@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode2.Systems;
 
+import static org.firstinspires.ftc.teamcode2.Systems.Consts.AllianceColor.BLUE;
+import static org.firstinspires.ftc.teamcode2.Systems.Consts.AllianceColor.RED;
+
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
@@ -7,8 +10,14 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 public class Consts {
     public static final double DRIVE_SCALAR = 1.0; // Scalar for drive power
     public static final double AUTO_ALIGNMENT_TURN_SCALAR = 0.03; // Scalar for turning in auto-alignment
+    // TUNE LL_PIDF VALUES FOR AUTO-ALIGNMENT
+    public static PIDFCoefficients LimelightAutoAlignmentTurning =
+        new PIDFCoefficients(
+                0.03, 0.0, 0.0, 0.5
+        );
+
     public static final double SERVO_UP_POSITION = 0.9;
-    public static final double SERVO_DOWN_POSITION = 0;
+    public static final double SERVO_DOWN_POSITION = 0.5; // Use CR Servo
     public static final double SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
     public static final double SLEEP_BEFORE_SECOND_ITERATION = 400;
     public static final double VELOCITY_TOLERANCE = 100;
@@ -28,6 +37,24 @@ public class Consts {
 
         public AllianceColor switchColors() {
             return this == RED ? BLUE : RED;
+        }
+    }
+    public enum Auto {
+        BLUE_CLOSE(BLUE),
+        BLUE_FAR(BLUE),
+        RED_CLOSE(RED),
+        RED_FAR(RED);
+
+        Auto(AllianceColor allianceColor) {
+
+        }
+        public Auto next() {
+            return values()[(this.ordinal() + 1) % values().length];
+        }
+        public AllianceColor getAllianceColor() {
+            return name().startsWith("BLUE")
+                    ? BLUE
+                    : RED;
         }
     }
     public static Pose RED_GOAL = new Pose(130.37, 127.64, Math.toRadians(45));

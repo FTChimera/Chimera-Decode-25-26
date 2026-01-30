@@ -10,8 +10,8 @@
     {
       "name": "LAUNCH",
       "endPoint": {
-        "x": 110,
-        "y": 110,
+        "x": 108,
+        "y": 108,
         "heading": "linear",
         "startDeg": 37.5,
         "endDeg": 45
@@ -27,7 +27,7 @@
     {
       "name": "SET_1",
       "endPoint": {
-        "x": 102,
+        "x": 96,
         "y": 84,
         "heading": "linear",
         "reverse": false,
@@ -62,8 +62,8 @@
       "id": "mk8wlsgb-gddv5z",
       "name": "LAUNCH",
       "endPoint": {
-        "x": 110,
-        "y": 110,
+        "x": 108,
+        "y": 108,
         "heading": "linear",
         "reverse": false,
         "startDeg": 0,
@@ -80,12 +80,13 @@
       "id": "mk8wnfqk-tz7hp8",
       "name": "SET2",
       "endPoint": {
-        "x": 102,
+        "x": 96,
         "y": 60,
         "heading": "linear",
         "reverse": false,
         "startDeg": 45,
-        "endDeg": 0
+        "endDeg": 0,
+        "locked": false
       },
       "controlPoints": [],
       "color": "#6A675B",
@@ -98,7 +99,7 @@
       "id": "mk8wug1d-tvm2q3",
       "name": "INTAKE2",
       "endPoint": {
-        "x": 125,
+        "x": 129,
         "y": 60,
         "heading": "tangential",
         "reverse": false
@@ -123,8 +124,8 @@
       },
       "controlPoints": [
         {
-          "x": 110,
-          "y": 72
+          "x": 108,
+          "y": 60
         },
         {
           "x": 120,
@@ -164,7 +165,7 @@
       "id": "mk8x58am-6h6o97",
       "name": "SET3",
       "endPoint": {
-        "x": 102,
+        "x": 96,
         "y": 36,
         "heading": "linear",
         "reverse": false,
@@ -182,7 +183,7 @@
       "id": "mk8xac90-2pd2eg",
       "name": "INTAKE3",
       "endPoint": {
-        "x": 132,
+        "x": 129,
         "y": 36,
         "heading": "tangential",
         "reverse": false
@@ -303,5 +304,5 @@
     "onionNextPointOnly": false
   },
   "version": "1.2.1",
-  "timestamp": "2026-01-14T00:43:27.990Z"
+  "timestamp": "2026-01-27T04:00:38.570Z"
 }
