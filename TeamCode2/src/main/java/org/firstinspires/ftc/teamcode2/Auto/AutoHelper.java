@@ -2,6 +2,10 @@ package org.firstinspires.ftc.teamcode2.Auto;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 
+import static org.firstinspires.ftc.teamcode2.Systems.Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
+import static org.firstinspires.ftc.teamcode2.Systems.Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+import static org.firstinspires.ftc.teamcode2.Systems.Consts.VELOCITY_TOLERANCE;
+
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -60,19 +64,14 @@ public class AutoHelper {
 
     // The boolean is to indicate whether the sequence was completed (false: continue, true: sequence done)
     public boolean runLauncherSequence(boolean back, int numBalls) {
+        double velocity = back? TARGET_VELOCITY_BACK_LAUNCH_ZONE : TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
         if (launchState == LaunchState.IDLE) {
-            // Find velocity based on back
-            if (back) {
-                launcher.setVelocity(Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE);
-                launcher.setVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
-            } else {
-                launcher.setVelocity(Consts.MIN_VELOCITY_FRONT_LAUNCH_ZONE);
-                launcher.setVelocity(Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
-            }
+            launcher.setVelocity(velocity - VELOCITY_TOLERANCE);
+            launcher.setVelocity(velocity);
             next();
             return false;
         } else if (launchState == LaunchState.SPINUP) {
-            if (launcher.getVelocity() >= Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - Consts.VELOCITY_TOLERANCE) {
+            if (launcher.getVelocity() >= velocity - VELOCITY_TOLERANCE) {
                 next();
                 isServoLaunching = false;
             }

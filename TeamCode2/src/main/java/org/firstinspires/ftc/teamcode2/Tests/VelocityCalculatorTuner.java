@@ -109,11 +109,11 @@ public class VelocityCalculatorTuner extends OpMode {
         if (oneGamepadControl) intake.setPower(gamepad1.x?1.0:0.0);
         else intake.setPower((Math.max(Math.min(gamepad2.left_stick_y *1.1,1),-1))); //Counteract imperfect intake power
         if (gamepad2.a || oneGamepadControl&&gamepad1.a) {
-            launcher.setVelocity(Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE);
+            launcher.setVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE - Consts.VELOCITY_TOLERANCE);
             launcher.setVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
         }
         if (gamepad2.y || oneGamepadControl&&gamepad1.y) {
-            launcher.setVelocity(Consts.MIN_VELOCITY_FRONT_LAUNCH_ZONE);
+            launcher.setVelocity(Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - Consts.VELOCITY_TOLERANCE);
             launcher.setVelocity(Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
         }
         if (gamepad2.b || oneGamepadControl&&gamepad1.b) {

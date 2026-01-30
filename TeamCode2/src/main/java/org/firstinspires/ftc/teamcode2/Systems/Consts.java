@@ -20,19 +20,15 @@ public class Consts {
     public static final double SERVO_DOWN_POSITION = 0.5; // Use CR Servo
     public static final double SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
     public static final double SLEEP_BEFORE_SECOND_ITERATION = 400;
-    public static final double VELOCITY_TOLERANCE = 100;
+    public static final double VELOCITY_TOLERANCE = 70;
     // 550 test for now. larger amounts will break the cardboard for now
     public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 550;// Set target velocity from back launch zone
     public static double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 550;// Set target velocity from front launch zone
-    public static double MIN_VELOCITY_BACK_LAUNCH_ZONE = 370;// Set target velocity from back launch zone
-    public static double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 370;// Set target velocity from back launch zone
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
-    public static int[] BALL_NUM_INTAKE_NEEDED = {3};
+    public static int[] BALL_NUM_INTAKE_NEEDED = {2,3};
     public static PIDFCoefficients LaunchPIDF = new PIDFCoefficients(
-            0,0,0,0
+            10,0,0,0
     );
-    // TODO Change Starting position. Temporarily set starting position to back launch
-    // zone, (x,y) = (72,0)
     public enum AllianceColor {
         BLUE, RED;
 

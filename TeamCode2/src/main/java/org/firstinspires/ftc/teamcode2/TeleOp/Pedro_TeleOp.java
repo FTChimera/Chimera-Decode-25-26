@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode2.TeleOp;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 
+import static org.firstinspires.ftc.teamcode2.Systems.Consts.STOP_VELOCITY;
+import static org.firstinspires.ftc.teamcode2.Systems.Consts.VELOCITY_TOLERANCE;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.Configurable;
@@ -208,17 +211,15 @@ public class Pedro_TeleOp extends OpMode {
         if (gamepad1.leftBumperWasPressed()) {
             // Run launcher
             if (!launcherOn) {
+                double velocity = IsBackLaunchZoneCloser() ?
+                        Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE : Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+                double min_velocity = velocity - VELOCITY_TOLERANCE;
                 // Set launcher velocity based on launch zone
-                if (IsBackLaunchZoneCloser()) {
-                    launcher.setVelocity(Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE);
-                    launcher.setVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
-                } else {
-                    launcher.setVelocity(Consts.MIN_VELOCITY_FRONT_LAUNCH_ZONE);
-                    launcher.setVelocity(Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
-                }
+                launcher.setVelocity(min_velocity);
+                launcher.setVelocity(velocity);
                 launcherOn = true;
             } else {
-                launcher.setVelocity(Consts.STOP_VELOCITY);
+                launcher.setVelocity(STOP_VELOCITY);
                 launcherOn = false;
             }
         }
@@ -231,9 +232,11 @@ public class Pedro_TeleOp extends OpMode {
 
         if (launchingState==LaunchingState.GOING_UP) {
             // This is the Fire logic.
-            // Wait until the launcher reaches past the Min velocity
-            if (launcher.getVelocity() >= Consts.MIN_VELOCITY_BACK_LAUNCH_ZONE && IsBackLaunchZoneCloser()
-            || launcher.getVelocity() >= Consts.MIN_VELOCITY_FRONT_LAUNCH_ZONE && !IsBackLaunchZoneCloser()) {
+            double velocity = IsBackLaunchZoneCloser() ?
+                    Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE : Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+            double min_velocity = velocity - VELOCITY_TOLERANCE;
+            // Wait until the launcher reaches past the velocity tolerance
+            if (launcher.getVelocity() >= min_velocity) {
                 pushServo.setPower(Consts.SERVO_UP_POSITION);
                 launchingState = LaunchingState.LAUNCHING;
                 Servo_timer.resetTimer();
