@@ -58,9 +58,7 @@ public class VelocityCalculator {
             return Double.NaN;
         }
         if (type == Type.POSE) {
-            double dx = goalPose().getX() - curPose.getX();
-            double dy = goalPose().getY() - curPose.getY();
-            double distance = Math.hypot(dx, dy);
+            double distance = getDistanceToGoal(curPose);
             if (distance <= shotTable[0][0]) {
                 return shotTable[0][1];
             } else if (distance >= shotTable[shotTable.length-1][0]) {
@@ -79,6 +77,13 @@ public class VelocityCalculator {
             }
         }
         return Double.NaN;
+    }
+
+    public double getDistanceToGoal(Pose pose) {
+        Pose goal = goalPose();
+        double dx = goal.getX() - pose.getX();
+        double dy = goal.getY() - pose.getY();
+        return Math.hypot(dx, dy);
     }
 
     public double[][] convertVelCalcDataToDoubleArray(java.util.List<VelocityCalcData> dataList) {
