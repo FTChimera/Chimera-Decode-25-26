@@ -223,6 +223,7 @@ public class Pedro_TeleOp extends OpMode {
 
         // Manual-stick override: if driver is giving significant rotation input, disable auto-align
         if (gamepad1.x && Math.abs(gamepad1.right_stick_x) <= 0.12) {
+            automatedDrive = true; // turning using pedro pathing.
             // Use auto align system with calculated dt
             autoAlignSystem.turnAutoAlign(dt);
         } else {
@@ -279,9 +280,9 @@ public class Pedro_TeleOp extends OpMode {
             Servo_timer.resetTimer();
         }
         // INCREASE/DECREASE LAUNCHER VELOCITY
-        if (gamepad1.right_stick_button) {
+        if (gamepad1.rightStickButtonWasPressed()) {
             launcher.setVelocity(launcher.getVelocity()+25);
-        } else if (gamepad1.left_stick_button) {
+        } else if (gamepad1.leftStickButtonWasPressed()) {
             launcher.setVelocity(launcher.getVelocity()-25);
         }
         // INTAKE CONTROL
