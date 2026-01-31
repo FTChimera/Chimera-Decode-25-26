@@ -270,6 +270,7 @@ public class VelocityCalculatorTuner extends OpMode {
         tuningData.clear();
     }
     
+    @SuppressLint("DefaultLocale")
     private String generateKotlinCode() {
         if (tuningData.size() < 2) return "Need more data points";
         
