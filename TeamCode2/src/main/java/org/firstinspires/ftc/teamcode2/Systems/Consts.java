@@ -11,7 +11,7 @@ public class Consts {
 
     public static double applyPolynomialToDriveInputs(double input) {
         double output = input;
-        output = output*output; // square for more control
+        output = output*Math.abs(output); // square for more control
         output = output*-1.0; // scalar (negate for pedro pathing)
         return output;
     }
