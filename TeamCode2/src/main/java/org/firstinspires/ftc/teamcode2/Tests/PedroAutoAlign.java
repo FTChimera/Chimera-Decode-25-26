@@ -15,7 +15,7 @@ public class PedroAutoAlign {
     double angle;
     public Consts.AllianceColor currentGoal;
 
-    public Follower follower;
+    private Follower follower;
     Path autoAlignmentPath;
     Pose GoalCoordinates;
 

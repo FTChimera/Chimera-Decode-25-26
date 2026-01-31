@@ -27,6 +27,7 @@ import org.firstinspires.ftc.teamcode2.Auto.Blue_Far;
 import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO_ARCHIVE;
 import org.firstinspires.ftc.teamcode2.Auto.Red_Close;
 import org.firstinspires.ftc.teamcode2.Auto.Red_Far;
+import org.firstinspires.ftc.teamcode2.Systems.AutoAlignSystem;
 import org.firstinspires.ftc.teamcode2.Systems.Consts;
 import org.firstinspires.ftc.teamcode2.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode2.Systems.PIDFController;
@@ -42,14 +43,11 @@ public class Pedro_TeleOp extends OpMode {
     * Make sure that every constant final variable is kept in Consts.java
     * FIGURE OUT HOW TO COMPLETE TELEOP
     */
-    private LimelightSystem limelight;
+    private LimelightSystem limelight; private AutoAlignSystem autoAlignSystem;
     private RGBIndicator rgbIndicator;
     private Follower follower;
     private Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;public Consts.Auto auto = Consts.Auto.RED_CLOSE;
-    private PIDFController ll_PIDF = new PIDFController(
-            Consts.LimelightAutoAlignmentTurning,
-            -1,1,10
-    );
+    // Removed redundant PID controller - now handled by AutoAlignSystem
     private boolean automatedDrive=false, launcherOn=false;
     private long lastTimeNs,nowNs;
     double dt;
@@ -109,6 +107,8 @@ public class Pedro_TeleOp extends OpMode {
 
     @Override
     public void start() {
+        autoAlignSystem = new AutoAlignSystem(allianceColor); // INITIALIZE AUTO ALIGN SYSTEM
+        autoAlignSystem.PedroSetUp(follower);
         // Limelight start with pipeline 0 for april tags
         limelight.start(0);
         // Follower stuff
@@ -184,28 +184,18 @@ public class Pedro_TeleOp extends OpMode {
             follower.startTeleopDrive();
             automatedDrive = false;
         }
-        // Auto Alignment using Limelight
+        // Auto Alignment using AutoAlignSystem
         nowNs = System.nanoTime();
         dt = (nowNs - lastTimeNs) / 1e9;
         lastTimeNs = nowNs;
 
-        // Manual-stick override: if driver is giving significant rotation input, reset PID
-        if (Math.abs(gamepad1.right_stick_x) > 0.12) {
-            ll_PIDF.reset();
-        }
-        if (gamepad1.x) {
-            double error = limelight.tx;
-            double rotationCmd = ll_PIDF.update(error, dt);
-            follower.setTeleOpDrive(
-                    0,
-                    0,
-                    rotationCmd, // Proportional control for turning
-                    true
-            );
+        // Manual-stick override: if driver is giving significant rotation input, disable auto-align
+        if (gamepad1.x && Math.abs(gamepad1.right_stick_x) <= 0.12) {
+            // Use auto align system with calculated dt
+            autoAlignSystem.turnAutoAlign(dt);
         } else {
-            // Not auto-aiming, ensure PID state cleared so integral doesn't accumulate unseen error
-            // (optional: only reset on button release if you want integral to persist)
-            ll_PIDF.reset();
+            // Not auto-aiming, ensure normal teleop drive continues
+            // No additional action needed as setTeleOpDrive handles this
         }
         // Launcher and Intake
         if (gamepad1.leftBumperWasPressed()) {

@@ -187,7 +187,7 @@ public class Red_Far extends OpMode {
 
             case LAUNCH_2:
                 follower.followPath(launchPath_2);
-                if (autoHelper.runLauncherSequence(true, 3)) setPathState(PathState.SET2);
+                if (autoHelper.runLauncherSequence(true, 3)) setPathState(PathState.END);
                 break;
 
             case END:
