@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
+@SuppressWarnings("SpellCheckingInspection")
 @Autonomous(name = "Red Far Auto", group = "Pedro Auto", preselectTeleOp = "Pedro_TeleOp")
 public class Red_Far extends OpMode {
 

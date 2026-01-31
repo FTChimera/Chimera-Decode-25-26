@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
+@SuppressWarnings("SpellCheckingInspection")
 @Disabled
 @Autonomous(name = "RED ARCHIVE", group = "Pedro Auto", preselectTeleOp = "Pedro_TeleOp")
 public class RED_AUTO_ARCHIVE extends OpMode {

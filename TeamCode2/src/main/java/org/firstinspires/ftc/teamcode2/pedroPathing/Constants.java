@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(0)

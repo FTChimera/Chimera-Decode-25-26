@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode2.Systems.Consts;
 import org.firstinspires.ftc.teamcode2.Systems.TeleOpDriveControl;
 import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
+@SuppressWarnings("SpellCheckingInspection")
 @TeleOp
 public class TeleOpTest extends LinearOpMode {
 

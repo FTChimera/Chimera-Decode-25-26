@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import static org.firstinspires.ftc.teamcode2.pedroPathing.Constants.driveConstants;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class TeleOpDriveControl {
     public DcMotor lf, rf, lb, rb;
 

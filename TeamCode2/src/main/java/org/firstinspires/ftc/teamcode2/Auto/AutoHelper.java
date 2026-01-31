@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import java.util.stream.IntStream;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class AutoHelper {
     public enum LaunchState {
         IDLE,

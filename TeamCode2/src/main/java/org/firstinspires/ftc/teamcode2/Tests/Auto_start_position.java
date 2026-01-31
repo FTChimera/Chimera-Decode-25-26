@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO_ARCHIVE;
 import org.firstinspires.ftc.teamcode2.Systems.Consts;
 import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
+@SuppressWarnings("SpellCheckingInspection")
 @Autonomous(name = "Auto Start Position Test", group = "Test")
 public class Auto_start_position extends OpMode {
     private Follower follower;

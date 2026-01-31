@@ -23,6 +23,7 @@ import com.pedropathing.util.Timer;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("SpellCheckingInspection")
 @TeleOp(name="Velocity Calc Tuner", group="Tests")
 public class VelocityCalculatorTuner extends OpMode {
     // Drive and hardware

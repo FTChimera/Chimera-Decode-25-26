@@ -9,6 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.List;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class LimelightSystem {
     public LimelightSystem(HardwareMap hwMap) {
         limelight1 = hwMap.get(Limelight3A.class, "limelight");

@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.List;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class AutoAlignSystem {
 
     // Test class of how this works
@@ -94,7 +95,7 @@ public class AutoAlignSystem {
 
         // Use Pedro's turn functionality for pure rotation
         // This is more efficient than creating a path with same coordinates
-        follower.turnToHeading(angle);
+        follower.turnTo(angle);
     }
 
     private void turnAutoAlignLimelight(double dt) {

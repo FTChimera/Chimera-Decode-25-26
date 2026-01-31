@@ -6,22 +6,32 @@ import static org.firstinspires.ftc.teamcode2.Systems.Consts.AllianceColor.RED;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-
+@SuppressWarnings("SpellCheckingInspection")
 public class Consts {
-    public static final double DRIVE_SCALAR = 1.0; // Scalar for drive power
+
+    public static double applyPolynomialToDriveInputs(double input) {
+        double output = input;
+        output = output*output; // square for more control
+        output = output*-1.0; // scalar (negate for pedro pathing)
+        return output;
+    }
     public static final double AUTO_ALIGNMENT_TURN_SCALAR = 0.03; // Scalar for turning in auto-alignment
     // TUNE LL_PIDF VALUES FOR AUTO-ALIGNMENT
     public static PIDFCoefficients LimelightAutoAlignmentTurning =
         new PIDFCoefficients(
                 0.03, 0.0, 0.0, 0.5
         );
+    public static final double LIMELIGHT_PIDF_MIN_OUTPUT = -1;
+    public static final double LIMELIGHT_PIDF_MAX_OUTPUT = 1;
+    public static final double LIMELIGHT_PIDF_INTEGRAL_LIMIT = 10;
+
 
     public static final double SERVO_UP_POSITION = 0.9;
-    public static final double SERVO_DOWN_POSITION = 0.5; // Use CR Servo
+    public static final double SERVO_DOWN_POSITION = 0; // Use CR Servo
     public static final double SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
     public static final double SLEEP_BEFORE_SECOND_ITERATION = 400;
     public static final double VELOCITY_TOLERANCE = 70;
-    // 550 test for now. larger amounts will break the cardboard for now
+    // 550 test for now. larger amounts will break the wood for now
     public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 550;// Set target velocity from back launch zone
     public static double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 550;// Set target velocity from front launch zone
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)

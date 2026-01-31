@@ -11,6 +11,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class LogitechSystem {
     long exposureTime = 10000; // in microseconds
     AprilTagProcessor tagProcessor;
