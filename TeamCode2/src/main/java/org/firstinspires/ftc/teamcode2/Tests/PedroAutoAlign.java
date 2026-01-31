@@ -1,9 +1,11 @@
-package org.firstinspires.ftc.teamcode2.Systems;
+package org.firstinspires.ftc.teamcode2.Tests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
+
+import org.firstinspires.ftc.teamcode2.Systems.Consts;
 
 public class PedroAutoAlign {
     // Test class of how this works
