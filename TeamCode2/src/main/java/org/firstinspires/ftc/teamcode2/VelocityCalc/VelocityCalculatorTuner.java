@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode2.VelocityCalc;
 
+import android.annotation.SuppressLint;
+import androidx.annotation.NonNull;
+
 import com.pedropathing.follower.Follower;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -36,6 +39,7 @@ public class VelocityCalculatorTuner extends OpMode {
     
     // Tuning data collection
     private List<TuningDataPoint> tuningData = new ArrayList<>();
+    private double targetVelocity;
     private boolean isRecording = false;
     private double currentDistance = 0;
     
@@ -55,6 +59,8 @@ public class VelocityCalculatorTuner extends OpMode {
             this.successful = success;
         }
         
+        @SuppressLint("DefaultLocale")
+        @NonNull
         @Override
         public String toString() {
             return String.format("%.1f to %.0f%s", distance, velocity, successful ? " ✓" : " ✗");
@@ -68,6 +74,11 @@ public class VelocityCalculatorTuner extends OpMode {
             timer = new Timer();
             timer.resetTimer();
         }
+    }
+
+    public void setVelocity(double vel) {
+        launcher.setVelocity(vel);
+        targetVelocity = vel;
     }
 
     @Override
@@ -128,13 +139,13 @@ public class VelocityCalculatorTuner extends OpMode {
         handleServoStateMachine();
         
         // Use old drive control
-        drive.move(gamepad1, 1.0);
+        drive.move(gamepad1, 0.8);
         
         // Tuning controls
-        if (gamepad1.start) {
+        if (gamepad1.dpad_right) {
             recordDataPoint();
         }
-        if (gamepad1.back) {
+        if (gamepad1.dpad_left) {
             clearTuningData();
         }
         
@@ -168,17 +179,17 @@ public class VelocityCalculatorTuner extends OpMode {
         else intake.setPower((Math.max(Math.min(gamepad2.left_stick_y * 1.1, 1), -1)));
         
         if (gamepad2.a || oneGamepadControl && gamepad1.a) {
-            launcher.setVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
+            setVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
         }
         if (gamepad2.y || oneGamepadControl && gamepad1.y) {
-            launcher.setVelocity(Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
+            setVelocity(Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
         }
         // Use calculated velocity
         if (gamepad1.right_trigger > 0.5) {
-            launcher.setVelocity(calcVelocity);
+            setVelocity(calcVelocity);
         }
         if (gamepad2.b || oneGamepadControl && gamepad1.b) {
-            launcher.setVelocity(Consts.STOP_VELOCITY);
+            setVelocity(Consts.STOP_VELOCITY);
         }
         
         // Servo control - trigger state machine
@@ -189,9 +200,9 @@ public class VelocityCalculatorTuner extends OpMode {
         
         // Fine tune launcher velocity
         if (gamepad2.dpad_up || oneGamepadControl && gamepad1.dpad_up) {
-            launcher.setVelocity(launcher.getVelocity() + 25);
+            setVelocity(launcher.getVelocity() + 25);
         } else if (gamepad2.dpad_down || oneGamepadControl && gamepad1.dpad_down) {
-            launcher.setVelocity(launcher.getVelocity() - 25);
+            setVelocity(launcher.getVelocity() - 25);
         }
         
         telemetry.update();
@@ -201,7 +212,7 @@ public class VelocityCalculatorTuner extends OpMode {
         switch (servoState) {
             case GOING_UP:
                 // Wait until the launcher reaches target velocity
-                if (launcher.getVelocity() >= launcher.getTargetVelocity() - Consts.VELOCITY_TOLERANCE) {
+                if (launcher.getVelocity() >= targetVelocity - Consts.VELOCITY_TOLERANCE) {
                     pushServo.setPower(Consts.SERVO_UP_POSITION);
                     servoState = ServoState.LAUNCHING;
                     pushServo_timer.resetTimer();
