@@ -41,8 +41,8 @@ public class Red_Close extends OpMode {
     );
 
     public static final Pose launchPose = new Pose(
-            108,
-            108,
+            114,
+            114,
             Math.toRadians(45)
     );
 

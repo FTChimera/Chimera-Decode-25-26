@@ -41,8 +41,8 @@ public class Blue_Close extends OpMode {
     );
 
     public static final Pose launchPose = new Pose(
-            36,
-            108,
+            30,
+            114,
             Math.toRadians(135)
     );
 
