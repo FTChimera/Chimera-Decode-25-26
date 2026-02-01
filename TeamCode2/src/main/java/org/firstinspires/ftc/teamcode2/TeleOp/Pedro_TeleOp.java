@@ -61,6 +61,7 @@ public class Pedro_TeleOp extends OpMode {
     * B - Stop automated drive
     * X - hold for auto alignment
     * Dpad-Up - reset IMU (do this when you are facing up)
+    * Dpad-Down - reset PP Robot Pose to goal start pose
     * Left Stick - Drive
     * Right Stick - turn
     * Left Stick Button - reduce velocity by 25
@@ -190,7 +191,10 @@ public class Pedro_TeleOp extends OpMode {
         // IMU Reset
         if (gamepad1.dpadUpWasPressed()) {
              follower.setPose(follower.getPose().setHeading(90)); // Facing Up
-         }
+        }
+        if (gamepad1.dpadDownWasPressed()) {
+             follower.setPose(allianceColor == Consts.AllianceColor.RED ? Red_Close.startPose : Blue_Close.startPose); // Reset to starting pose
+        }
 
         //Automated Path Following
         if (gamepad1.aWasPressed()) {
