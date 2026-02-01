@@ -40,12 +40,12 @@ public class Constants {
             .rightRearMotorName("brm")
             .leftRearMotorName("blm")
             .leftFrontMotorName("flm")
-            // intake and launcher are "intake" and "launcher". push servo (CR servo) is "push"
+            // intake and launcher are "intake" and "launcher". transfer is "transfer"
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
-            // intake is reversed
+            // intake is reversed, transfer is reversed
             .xVelocity(0*VELOCITY_SCALING_FACTOR)
             .yVelocity(0*VELOCITY_SCALING_FACTOR);
     public static Follower createFollower(HardwareMap hardwareMap) {
