@@ -6,6 +6,8 @@ import static org.firstinspires.ftc.teamcode2.Systems.Consts.TRANSFER_UP_POSITIO
 import static org.firstinspires.ftc.teamcode2.Systems.Consts.VELOCITY_TOLERANCE;
 import static org.firstinspires.ftc.teamcode2.Systems.Consts.applyPolynomialToDriveInputs;
 
+import androidx.annotation.NonNull;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.bylazar.configurables.annotations.Configurable;
@@ -77,7 +79,7 @@ public class Pedro_TeleOp extends OpMode {
     private Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;public Consts.Auto auto = Consts.Auto.RED_CLOSE;
     // Removed redundant PID controller - now handled by AutoAlignSystem
     private boolean automatedDrive=false, launcherOn=false, robotCentric=true;
-    private long lastTimeNs,nowNs;
+    private long lastTimeNs;
     double dt;
     private enum LaunchingState {
         IDLE,
@@ -243,7 +245,7 @@ public class Pedro_TeleOp extends OpMode {
             automatedDrive = false;
         }
         // Auto Alignment using AutoAlignSystem
-        nowNs = System.nanoTime();
+        long nowNs = System.nanoTime();
         dt = (nowNs - lastTimeNs) / 1e9;
         lastTimeNs = nowNs;
 
@@ -255,6 +257,7 @@ public class Pedro_TeleOp extends OpMode {
         } else {
             // Not auto-aiming, ensure normal teleop drive continues
             // No additional action needed as setTeleOpDrive handles this
+            autoAlignSystem.resetPIDController();
         }
 
         // Launcher and Intake
@@ -330,6 +333,7 @@ public class Pedro_TeleOp extends OpMode {
         if (launchingState != LaunchingState.IDLE) panelsTelemetry.addData("Servo Timer (ms)", transfer_timer.getElapsedTimeSeconds()*1000);
     }
     private Pose getRobotPoseFromCamera() {
+        // Thanks to team 20367 RMS Overdrive for this code snippet
         try {
             LLResult result = limelight.result;
             // Get robot pose from Limelight (in FTC coordinates)
@@ -439,5 +443,5 @@ public class Pedro_TeleOp extends OpMode {
                 getDistanceFromTwoPosesPP(follower.getPose(), frontLaunchZone);
     }
 
-    public double getDistanceFromTwoPosesPP(Pose pose1, Pose pose2) {return Math.hypot(pose2.getX() - pose1.getX(), pose2.getY() - pose1.getY());}
+    public double getDistanceFromTwoPosesPP(@NonNull Pose pose1, @NonNull Pose pose2) {return Math.hypot(pose2.getX() - pose1.getX(), pose2.getY() - pose1.getY());}
 }

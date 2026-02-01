@@ -1,13 +1,10 @@
 package org.firstinspires.ftc.teamcode2.Systems;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import java.util.List;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class AutoAlignSystem {
@@ -35,7 +32,9 @@ public class AutoAlignSystem {
     private DcMotor[] drivingMotors; // for auto alignment turning
 
     boolean areWeUsingPedro;
-
+    public void resetPIDController() {
+        limelightPIDF.reset();
+    }
 
     public AutoAlignSystem(Consts.AllianceColor allianceColor) {
         currentGoal = allianceColor;
