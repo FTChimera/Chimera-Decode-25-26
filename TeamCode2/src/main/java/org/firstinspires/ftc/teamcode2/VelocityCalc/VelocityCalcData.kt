@@ -7,7 +7,7 @@ data class VelocityCalcData(
 ) {
     companion object {
         // Key value pairs for distance to velocity
-        val VEL_MAP: Map<Double, Double> = mapOf(
+        private val VEL_MAP: Map<Double, Double> = mapOf(
             // TUNE
             0.1 to 12.3,
             1.2 to 0.01,

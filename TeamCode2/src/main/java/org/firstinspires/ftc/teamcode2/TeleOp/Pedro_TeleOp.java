@@ -24,6 +24,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
@@ -49,6 +50,24 @@ public class Pedro_TeleOp extends OpMode {
     * FIGURE OUT HOW TO COMPLETE TELEOP
     */
 
+    /*
+    * ------ DRIVER CONTROLS ------
+    * Right trigger - intake
+    * Left trigger - reverse intake
+    * Left bumper - run/stop launcher
+    * Right bumper - run CRServo to launch ball
+    * A - automated drive to launch zone (which ever is closest)
+    * Y - Pedro pathing automated parking aid
+    * B - Stop automated drive
+    * X - hold for auto alignment
+    * Dpad-Up - reset IMU (do this when you are facing up)
+    * Left Stick - Drive
+    * Right Stick - turn
+    * Left Stick Button - reduce velocity by 25
+    * Right Stick Button - increase velocity by 25
+    * ---------------------------------------------------
+    */
+
     // set up bulk reading on sensors
     private List<LynxModule> allHubs;
     private LimelightSystem limelight; private AutoAlignSystem autoAlignSystem;
@@ -64,7 +83,8 @@ public class Pedro_TeleOp extends OpMode {
         GOING_UP,
         LAUNCHING,
         GOING_DOWN
-    } private LaunchingState launchingState = LaunchingState.IDLE;
+    }
+    private LaunchingState launchingState = LaunchingState.IDLE;
     protected MultipleTelemetry telemetryM;
     private TelemetryManager panelsTelemetry;
     public Pose startingPose;
@@ -93,6 +113,7 @@ public class Pedro_TeleOp extends OpMode {
         launcher = hardwareMap.get(DcMotorEx.class, "launcher");
         intake = hardwareMap.dcMotor.get("intake");
 
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
         launcher.setZeroPowerBehavior(FLOAT);
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.LaunchPIDF);
         pushServo.setPower(Consts.SERVO_DOWN_POSITION);
@@ -286,7 +307,8 @@ public class Pedro_TeleOp extends OpMode {
             launcher.setVelocity(launcher.getVelocity()-25);
         }
         // INTAKE CONTROL
-        intake.setPower(Math.max(Math.min(gamepad1.left_trigger - gamepad1.right_trigger *1.1,1),-1)); //Counteract imperfect intake power
+        intake.setPower(Math.max(Math.min(gamepad1.right_trigger - gamepad1.left_trigger *1.1,1),-1)); //Counteract imperfect intake power
+
         panelsTelemetry.addData("Angle (in degrees)", limelight.tx); // LLScore is negative/positive
         panelsTelemetry.addData("Launcher Velocity", launcher.getVelocity());
         panelsTelemetry.addData("Servo data", launchingState);

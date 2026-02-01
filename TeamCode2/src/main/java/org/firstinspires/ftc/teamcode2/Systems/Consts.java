@@ -12,10 +12,9 @@ public class Consts {
     public static double applyPolynomialToDriveInputs(double input) {
         double output = input;
         output = output*Math.abs(output); // square for more control
-        output = output*-1.0; // scalar (negate for pedro pathing)
+        output = output*-0.8; // scalar (negate for pedro pathing driving)
         return output;
     }
-    public static final double AUTO_ALIGNMENT_TURN_SCALAR = 0.03; // Scalar for turning in auto-alignment
     // TUNE LL_PIDF VALUES FOR AUTO-ALIGNMENT
     public static PIDFCoefficients LimelightAutoAlignmentTurning =
         new PIDFCoefficients(
