@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode2.Systems.TeleOpDriveControl;
 import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
 @SuppressWarnings("SpellCheckingInspection")
-@TeleOp
+@TeleOp(name="TeleOpTest", group="Tests")
 public class TeleOpTest extends LinearOpMode {
 
     @Override
