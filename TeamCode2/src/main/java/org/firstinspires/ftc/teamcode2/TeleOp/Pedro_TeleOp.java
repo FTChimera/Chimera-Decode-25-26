@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode2.TeleOp;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 
 import static org.firstinspires.ftc.teamcode2.Systems.Consts.STOP_VELOCITY;
+import static org.firstinspires.ftc.teamcode2.Systems.Consts.TRANSFER_UP_POSITION;
 import static org.firstinspires.ftc.teamcode2.Systems.Consts.VELOCITY_TOLERANCE;
 import static org.firstinspires.ftc.teamcode2.Systems.Consts.applyPolynomialToDriveInputs;
 
@@ -79,8 +80,9 @@ public class Pedro_TeleOp extends OpMode {
     double dt;
     private enum LaunchingState {
         IDLE,
-        GOING_UP,
-        LAUNCHING,
+        LAUNCHER_GOING_UP,
+        TRANSFER_GOING_UP,
+        INTAKE,
         GOING_DOWN
     }
     private LaunchingState launchingState = LaunchingState.IDLE;
@@ -267,33 +269,40 @@ public class Pedro_TeleOp extends OpMode {
                 launcherOn = false;
             }
         }
-        // ALL SERVO LAUNCHING LOGIC
+        // ALL BALL LAUNCHING LOGIC - LAUNCHER THEN INTAKE THEN TRANSFER
         if (gamepad1.right_bumper && launchingState==LaunchingState.IDLE) {
             // In IDLE, we don't do anything
-            launchingState = LaunchingState.GOING_UP;
+            launchingState = LaunchingState.LAUNCHER_GOING_UP;
             transfer_timer.resetTimer();
         }
 
-        if (launchingState==LaunchingState.GOING_UP) {
+        if (launchingState==LaunchingState.LAUNCHER_GOING_UP) {
             // This is the Fire logic.
             double velocity = IsBackLaunchZoneCloser() ?
                     Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE : Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
             double min_velocity = velocity - VELOCITY_TOLERANCE;
             // Wait until the launcher reaches past the velocity tolerance
             if (launcher.getVelocity() >= min_velocity) {
-                transfer.setPower(Consts.TRANSFER_UP_POSITION);
-                launchingState = LaunchingState.LAUNCHING;
+                transfer.setPower(TRANSFER_UP_POSITION);
+                launchingState = LaunchingState.TRANSFER_GOING_UP;
                 transfer_timer.resetTimer();
             }
 
         }
-        if (launchingState==LaunchingState.LAUNCHING) {
+        if (launchingState==LaunchingState.TRANSFER_GOING_UP) {
             if (transfer_timer.getElapsedTimeSeconds()/1000 >= Consts.SLEEP_BEFORE_TRANSFER_RESET) {
+                launchingState = LaunchingState.INTAKE;
+                transfer_timer.resetTimer();
+            }
+        }
+
+        if (launchingState==LaunchingState.INTAKE) {
+            intake.setPower(1);
+            if (transfer_timer.getElapsedTimeSeconds()/1000 >= Consts.SLEEP_BEFORE_INTAKE_RESET_LAUNCHING) {
                 launchingState = LaunchingState.GOING_DOWN;
                 transfer_timer.resetTimer();
             }
         }
-
         if (launchingState==LaunchingState.GOING_DOWN) {
             transfer.setPower(Consts.TRANSFER_DOWN_POSITION);
             launchingState = LaunchingState.IDLE;
@@ -306,8 +315,11 @@ public class Pedro_TeleOp extends OpMode {
             launcher.setVelocity(launcher.getVelocity()-25);
         }
         // INTAKE CONTROL
-        intake.setPower(Math.max(Math.min(gamepad1.right_trigger - gamepad1.left_trigger *1.1,1),-1)); //Counteract imperfect intake power
-
+        if (!(launchingState == LaunchingState.GOING_DOWN)) {
+            intake.setPower(Math.max(Math.min(
+                    gamepad1.right_trigger - gamepad1.left_trigger * 1.1, 1
+            ), -1)); //Counteract imperfect intake power
+        }
         panelsTelemetry.addData("Angle (in degrees)", limelight.tx); // LLScore is negative/positive
         panelsTelemetry.addData("Launcher Velocity", launcher.getVelocity());
         panelsTelemetry.addData("Servo data", launchingState);
