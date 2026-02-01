@@ -20,7 +20,7 @@ public class TeleOpTest extends LinearOpMode {
         TeleOpDriveControl driveControl = new TeleOpDriveControl(hardwareMap);
         DcMotor intake = hardwareMap.dcMotor.get("intake");
         DcMotorEx launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        CRServo servo = hardwareMap.crservo.get("push");
+        //CRServo servo = hardwareMap.crservo.get("push");
 
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -45,9 +45,9 @@ public class TeleOpTest extends LinearOpMode {
             }
 
             if (gamepad1.left_bumper) {
-                servo.setPower(Consts.SERVO_UP_POSITION);
+               // servo.setPower(Consts.TRANSFER_UP_POSITION);
             } else {
-                servo.setPower(Consts.SERVO_DOWN_POSITION);
+                //servo.setPower(Consts.TRANSFER_DOWN_POSITION);
             }
         }
     }

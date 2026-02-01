@@ -102,7 +102,7 @@ public class VelocityCalculatorTuner extends OpMode {
         // SET DIRECTION FOR MOTORS
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.LaunchPIDF);
-        pushServo.setPower(Consts.SERVO_DOWN_POSITION);
+        pushServo.setPower(Consts.TRANSFER_DOWN_POSITION);
     }
 
     @Override
@@ -140,7 +140,7 @@ public class VelocityCalculatorTuner extends OpMode {
         handleServoStateMachine();
         
         // Use old drive control
-        drive.move(gamepad1, 0.8);
+        drive.move(gamepad1);
         
         // Tuning controls
         if (gamepad1.dpad_right) {
@@ -214,25 +214,25 @@ public class VelocityCalculatorTuner extends OpMode {
             case GOING_UP:
                 // Wait until the launcher reaches target velocity
                 if (launcher.getVelocity() >= targetVelocity - Consts.VELOCITY_TOLERANCE) {
-                    pushServo.setPower(Consts.SERVO_UP_POSITION);
+                    pushServo.setPower(Consts.TRANSFER_UP_POSITION);
                     servoState = ServoState.LAUNCHING;
                     pushServo_timer.resetTimer();
                 }
                 break;
             case LAUNCHING:
-                if (pushServo_timer.getElapsedTimeSeconds() >= Consts.SLEEP_BEFORE_RESET_SERVO_POSITION / 1000.0) {
+                if (pushServo_timer.getElapsedTimeSeconds() >= Consts.SLEEP_BEFORE_TRANSFER_RESET / 1000.0) {
                     servoState = ServoState.GOING_DOWN;
                     pushServo_timer.resetTimer();
                 }
                 break;
             case GOING_DOWN:
-                pushServo.setPower(Consts.SERVO_DOWN_POSITION);
+                pushServo.setPower(Consts.TRANSFER_DOWN_POSITION);
                 servoState = ServoState.IDLE;
                 pushServo_timer.resetTimer();
                 break;
             case IDLE:
             default:
-                pushServo.setPower(Consts.SERVO_DOWN_POSITION);
+                pushServo.setPower(Consts.TRANSFER_DOWN_POSITION);
                 break;
         }
     }

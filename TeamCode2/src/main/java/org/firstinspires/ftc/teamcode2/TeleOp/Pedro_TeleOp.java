@@ -21,7 +21,6 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -88,8 +87,8 @@ public class Pedro_TeleOp extends OpMode {
     protected MultipleTelemetry telemetryM;
     private TelemetryManager panelsTelemetry;
     public Pose startingPose;
-    DcMotorEx launcher; DcMotor intake; CRServo pushServo;
-    Timer Servo_timer;
+    DcMotorEx launcher; DcMotor intake, transfer;
+    Timer transfer_timer;
 
     @Override
     public void init() {
@@ -101,8 +100,8 @@ public class Pedro_TeleOp extends OpMode {
 
         limelight = new LimelightSystem(hardwareMap);
         rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
-        pushServo = hardwareMap.get(CRServo.class, "push");
-        Servo_timer = new Timer();
+        transfer = hardwareMap.get(DcMotor.class, "transfer");
+        transfer_timer = new Timer();
         follower = Constants.createFollower(hardwareMap);
         follower.update();
         telemetryM = new MultipleTelemetry(
@@ -116,7 +115,7 @@ public class Pedro_TeleOp extends OpMode {
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
         launcher.setZeroPowerBehavior(FLOAT);
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.LaunchPIDF);
-        pushServo.setPower(Consts.SERVO_DOWN_POSITION);
+        transfer.setPower(Consts.TRANSFER_DOWN_POSITION);
     }
     @Override
     public void init_loop() {
@@ -272,7 +271,7 @@ public class Pedro_TeleOp extends OpMode {
         if (gamepad1.right_bumper && launchingState==LaunchingState.IDLE) {
             // In IDLE, we don't do anything
             launchingState = LaunchingState.GOING_UP;
-            Servo_timer.resetTimer();
+            transfer_timer.resetTimer();
         }
 
         if (launchingState==LaunchingState.GOING_UP) {
@@ -282,23 +281,23 @@ public class Pedro_TeleOp extends OpMode {
             double min_velocity = velocity - VELOCITY_TOLERANCE;
             // Wait until the launcher reaches past the velocity tolerance
             if (launcher.getVelocity() >= min_velocity) {
-                pushServo.setPower(Consts.SERVO_UP_POSITION);
+                transfer.setPower(Consts.TRANSFER_UP_POSITION);
                 launchingState = LaunchingState.LAUNCHING;
-                Servo_timer.resetTimer();
+                transfer_timer.resetTimer();
             }
 
         }
         if (launchingState==LaunchingState.LAUNCHING) {
-            if (Servo_timer.getElapsedTimeSeconds()/1000 >= Consts.SLEEP_BEFORE_RESET_SERVO_POSITION) {
+            if (transfer_timer.getElapsedTimeSeconds()/1000 >= Consts.SLEEP_BEFORE_TRANSFER_RESET) {
                 launchingState = LaunchingState.GOING_DOWN;
-                Servo_timer.resetTimer();
+                transfer_timer.resetTimer();
             }
         }
 
         if (launchingState==LaunchingState.GOING_DOWN) {
-            pushServo.setPower(Consts.SERVO_DOWN_POSITION);
+            transfer.setPower(Consts.TRANSFER_DOWN_POSITION);
             launchingState = LaunchingState.IDLE;
-            Servo_timer.resetTimer();
+            transfer_timer.resetTimer();
         }
         // INCREASE/DECREASE LAUNCHER VELOCITY
         if (gamepad1.rightStickButtonWasPressed()) {
@@ -312,7 +311,7 @@ public class Pedro_TeleOp extends OpMode {
         panelsTelemetry.addData("Angle (in degrees)", limelight.tx); // LLScore is negative/positive
         panelsTelemetry.addData("Launcher Velocity", launcher.getVelocity());
         panelsTelemetry.addData("Servo data", launchingState);
-        if (launchingState != LaunchingState.IDLE) panelsTelemetry.addData("Servo Timer (ms)", Servo_timer.getElapsedTimeSeconds()/1000);
+        if (launchingState != LaunchingState.IDLE) panelsTelemetry.addData("Servo Timer (ms)", transfer_timer.getElapsedTimeSeconds()/1000);
     }
     private Pose getRobotPoseFromCamera() {
         try {

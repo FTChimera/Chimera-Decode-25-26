@@ -13,7 +13,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode2.Systems.Consts;
 
 import com.pedropathing.util.Timer;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import java.util.stream.IntStream;
 
@@ -89,13 +88,13 @@ public class AutoHelper {
                     }
                     if (ballLaunchTimer.getElapsedTimeSeconds()/1000 >= Consts.SLEEP_BEFORE_SECOND_ITERATION) {
                         IntakeStop();
-                        pushServo.setPower(Consts.SERVO_UP_POSITION);
+                        pushServo.setPower(Consts.TRANSFER_UP_POSITION);
                         isServoLaunching = true;
                         ballLaunchTimer.resetTimer();
                     }
                 } else {
-                    if (ballLaunchTimer.getElapsedTimeSeconds()/1000 >= Consts.SLEEP_BEFORE_RESET_SERVO_POSITION) {
-                        pushServo.setPower(Consts.SERVO_DOWN_POSITION);
+                    if (ballLaunchTimer.getElapsedTimeSeconds()/1000 >= Consts.SLEEP_BEFORE_TRANSFER_RESET) {
+                        pushServo.setPower(Consts.TRANSFER_DOWN_POSITION);
                         iterations++;
                         isServoLaunching = false;
                         ballLaunchTimer.resetTimer();

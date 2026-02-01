@@ -25,9 +25,9 @@ public class Consts {
     public static final double LIMELIGHT_PIDF_INTEGRAL_LIMIT = 10;
 
 
-    public static final double SERVO_UP_POSITION = 0.9;
-    public static final double SERVO_DOWN_POSITION = 0; // Use CR Servo
-    public static final double SLEEP_BEFORE_RESET_SERVO_POSITION = 600;
+    public static final double TRANSFER_UP_POSITION = 0.9;
+    public static final double TRANSFER_DOWN_POSITION = 0;
+    public static final double SLEEP_BEFORE_TRANSFER_RESET = 1020;
     public static final double SLEEP_BEFORE_SECOND_ITERATION = 400;
     public static final double VELOCITY_TOLERANCE = 70;
     // 550 test for now. larger amounts will break the wood for now
@@ -36,7 +36,7 @@ public class Consts {
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     public static int[] BALL_NUM_INTAKE_NEEDED = {2,3};
     public static PIDFCoefficients LaunchPIDF = new PIDFCoefficients(
-            10,0,0,0
+            304.7, 0.7, 1.57, 7
     );
     public enum AllianceColor {
         BLUE, RED;
