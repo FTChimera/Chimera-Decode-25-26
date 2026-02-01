@@ -28,9 +28,7 @@ public class TeleOpTest extends LinearOpMode {
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.LaunchPIDF);
         waitForStart();
         while (opModeIsActive()) {
-            driveControl.move(
-                    gamepad1, 0.7
-            );
+            driveControl.move(gamepad1);
 
             double intakeMove =
                     gamepad1.right_trigger - gamepad1.left_trigger;

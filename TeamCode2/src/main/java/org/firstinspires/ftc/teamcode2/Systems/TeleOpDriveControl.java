@@ -22,12 +22,13 @@ public class TeleOpDriveControl {
     }
 
 
-    public void move(Gamepad gamepad, double scalar) {
-        double y = -gamepad.left_stick_y; // Forward/Backward
-        double x = gamepad.left_stick_x*1.1;  // Left/Right counteract imperfect strafing
-        double rx = gamepad.right_stick_x; // Rotation
+    public void move(Gamepad gamepad) {
+        // applyPolynomialToDriveInputs assumes pedro drive - so we negate some of them.
+        double y = Consts.applyPolynomialToDriveInputs(gamepad.left_stick_y); // Forward/Backward
+        double x = -Consts.applyPolynomialToDriveInputs(gamepad.left_stick_x*1.1);  // Left/Right counteract imperfect strafing
+        double rx = -Consts.applyPolynomialToDriveInputs(gamepad.right_stick_x); // Rotation
 
-        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1) / scalar;
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
         double frontLeftPower = (y + x + rx) / denominator;
         double backLeftPower = (y - x + rx) / denominator;
         double frontRightPower = (y - x - rx) / denominator;
