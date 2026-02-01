@@ -27,9 +27,8 @@ public class Consts {
 
     public static final double TRANSFER_UP_POSITION = 0.9;
     public static final double TRANSFER_DOWN_POSITION = 0;
-    public static final double SLEEP_BEFORE_TRANSFER_RESET = 1020;
+    public static final double SLEEP_BEFORE_INTAKE_START = 1020;
     public static final double SLEEP_BEFORE_INTAKE_RESET_LAUNCHING = 1600;
-    public static final double SLEEP_BEFORE_SECOND_ITERATION = 400;
     public static final double VELOCITY_TOLERANCE = 70;
     // 550 test for now. larger amounts will break the wood for now
     public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 550;// Set target velocity from back launch zone

@@ -290,7 +290,7 @@ public class Pedro_TeleOp extends OpMode {
 
         }
         if (launchingState==LaunchingState.TRANSFER_GOING_UP) {
-            if (transfer_timer.getElapsedTimeSeconds()/1000 >= Consts.SLEEP_BEFORE_TRANSFER_RESET) {
+            if (transfer_timer.getElapsedTimeSeconds()*1000 >= Consts.SLEEP_BEFORE_INTAKE_START) {
                 launchingState = LaunchingState.INTAKE;
                 transfer_timer.resetTimer();
             }
@@ -298,7 +298,7 @@ public class Pedro_TeleOp extends OpMode {
 
         if (launchingState==LaunchingState.INTAKE) {
             intake.setPower(1);
-            if (transfer_timer.getElapsedTimeSeconds()/1000 >= Consts.SLEEP_BEFORE_INTAKE_RESET_LAUNCHING) {
+            if (transfer_timer.getElapsedTimeSeconds()*1000 >= Consts.SLEEP_BEFORE_INTAKE_RESET_LAUNCHING) {
                 launchingState = LaunchingState.GOING_DOWN;
                 transfer_timer.resetTimer();
             }
@@ -323,7 +323,7 @@ public class Pedro_TeleOp extends OpMode {
         panelsTelemetry.addData("Angle (in degrees)", limelight.tx); // LLScore is negative/positive
         panelsTelemetry.addData("Launcher Velocity", launcher.getVelocity());
         panelsTelemetry.addData("Servo data", launchingState);
-        if (launchingState != LaunchingState.IDLE) panelsTelemetry.addData("Servo Timer (ms)", transfer_timer.getElapsedTimeSeconds()/1000);
+        if (launchingState != LaunchingState.IDLE) panelsTelemetry.addData("Servo Timer (ms)", transfer_timer.getElapsedTimeSeconds()*1000);
     }
     private Pose getRobotPoseFromCamera() {
         try {

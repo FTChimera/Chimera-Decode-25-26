@@ -220,7 +220,7 @@ public class VelocityCalculatorTuner extends OpMode {
                 }
                 break;
             case LAUNCHING:
-                if (pushServo_timer.getElapsedTimeSeconds() >= Consts.SLEEP_BEFORE_TRANSFER_RESET / 1000.0) {
+                if (pushServo_timer.getElapsedTimeSeconds() >= Consts.SLEEP_BEFORE_INTAKE_START / 1000.0) {
                     servoState = ServoState.GOING_DOWN;
                     pushServo_timer.resetTimer();
                 }
