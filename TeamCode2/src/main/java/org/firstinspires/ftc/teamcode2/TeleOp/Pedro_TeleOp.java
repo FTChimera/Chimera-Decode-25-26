@@ -223,7 +223,12 @@ public class Pedro_TeleOp extends OpMode {
             // First, find which heading is closer.
             double heading = Math.toDegrees(follower.getHeading());
             heading = heading / 90; // make values we want integers and the rest are floating-point numbers
-            heading = Math.round(heading); // round to nearest integer
+            // round to nearest integer
+            if (heading - Math.floor(heading) < 0.5) {
+                heading = Math.floor(heading);
+            } else {
+                heading = Math.ceil(heading);
+            }
             heading = heading * 90; // go back to before
             heading = heading % 360; // Apply modulo operator to convert 360 to 0.
             // Follow path to the parking zone
