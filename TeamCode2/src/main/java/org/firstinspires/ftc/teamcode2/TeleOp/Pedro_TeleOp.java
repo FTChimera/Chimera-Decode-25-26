@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.teamcode2.TeleOp;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 
-import static org.firstinspires.ftc.teamcode2.Systems.Consts.STOP_VELOCITY;
-import static org.firstinspires.ftc.teamcode2.Systems.Consts.TRANSFER_UP_POSITION;
-import static org.firstinspires.ftc.teamcode2.Systems.Consts.VELOCITY_TOLERANCE;
-import static org.firstinspires.ftc.teamcode2.Systems.Consts.applyPolynomialToDriveInputs;
+import static org.firstinspires.ftc.teamcode2.Systems.Constants.STOP_VELOCITY;
+import static org.firstinspires.ftc.teamcode2.Systems.Constants.TRANSFER_UP_POSITION;
+import static org.firstinspires.ftc.teamcode2.Systems.Constants.VELOCITY_TOLERANCE;
+import static org.firstinspires.ftc.teamcode2.Systems.Constants.applyPolynomialToDriveInputs;
 
 import androidx.annotation.NonNull;
 
@@ -35,10 +35,9 @@ import org.firstinspires.ftc.teamcode2.Auto.Blue_Far;
 import org.firstinspires.ftc.teamcode2.Auto.Red_Close;
 import org.firstinspires.ftc.teamcode2.Auto.Red_Far;
 import org.firstinspires.ftc.teamcode2.Systems.AutoAlignSystem;
-import org.firstinspires.ftc.teamcode2.Systems.Consts;
+import org.firstinspires.ftc.teamcode2.Systems.Constants;
 import org.firstinspires.ftc.teamcode2.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode2.Systems.RGBIndicator;
-import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
 import java.util.List;
 
@@ -76,7 +75,7 @@ public class Pedro_TeleOp extends OpMode {
     private LimelightSystem limelight; private AutoAlignSystem autoAlignSystem;
     private RGBIndicator rgbIndicator;
     private Follower follower;
-    private Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;public Consts.Auto auto = Consts.Auto.RED_CLOSE;
+    private Constants.AllianceColor allianceColor = Constants.AllianceColor.RED;public Constants.Auto auto = Constants.Auto.RED_CLOSE;
     // Removed redundant PID controller - now handled by AutoAlignSystem
     private boolean automatedDrive=false, launcherOn=false, robotCentric=true;
     private long lastTimeNs;
@@ -107,7 +106,7 @@ public class Pedro_TeleOp extends OpMode {
         rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
         transfer = hardwareMap.get(DcMotor.class, "transfer");
         transfer_timer = new Timer();
-        follower = Constants.createFollower(hardwareMap);
+        follower = Constants.createPedroFollower(hardwareMap);
         follower.update();
         telemetryM = new MultipleTelemetry(
                 telemetry,
@@ -119,8 +118,8 @@ public class Pedro_TeleOp extends OpMode {
 
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
         launcher.setZeroPowerBehavior(FLOAT);
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.LaunchPIDF);
-        transfer.setPower(Consts.TRANSFER_DOWN_POSITION);
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Constants.LaunchPIDF);
+        transfer.setPower(Constants.TRANSFER_DOWN_POSITION);
     }
     @Override
     public void init_loop() {
@@ -134,13 +133,13 @@ public class Pedro_TeleOp extends OpMode {
             robotCentric = !robotCentric;
         }
         // Set starting pose based on alliance color
-        if (auto == Consts.Auto.RED_CLOSE) {
+        if (auto == Constants.Auto.RED_CLOSE) {
             startingPose = Red_Close.endPose; // Auto end pose is TeleOp start pose
-        } else if (auto == Consts.Auto.BLUE_CLOSE) {
+        } else if (auto == Constants.Auto.BLUE_CLOSE) {
             startingPose = Blue_Close.endPose;
-        } else if (auto == Consts.Auto.BLUE_FAR) {
+        } else if (auto == Constants.Auto.BLUE_FAR) {
             startingPose = Blue_Far.endPose;
-        } else if (auto == Consts.Auto.RED_FAR) {
+        } else if (auto == Constants.Auto.RED_FAR) {
             startingPose = Red_Far.endPose;
         }
 
@@ -195,16 +194,16 @@ public class Pedro_TeleOp extends OpMode {
              follower.setPose(follower.getPose().setHeading(90)); // Facing Up
         }
         if (gamepad1.dpadDownWasPressed()) {
-             follower.setPose(allianceColor == Consts.AllianceColor.RED ? Red_Close.startPose : Blue_Close.startPose); // Reset to starting pose
+             follower.setPose(allianceColor == Constants.AllianceColor.RED ? Red_Close.startPose : Blue_Close.startPose); // Reset to starting pose
         }
 
         //Automated Path Following
         if (gamepad1.aWasPressed()) {
             // Find which launch zone is closer
-            Pose backLaunchZone = allianceColor == Consts.AllianceColor.RED ?
-                    Consts.RED_SHOOTING_BACK : Consts.BLUE_SHOOTING_BACK;
-            Pose frontLaunchZone = allianceColor == Consts.AllianceColor.RED ?
-                    Consts.RED_SHOOTING_FRONT : Consts.BLUE_SHOOTING_FRONT;
+            Pose backLaunchZone = allianceColor == Constants.AllianceColor.RED ?
+                    Constants.RED_SHOOTING_BACK : Constants.BLUE_SHOOTING_BACK;
+            Pose frontLaunchZone = allianceColor == Constants.AllianceColor.RED ?
+                    Constants.RED_SHOOTING_FRONT : Constants.BLUE_SHOOTING_FRONT;
             boolean shootFromBack = IsBackLaunchZoneCloser();
             // Follow path to the closer launch zone
             Path pathToLaunchZone = new Path(
@@ -232,8 +231,8 @@ public class Pedro_TeleOp extends OpMode {
             heading = heading * 90; // go back to before
             heading = heading % 360; // Apply modulo operator to convert 360 to 0.
             // Follow path to the parking zone
-            Pose parkingPose = allianceColor == Consts.AllianceColor.RED ?
-                    Consts.RED_PARKING : Consts.BLUE_PARKING;
+            Pose parkingPose = allianceColor == Constants.AllianceColor.RED ?
+                    Constants.RED_PARKING : Constants.BLUE_PARKING;
             Path pathToParking = new Path(
                     new BezierLine(follower.getPose(), parkingPose)
             );
@@ -270,7 +269,7 @@ public class Pedro_TeleOp extends OpMode {
             // Run launcher
             if (!launcherOn) {
                 double velocity = IsBackLaunchZoneCloser() ?
-                        Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE : Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+                        Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE : Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
                 double min_velocity = velocity - VELOCITY_TOLERANCE;
                 // Set launcher velocity based on launch zone
                 launcher.setVelocity(min_velocity);
@@ -291,7 +290,7 @@ public class Pedro_TeleOp extends OpMode {
         if (launchingState==LaunchingState.LAUNCHER_GOING_UP) {
             // This is the Fire logic.
             double velocity = IsBackLaunchZoneCloser() ?
-                    Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE : Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+                    Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE : Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
             double min_velocity = velocity - VELOCITY_TOLERANCE;
             // Wait until the launcher reaches past the velocity tolerance
             if (launcher.getVelocity() >= min_velocity) {
@@ -302,7 +301,7 @@ public class Pedro_TeleOp extends OpMode {
 
         }
         if (launchingState==LaunchingState.TRANSFER_GOING_UP) {
-            if (transfer_timer.getElapsedTimeSeconds()*1000 >= Consts.SLEEP_BEFORE_INTAKE_START) {
+            if (transfer_timer.getElapsedTimeSeconds()*1000 >= Constants.SLEEP_BEFORE_INTAKE_START) {
                 launchingState = LaunchingState.INTAKE;
                 transfer_timer.resetTimer();
             }
@@ -310,21 +309,21 @@ public class Pedro_TeleOp extends OpMode {
 
         if (launchingState==LaunchingState.INTAKE) {
             intake.setPower(1);
-            if (transfer_timer.getElapsedTimeSeconds()*1000 >= Consts.SLEEP_BEFORE_INTAKE_RESET_LAUNCHING) {
+            if (transfer_timer.getElapsedTimeSeconds()*1000 >= Constants.SLEEP_BEFORE_INTAKE_RESET_LAUNCHING) {
                 launchingState = LaunchingState.GOING_DOWN;
                 transfer_timer.resetTimer();
             }
         }
         if (launchingState==LaunchingState.GOING_DOWN) {
-            transfer.setPower(Consts.TRANSFER_DOWN_POSITION);
+            transfer.setPower(Constants.TRANSFER_DOWN_POSITION);
             launchingState = LaunchingState.IDLE;
             transfer_timer.resetTimer();
         }
         // INCREASE/DECREASE LAUNCHER VELOCITY
         if (gamepad1.rightStickButtonWasPressed()) {
-            launcher.setVelocity(launcher.getVelocity()+25);
+            launcher.setVelocity(launcher.getVelocity()+Constants.INCREMENT_CHANGE_IN_VELOCITY);
         } else if (gamepad1.leftStickButtonWasPressed()) {
-            launcher.setVelocity(launcher.getVelocity()-25);
+            launcher.setVelocity(launcher.getVelocity()-Constants.INCREMENT_CHANGE_IN_VELOCITY);
         }
         // INTAKE CONTROL
         if (!(launchingState == LaunchingState.GOING_DOWN)) {
@@ -440,10 +439,10 @@ public class Pedro_TeleOp extends OpMode {
         }
     }
     public boolean IsBackLaunchZoneCloser() {
-        Pose backLaunchZone = allianceColor == Consts.AllianceColor.RED ?
-                Consts.RED_SHOOTING_BACK : Consts.BLUE_SHOOTING_BACK;
-        Pose frontLaunchZone = allianceColor == Consts.AllianceColor.RED ?
-                Consts.RED_SHOOTING_FRONT : Consts.BLUE_SHOOTING_FRONT;
+        Pose backLaunchZone = allianceColor == Constants.AllianceColor.RED ?
+                Constants.RED_SHOOTING_BACK : Constants.BLUE_SHOOTING_BACK;
+        Pose frontLaunchZone = allianceColor == Constants.AllianceColor.RED ?
+                Constants.RED_SHOOTING_FRONT : Constants.BLUE_SHOOTING_FRONT;
         return getDistanceFromTwoPosesPP(follower.getPose(), backLaunchZone) <
                 getDistanceFromTwoPosesPP(follower.getPose(), frontLaunchZone);
     }

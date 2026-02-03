@@ -12,11 +12,10 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO_ARCHIVE;
-import org.firstinspires.ftc.teamcode2.Systems.Consts;
+import org.firstinspires.ftc.teamcode2.Systems.Constants;
 import org.firstinspires.ftc.teamcode2.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode2.Systems.RGBIndicator;
 import org.firstinspires.ftc.teamcode2.Systems.TeleOpDriveControl;
-import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
 import com.pedropathing.util.Timer;
 
@@ -86,7 +85,7 @@ public class VelocityCalculatorTuner extends OpMode {
     public void init() {
         limelight = new LimelightSystem(hardwareMap);
         rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
-        follower = Constants.createFollower(hardwareMap);
+        follower = Constants.createPedroFollower(hardwareMap);
         pushServo_timer = new Timer();
         
         // Initialize drive control
@@ -101,8 +100,8 @@ public class VelocityCalculatorTuner extends OpMode {
 
         // SET DIRECTION FOR MOTORS
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.LaunchPIDF);
-        pushServo.setPower(Consts.TRANSFER_DOWN_POSITION);
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Constants.LaunchPIDF);
+        pushServo.setPower(Constants.TRANSFER_DOWN_POSITION);
     }
 
     @Override
@@ -180,17 +179,17 @@ public class VelocityCalculatorTuner extends OpMode {
         else intake.setPower((Math.max(Math.min(gamepad2.left_stick_y * 1.1, 1), -1)));
         
         if (gamepad2.a || oneGamepadControl && gamepad1.a) {
-            setVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
+            setVelocity(Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
         }
         if (gamepad2.y || oneGamepadControl && gamepad1.y) {
-            setVelocity(Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
+            setVelocity(Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
         }
         // Use calculated velocity
         if (gamepad1.right_trigger > 0.5) {
             setVelocity(calcVelocity);
         }
         if (gamepad2.b || oneGamepadControl && gamepad1.b) {
-            setVelocity(Consts.STOP_VELOCITY);
+            setVelocity(Constants.STOP_VELOCITY);
         }
         
         // Servo control - trigger state machine
@@ -213,26 +212,26 @@ public class VelocityCalculatorTuner extends OpMode {
         switch (servoState) {
             case GOING_UP:
                 // Wait until the launcher reaches target velocity
-                if (launcher.getVelocity() >= targetVelocity - Consts.VELOCITY_TOLERANCE) {
-                    pushServo.setPower(Consts.TRANSFER_UP_POSITION);
+                if (launcher.getVelocity() >= targetVelocity - Constants.VELOCITY_TOLERANCE) {
+                    pushServo.setPower(Constants.TRANSFER_UP_POSITION);
                     servoState = ServoState.LAUNCHING;
                     pushServo_timer.resetTimer();
                 }
                 break;
             case LAUNCHING:
-                if (pushServo_timer.getElapsedTimeSeconds() >= Consts.SLEEP_BEFORE_INTAKE_START / 1000.0) {
+                if (pushServo_timer.getElapsedTimeSeconds() >= Constants.SLEEP_BEFORE_INTAKE_START / 1000.0) {
                     servoState = ServoState.GOING_DOWN;
                     pushServo_timer.resetTimer();
                 }
                 break;
             case GOING_DOWN:
-                pushServo.setPower(Consts.TRANSFER_DOWN_POSITION);
+                pushServo.setPower(Constants.TRANSFER_DOWN_POSITION);
                 servoState = ServoState.IDLE;
                 pushServo_timer.resetTimer();
                 break;
             case IDLE:
             default:
-                pushServo.setPower(Consts.TRANSFER_DOWN_POSITION);
+                pushServo.setPower(Constants.TRANSFER_DOWN_POSITION);
                 break;
         }
     }

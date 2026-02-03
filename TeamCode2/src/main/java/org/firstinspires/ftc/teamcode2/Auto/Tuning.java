@@ -1,11 +1,11 @@
-package org.firstinspires.ftc.teamcode2.pedroPathing;
+package org.firstinspires.ftc.teamcode2.Auto;
 
-import static org.firstinspires.ftc.teamcode2.pedroPathing.Tuning.changes;
-import static org.firstinspires.ftc.teamcode2.pedroPathing.Tuning.drawOnlyCurrent;
-import static org.firstinspires.ftc.teamcode2.pedroPathing.Tuning.draw;
-import static org.firstinspires.ftc.teamcode2.pedroPathing.Tuning.follower;
-import static org.firstinspires.ftc.teamcode2.pedroPathing.Tuning.stopRobot;
-import static org.firstinspires.ftc.teamcode2.pedroPathing.Tuning.telemetryM;
+import static org.firstinspires.ftc.teamcode2.Auto.Tuning.changes;
+import static org.firstinspires.ftc.teamcode2.Auto.Tuning.drawOnlyCurrent;
+import static org.firstinspires.ftc.teamcode2.Auto.Tuning.draw;
+import static org.firstinspires.ftc.teamcode2.Auto.Tuning.follower;
+import static org.firstinspires.ftc.teamcode2.Auto.Tuning.stopRobot;
+import static org.firstinspires.ftc.teamcode2.Auto.Tuning.telemetryM;
 
 import com.bylazar.configurables.PanelsConfigurables;
 import com.bylazar.configurables.annotations.Configurable;
@@ -23,6 +23,8 @@ import com.pedropathing.telemetry.SelectableOpMode;
 import com.pedropathing.util.*;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode2.Systems.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,10 +81,10 @@ public class Tuning extends SelectableOpMode {
     @Override
     public void onSelect() {
         if (follower == null) {
-            follower = Constants.createFollower(hardwareMap);
+            follower = Constants.createPedroFollower(hardwareMap);
             PanelsConfigurables.INSTANCE.refreshClass(this);
         } else {
-            follower = Constants.createFollower(hardwareMap);
+            follower = Constants.createPedroFollower(hardwareMap);
         }
 
         follower.setStartingPose(new Pose());

@@ -2,17 +2,17 @@ package org.firstinspires.ftc.teamcode2.Auto;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 
-import static org.firstinspires.ftc.teamcode2.Systems.Consts.SLEEP_BEFORE_INTAKE_START;
-import static org.firstinspires.ftc.teamcode2.Systems.Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
-import static org.firstinspires.ftc.teamcode2.Systems.Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
-import static org.firstinspires.ftc.teamcode2.Systems.Consts.TRANSFER_DOWN_POSITION;
-import static org.firstinspires.ftc.teamcode2.Systems.Consts.TRANSFER_UP_POSITION;
-import static org.firstinspires.ftc.teamcode2.Systems.Consts.VELOCITY_TOLERANCE;
+import static org.firstinspires.ftc.teamcode2.Systems.Constants.SLEEP_BEFORE_INTAKE_START;
+import static org.firstinspires.ftc.teamcode2.Systems.Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
+import static org.firstinspires.ftc.teamcode2.Systems.Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+import static org.firstinspires.ftc.teamcode2.Systems.Constants.TRANSFER_DOWN_POSITION;
+import static org.firstinspires.ftc.teamcode2.Systems.Constants.TRANSFER_UP_POSITION;
+import static org.firstinspires.ftc.teamcode2.Systems.Constants.VELOCITY_TOLERANCE;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import org.firstinspires.ftc.teamcode2.Systems.Consts;
+import org.firstinspires.ftc.teamcode2.Systems.Constants;
 
 import com.pedropathing.util.Timer;
 
@@ -43,7 +43,7 @@ public class AutoHelper {
         transfer = hardwareMap.get(DcMotor.class, "transfer");
 
         launcher.setZeroPowerBehavior(FLOAT);
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.LaunchPIDF);
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Constants.LaunchPIDF);
         launchSequenceTimer = new Timer();
         ballLaunchTimer = new Timer();
     }
@@ -96,13 +96,13 @@ public class AutoHelper {
                         Intake();
                     }
                     */
-                    if (ballLaunchTimer.getElapsedTimeSeconds()*1000 >= Consts.SLEEP_BEFORE_INTAKE_RESET_LAUNCHING) {
+                    if (ballLaunchTimer.getElapsedTimeSeconds()*1000 >= Constants.SLEEP_BEFORE_INTAKE_RESET_LAUNCHING) {
                         IntakeStop();
                         isLaunching = true;
                         ballLaunchTimer.resetTimer();
                     }
                 } else {
-                    if (ballLaunchTimer.getElapsedTimeSeconds()*1000 >= Consts.SLEEP_BEFORE_INTAKE_START) {
+                    if (ballLaunchTimer.getElapsedTimeSeconds()*1000 >= Constants.SLEEP_BEFORE_INTAKE_START) {
                         Intake();
                         iterations++;
                         isLaunching = false;

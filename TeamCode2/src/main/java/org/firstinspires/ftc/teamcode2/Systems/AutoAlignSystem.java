@@ -17,7 +17,7 @@ public class AutoAlignSystem {
     private Pose currentPose, newPose;
     double Posex, Posey, diffX, diffY;
     double angle;
-    private Consts.AllianceColor currentGoal;
+    private Constants.AllianceColor currentGoal;
 
     private Follower follower;
     Path autoAlignmentPath;
@@ -36,9 +36,9 @@ public class AutoAlignSystem {
         limelightPIDF.reset();
     }
 
-    public AutoAlignSystem(Consts.AllianceColor allianceColor) {
+    public AutoAlignSystem(Constants.AllianceColor allianceColor) {
         currentGoal = allianceColor;
-        if (currentGoal == Consts.AllianceColor.RED) {
+        if (currentGoal == Constants.AllianceColor.RED) {
             GoalCoordinates = new Pose(
                     0,144
             ); // RED GOAL COORDINATES
@@ -58,10 +58,10 @@ public class AutoAlignSystem {
         limelight = limelightSystem;
         drivingMotors = driveMotors;
         limelightPIDF = new PIDFController(
-            Consts.LimelightAutoAlignmentTurning,
-            Consts.LIMELIGHT_PIDF_MIN_OUTPUT, 
-            Consts.LIMELIGHT_PIDF_MAX_OUTPUT, 
-            Consts.LIMELIGHT_PIDF_INTEGRAL_LIMIT
+            Constants.LimelightAutoAlignmentTurning,
+            Constants.LIMELIGHT_PIDF_MIN_OUTPUT,
+            Constants.LIMELIGHT_PIDF_MAX_OUTPUT,
+            Constants.LIMELIGHT_PIDF_INTEGRAL_LIMIT
         );
         areWeUsingPedro = false;
     }
@@ -118,9 +118,9 @@ public class AutoAlignSystem {
         
         // Verify tag ID matches alliance color for DECODE season (24 for red goal, 20 for blue goal)
         boolean correctTag = false;
-        if (currentGoal == Consts.AllianceColor.RED && tid == 24) {
+        if (currentGoal == Constants.AllianceColor.RED && tid == 24) {
             correctTag = true;
-        } else if (currentGoal == Consts.AllianceColor.BLUE && tid == 20) {
+        } else if (currentGoal == Constants.AllianceColor.BLUE && tid == 20) {
             correctTag = true;
         }
         

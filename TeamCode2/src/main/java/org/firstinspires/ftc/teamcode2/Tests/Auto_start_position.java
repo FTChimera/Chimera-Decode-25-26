@@ -10,8 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode2.Auto.BLUE_AUTO_ARCHIVE;
 import org.firstinspires.ftc.teamcode2.Auto.RED_AUTO_ARCHIVE;
-import org.firstinspires.ftc.teamcode2.Systems.Consts;
-import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode2.Systems.Constants;
 
 @SuppressWarnings("SpellCheckingInspection")
 @Autonomous(name = "Auto Start Position Test", group = "Test")
@@ -44,8 +43,8 @@ public class Auto_start_position extends OpMode {
 
     public Path launchPath;
     public Path startposePath;
-    public Consts.Auto autoPose = Consts.Auto.RED_CLOSE;
-    private Consts.AllianceColor allianceColor = Consts.AllianceColor.RED;
+    public Constants.Auto autoPose = Constants.Auto.RED_CLOSE;
+    private Constants.AllianceColor allianceColor = Constants.AllianceColor.RED;
 
     public void buildPaths() {
         launchPath = new Path(
@@ -57,11 +56,11 @@ public class Auto_start_position extends OpMode {
         );
 
         startposePath = new Path(
-                new BezierLine(launchPose, allianceColor == Consts.AllianceColor.BLUE? blue_start_pose : red_start_pose)
+                new BezierLine(launchPose, allianceColor == Constants.AllianceColor.BLUE? blue_start_pose : red_start_pose)
         );
         startposePath.setLinearHeadingInterpolation(
                 launchPose.getHeading(),
-                (allianceColor == Consts.AllianceColor.BLUE? blue_start_pose : red_start_pose).getHeading()
+                (allianceColor == Constants.AllianceColor.BLUE? blue_start_pose : red_start_pose).getHeading()
         );
     }
 
@@ -89,7 +88,7 @@ public class Auto_start_position extends OpMode {
     @Override
     public void init() {
         pathTimer = new Timer();
-        follower = Constants.createFollower(hardwareMap);
+        follower = Constants.createPedroFollower(hardwareMap);
 
         follower.setStartingPose(startPose);
         setPathState(PathState.LAUNCH);

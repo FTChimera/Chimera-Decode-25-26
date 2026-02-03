@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.teamcode2.Systems.Consts;
+import org.firstinspires.ftc.teamcode2.Systems.Constants;
 
 @SuppressWarnings("SpellCheckingInspection")
 @TeleOp(name="Max Velocity Test", group="Tests")
@@ -21,8 +21,8 @@ public class MaxVelocityTest extends LinearOpMode {
         waitForStart();
         while (opModeIsActive()) {
             currentVelocity = motor.getVelocity();
-            if (gamepad1.a) {motor.setVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE);}
-            if (gamepad1.b) {motor.setVelocity(Consts.STOP_VELOCITY);}
+            if (gamepad1.a) {motor.setVelocity(Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE);}
+            if (gamepad1.b) {motor.setVelocity(Constants.STOP_VELOCITY);}
             if (currentVelocity > maxVelocity) {
                 maxVelocity = currentVelocity;
             }

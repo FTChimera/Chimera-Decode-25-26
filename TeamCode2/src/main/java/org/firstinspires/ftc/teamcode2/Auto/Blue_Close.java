@@ -8,7 +8,8 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
+
+import org.firstinspires.ftc.teamcode2.Systems.Constants;
 
 @SuppressWarnings("SpellCheckingInspection")
 @Autonomous(name = "Blue Close Auto", group = "Pedro Auto", preselectTeleOp = "Pedro_TeleOp")
@@ -274,7 +275,7 @@ public class Blue_Close extends OpMode {
     public void init() {
         pathTimer = new Timer();
         autoHelper = new AutoHelper(hardwareMap);
-        follower = Constants.createFollower(hardwareMap);
+        follower = Constants.createPedroFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
         setPathState(PathState.LAUNCH);

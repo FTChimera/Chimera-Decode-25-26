@@ -2,13 +2,13 @@ package org.firstinspires.ftc.teamcode2.Auto;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
+
+import org.firstinspires.ftc.teamcode2.Systems.Constants;
 
 @SuppressWarnings("SpellCheckingInspection")
 @Autonomous(name = "Blue Far Auto", group = "Pedro Auto", preselectTeleOp = "Pedro_TeleOp")
@@ -207,7 +207,7 @@ public class Blue_Far extends OpMode {
     public void init() {
         pathTimer = new Timer();
         autoHelper = new AutoHelper(hardwareMap);
-        follower = Constants.createFollower(hardwareMap);
+        follower = Constants.createPedroFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
         setPathState(PathState.LAUNCH);

@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode2.VelocityCalc;
 
-import static org.firstinspires.ftc.teamcode2.Systems.Consts.BLUE_GOAL;
-import static org.firstinspires.ftc.teamcode2.Systems.Consts.RED_GOAL;
+import static org.firstinspires.ftc.teamcode2.Systems.Constants.BLUE_GOAL;
+import static org.firstinspires.ftc.teamcode2.Systems.Constants.RED_GOAL;
 
 import com.pedropathing.geometry.Pose;
-
-import org.firstinspires.ftc.teamcode2.VelocityCalc.VelocityCalcData;
 
 /**
  * Computes flywheel velocity based on Pedro pose distance to the active alliance goal.

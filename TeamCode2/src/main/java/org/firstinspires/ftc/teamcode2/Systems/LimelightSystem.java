@@ -47,7 +47,7 @@ public class LimelightSystem {
     public LLResult result;
     public void start(int pipeline) {startLLWithPipeline(pipeline);}
     private void startLLWithPipeline(int pipeline){limelight1.start();limelight1.pipelineSwitch(pipeline);}
-    public int pipelineChange(Consts.AllianceColor allianceColor){int newPipe = changePipeline(limelight1.getLatestResult().getPipelineIndex(), allianceColor==Consts.AllianceColor.RED);limelight1.pipelineSwitch(newPipe);return newPipe;}
+    public int pipelineChange(Constants.AllianceColor allianceColor){int newPipe = changePipeline(limelight1.getLatestResult().getPipelineIndex(), allianceColor== Constants.AllianceColor.RED);limelight1.pipelineSwitch(newPipe);return newPipe;}
     public void LLUpdate() {
         result = limelight1.getLatestResult();
         if (result!=null && result.isValid()) {

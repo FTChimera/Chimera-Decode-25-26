@@ -1,84 +1,30 @@
 package org.firstinspires.ftc.teamcode2.TeleOp;
 
 import com.bylazar.telemetry.TelemetryManager;
-import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.Path;
-import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode2.Systems.Consts;
-import org.firstinspires.ftc.teamcode2.Systems.LimelightSystem;
-import org.firstinspires.ftc.teamcode2.Systems.RGBIndicator;
-import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode2.Systems.Constants;
 
 
 @TeleOp(name = "Era TeleOp", group = "TeleOp")// Name and Group
 public class EraTeleOp extends LinearOpMode {
 
-    final double TARGET_VELOCITY = 500; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 500;// Set target velocity from back launch zone
-    final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 1100;// Set target velocity from front launch zone
-    final double INCREMENT_CHANGE_IN_VELOCITY = 50;
-    final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 200;// Set target velocity from back launch zone
-    final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
-    final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double MIN_VELOCITY = 1075;
-    final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
-    final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
-    final double FULL_SPEED = 1.0;
-    final int SERVO_LAUNCH_POSITION = 0;
-    final int SERVO_REST_POSITION = 1;
     final boolean TwoGamepads = false;
-    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 200;
-
     //public LimelightSystem limelight;
 
     // declaring our PIDF tuning values
-    private final PIDFCoefficients LauncherPIDF = new PIDFCoefficients(304.7, 0.7, 1.57, 7);
     double  setTargetVelocity = 0;
     double setMinVelocity = 0;
    // private Follower follower;
     public static Pose startingPose;
-    private boolean automatedDrive = false;
-    private boolean slowMode = false;
-    private TelemetryManager telemetryM;
-    double X_Coordinate_Blue_Goal = 0;
-    double Y_Coordinate_Blue_Goal = 144;
-    double X_Coordinate_Red_Goal = 144;
-    double Y_Coordinate_Red_Goal = 144;
-    double X_Coordinate = 0.0;
-    double Y_Coordinate = 0.0;
-    double Distance_To_Goal = 0;
-    double Distance_To_Goal_Blue = 0;
-    double currentHeading = 0.0;
-    double launchPositionHeadingRadians = 0;
-    final double SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE = 20;
-    final double SHOOTING_ZONE_FAR_FRONT_LAUNCH_ZONE = 60;
-    final double SHOOTING_ZONE_BACK_LAUNCH_ZONE = 65;
-
-    // TODO Change Starting position. Temporarily set starting position to back launch
-    // zone, (x,y) = (72,0)
-    final double RED_ALLIANCE_STARTING_X_COORDINATE = 104;
-    final double RED_ALLIANCE_STARTING_Y_COORDINATE = 60;
-    final double RED_ALLIANCE_STARTING_HEADING_POSITION = 180;
-
-    final double BLUE_ALLIANCE_STARTING_X_COORDINATE = 144;
-    final double BLUE_ALLIANCE_STARTING_Y_COORDINATE = 0;
-    final double BLUE_ALLIANCE_STARTING_HEADING_POSITION = 90;
-    enum AllianceColor {
-        BLUE,
-        RED
-    };
-    AllianceColor allianceColor;
+    Constants.AllianceColor allianceColor;
 
     ElapsedTime feederTimer = new ElapsedTime();
     //   RGBIndicator rgbIndicator;
@@ -94,18 +40,18 @@ public class EraTeleOp extends LinearOpMode {
             telemetry.addData("Press 'GamePad1 Right Bumper'", "for BLUE");
             telemetry.addData("Press 'GamePad1 Left Bumper'", "for RED");
             // This method is called repeatedly during the init phase
-            allianceColor = AllianceColor.RED;
+            allianceColor = Constants.AllianceColor.RED;
             if (gamepad1.right_bumper)
             {
-                allianceColor = AllianceColor.BLUE;
+                allianceColor = Constants.AllianceColor.BLUE;
                 // Display the current selection on the Driver Station
                 telemetry.addData("Alliance", "Selected: ", "BLUE");
             } else if (gamepad1.left_bumper) {
-                allianceColor = AllianceColor.RED;
+                allianceColor = Constants.AllianceColor.RED;
                 // Display the current selection on the Driver Station
                 telemetry.addData("Alliance", "Selected: ", "RED");
             } else {
-                allianceColor = AllianceColor.RED;
+                allianceColor = Constants.AllianceColor.RED;
                 // Display the current selection on the Driver Station
                 telemetry.addData("Alliance", "Selected: ", "RED");
             }
@@ -123,7 +69,7 @@ public class EraTeleOp extends LinearOpMode {
         DcMotor intakeMotor = hardwareMap.dcMotor.get("intake");
         DcMotor transferMotor = hardwareMap.dcMotor.get("transfer");
 
-        //follower = Constants.createFollower(hardwareMap);
+        //follower = Constants.createPedroFollower(hardwareMap);
 
         telemetry.addLine("Setting the motors now");
 
@@ -156,9 +102,9 @@ public class EraTeleOp extends LinearOpMode {
         OuttakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         transferMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        OuttakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, LauncherPIDF);
+        OuttakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Constants.LaunchPIDF);
 
-        if (allianceColor == AllianceColor.RED)
+        if (allianceColor == Constants.AllianceColor.RED)
         {
             // Starting position Red Goal
             startingPose = new Pose();
@@ -167,7 +113,7 @@ public class EraTeleOp extends LinearOpMode {
             telemetry.addData("Alliance Color", "Red");
             //telemetry.addData("Starting Pose", follower.getPose());
         }
-        else if(allianceColor == AllianceColor.BLUE)
+        else if(allianceColor == Constants.AllianceColor.BLUE)
         {
             startingPose = new Pose();
             //follower.setStartingPose(startingPose);
@@ -279,9 +225,9 @@ public class EraTeleOp extends LinearOpMode {
              */
 
             if (gamepad1.y) {
-                setMinVelocity = MIN_VELOCITY_FRONT_LAUNCH_ZONE;
-                setTargetVelocity = TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
-
+                setMinVelocity = Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - Constants.VELOCITY_TOLERANCE;
+                setTargetVelocity = Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+                OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
 
                 telemetry.addData("Outake Motor Velocity Front:", OuttakeMotor.getVelocity());
@@ -291,8 +237,9 @@ public class EraTeleOp extends LinearOpMode {
 
             if (gamepad1.a)
             {
-                setMinVelocity = MIN_VELOCITY_BACK_LAUNCH_ZONE;
-                setTargetVelocity = TARGET_VELOCITY_BACK_LAUNCH_ZONE;
+                setMinVelocity = Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - Constants.VELOCITY_TOLERANCE;
+                setTargetVelocity = Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
+                OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
                 telemetry.addData("Outake Motor Velocity Back", OuttakeMotor.getVelocity());
                 telemetry.addData("Target Velocity Back", setTargetVelocity);
@@ -315,18 +262,18 @@ public class EraTeleOp extends LinearOpMode {
             }
 
             if (gamepad1.b) {
-                OuttakeMotor.setVelocity(STOP_VELOCITY);
+                OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);
                 transferMotor.setPower(0);
             }
 
             if (gamepad1.dpadUpWasPressed()) {
-                setTargetVelocity += INCREMENT_CHANGE_IN_VELOCITY;
+                setTargetVelocity += Constants.INCREMENT_CHANGE_IN_VELOCITY;
                 telemetry.addData("Target Velocity Back", setTargetVelocity);
             }
 
             if (gamepad1.dpadDownWasPressed()) {
-                if (setTargetVelocity > INCREMENT_CHANGE_IN_VELOCITY) {
-                    setTargetVelocity -= INCREMENT_CHANGE_IN_VELOCITY;
+                if (setTargetVelocity > Constants.INCREMENT_CHANGE_IN_VELOCITY) {
+                    setTargetVelocity -= Constants.INCREMENT_CHANGE_IN_VELOCITY;
                     telemetry.addData("Target Velocity Back", setTargetVelocity);
                 }
             }

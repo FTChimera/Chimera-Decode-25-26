@@ -2,14 +2,12 @@ package org.firstinspires.ftc.teamcode2.Tests;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode2.Systems.Consts;
+import org.firstinspires.ftc.teamcode2.Systems.Constants;
 import org.firstinspires.ftc.teamcode2.Systems.TeleOpDriveControl;
-import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
 @SuppressWarnings("SpellCheckingInspection")
 @TeleOp(name="TeleOpTest", group="Tests")
@@ -25,7 +23,7 @@ public class TeleOpTest extends LinearOpMode {
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Consts.LaunchPIDF);
+        launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Constants.LaunchPIDF);
         waitForStart();
         while (opModeIsActive()) {
             driveControl.move(gamepad1);
@@ -35,13 +33,13 @@ public class TeleOpTest extends LinearOpMode {
             intake.setPower(intakeMove);
 
             if (gamepad1.a) {
-                launcher.setVelocity(Consts.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
+                launcher.setVelocity(Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE);
             }
             if (gamepad1.b) {
-                launcher.setVelocity(Consts.STOP_VELOCITY);
+                launcher.setVelocity(Constants.STOP_VELOCITY);
             }
             if (gamepad1.y) {
-                launcher.setVelocity(Consts.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
+                launcher.setVelocity(Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE);
             }
 
             if (gamepad1.left_bumper) {
