@@ -36,7 +36,7 @@ public class Consts {
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     public static int[] BALL_NUM_INTAKE_NEEDED = {2,3};
     public static PIDFCoefficients LaunchPIDF = new PIDFCoefficients(
-            304.7, 0.7, 1.57, 7
+            225, 0.0021, 0.0001, 10
     );
     public enum AllianceColor {
         BLUE, RED;

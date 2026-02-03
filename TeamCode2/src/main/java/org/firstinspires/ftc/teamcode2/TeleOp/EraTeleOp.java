@@ -37,6 +37,7 @@ public class EraTeleOp extends LinearOpMode {
     final double FULL_SPEED = 1.0;
     final int SERVO_LAUNCH_POSITION = 0;
     final int SERVO_REST_POSITION = 1;
+    final boolean TwoGamepads = false;
     final int SLEEP_BEFORE_RESET_SERVO_POSITION = 200;
 
     //public LimelightSystem limelight;
@@ -113,14 +114,14 @@ public class EraTeleOp extends LinearOpMode {
 
         // Declare our motors
         // Make sure your ID's match your configuration
-        DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
-        DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
-        DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
-        DcMotor backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
+        DcMotor frontLeftMotor = hardwareMap.dcMotor.get("flm");
+        DcMotor backLeftMotor = hardwareMap.dcMotor.get("blm");
+        DcMotor frontRightMotor = hardwareMap.dcMotor.get("frm");
+        DcMotor backRightMotor = hardwareMap.dcMotor.get("brm");
         // Using DcMotorEx instead of DcMotor to use PID controller
-        DcMotorEx OuttakeMotor = hardwareMap.get(DcMotorEx.class,"OuttakeMotor");
-        DcMotor intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
-        DcMotor transferMotor = hardwareMap.dcMotor.get("transferMotor");
+        DcMotorEx OuttakeMotor = hardwareMap.get(DcMotorEx.class,"launcher");
+        DcMotor intakeMotor = hardwareMap.dcMotor.get("intake");
+        DcMotor transferMotor = hardwareMap.dcMotor.get("transfer");
 
         //follower = Constants.createFollower(hardwareMap);
 
@@ -214,9 +215,16 @@ public class EraTeleOp extends LinearOpMode {
 
              */
             // if (limelight.isDisconnected) rgbIndicator.setColor(RGBIndicator.Color.RED);telemetry.addData("Disconnected",""); // DISCONNECTED
-            double y = -gamepad2.left_stick_y; // Remember, Y stick value is reversed
-            double x = gamepad2.left_stick_x * 1.1; // Counteract imperfect strafing
-            double rx = gamepad2.right_stick_x;
+            double y, x, rx;
+            if (TwoGamepads) {
+                y = -gamepad2.left_stick_y; // Remember, Y stick value is reversed
+                x = gamepad2.left_stick_x * 1.1; // Counteract imperfect strafing
+                rx = gamepad2.right_stick_x;
+            } else {
+                y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
+                x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+                rx = gamepad1.right_stick_x;
+            }
 
             y *= Math.abs(y);
             x *= Math.abs(x);
@@ -270,7 +278,7 @@ public class EraTeleOp extends LinearOpMode {
              * Step 7. position servo into launch position
              */
 
-            if (gamepad2.y) {
+            if (gamepad1.y) {
                 setMinVelocity = MIN_VELOCITY_FRONT_LAUNCH_ZONE;
                 setTargetVelocity = TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
 
@@ -281,7 +289,7 @@ public class EraTeleOp extends LinearOpMode {
                 telemetry.addData("Min Velocity front", setMinVelocity);
             }
 
-            if (gamepad2.a)
+            if (gamepad1.a)
             {
                 setMinVelocity = MIN_VELOCITY_BACK_LAUNCH_ZONE;
                 setTargetVelocity = TARGET_VELOCITY_BACK_LAUNCH_ZONE;
@@ -292,7 +300,7 @@ public class EraTeleOp extends LinearOpMode {
 
             }
 
-            if (gamepad2.x) {
+            if (gamepad1.x) {
                 intakeMotor.setPower(1);
                 transferMotor.setPower(0.5);
                 telemetry.addData("Intake Motor power", intakeMotor.getPower());
@@ -300,23 +308,23 @@ public class EraTeleOp extends LinearOpMode {
             }
 
             // In-take
-            if (gamepad2.dpad_right) {
+            if (gamepad1.dpad_right) {
                 intakeMotor.setPower(-1);
             } else {
-                intakeMotor.setPower(0);
+                //intakeMotor.setPower(0);
             }
 
-            if (gamepad2.b) {
+            if (gamepad1.b) {
                 OuttakeMotor.setVelocity(STOP_VELOCITY);
                 transferMotor.setPower(0);
             }
 
-            if (gamepad2.dpadUpWasPressed()) {
+            if (gamepad1.dpadUpWasPressed()) {
                 setTargetVelocity += INCREMENT_CHANGE_IN_VELOCITY;
                 telemetry.addData("Target Velocity Back", setTargetVelocity);
             }
 
-            if (gamepad2.dpadDownWasPressed()) {
+            if (gamepad1.dpadDownWasPressed()) {
                 if (setTargetVelocity > INCREMENT_CHANGE_IN_VELOCITY) {
                     setTargetVelocity -= INCREMENT_CHANGE_IN_VELOCITY;
                     telemetry.addData("Target Velocity Back", setTargetVelocity);
@@ -324,7 +332,7 @@ public class EraTeleOp extends LinearOpMode {
             }
 
             // Reverse In-take Send balls out of the motor, opposite of Intake
-            if (gamepad2.dpad_left) {
+            if (gamepad1.dpad_left) {
                 intakeMotor.setPower(1);
             } else {
                 intakeMotor.setPower(0);

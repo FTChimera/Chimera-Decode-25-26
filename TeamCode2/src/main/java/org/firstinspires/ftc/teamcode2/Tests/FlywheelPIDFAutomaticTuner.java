@@ -13,10 +13,10 @@ public class FlywheelPIDFAutomaticTuner extends LinearOpMode {
     String flywheel_name = "launcher";
 
     // ===== STARTING PIDF =====
-    double kP = 0.002;
+    double kP = 300;
     double kI = 0.0;        // start disabled
     double kD = 0.0001;
-    double kF = 0.05;
+    double kF = 10;
 
     static final double VELOCITY_TOLERANCE = 35;
     static final int SAMPLE_TIME_MS = 1000;
