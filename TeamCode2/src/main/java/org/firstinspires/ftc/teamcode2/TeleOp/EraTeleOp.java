@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode2.Systems.RGBIndicator;
 @TeleOp(name = "Era TeleOp", group = "TeleOp")// Name and Group
 public class EraTeleOp extends LinearOpMode {
 
-    final boolean TwoGamepads = false;
+    boolean TwoGamepads = false;
     //public LimelightSystem limelight;
 
     // declaring our PIDF tuning values
@@ -35,16 +35,23 @@ public class EraTeleOp extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         // For now - don't pass in hardware Map because then it won't throw an error.
         // When Limelight is added, pass in hardwareMap
-        limelight = new LimelightSystem();
-        //  rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
-        //    rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
+        limelight = new LimelightSystem(hardwareMap);
+        rgbIndicator = new RGBIndicator();
+        rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
         //while (!isStarted() && !isStopRequested())
+        allianceColor = Constants.AllianceColor.RED;
         while (opModeInInit())
         {
             telemetry.addData("Press 'GamePad1 Right Bumper'", "for BLUE");
             telemetry.addData("Press 'GamePad1 Left Bumper'", "for RED");
+            telemetry.addLine("Press A for 2 Gamepads, B for 1");
             // This method is called repeatedly during the init phase
-            allianceColor = Constants.AllianceColor.RED;
+            if (gamepad1.a) {
+                TwoGamepads = true;
+            }
+            if (gamepad1.b) {
+                TwoGamepads = false;
+            }
             if (gamepad1.right_bumper)
             {
                 allianceColor = Constants.AllianceColor.BLUE;
@@ -148,7 +155,7 @@ public class EraTeleOp extends LinearOpMode {
         if (isStopRequested()) return;
         telemetry.addData("Status", "Running");
         while (opModeIsActive()) {
-            /*
+
             limelight.LLUpdate();
             telemetry.addData("Limelight Score", limelight.getLLScore());
             if (limelight.getLLScore() == 0) rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
@@ -163,8 +170,8 @@ public class EraTeleOp extends LinearOpMode {
                 rgbIndicator.setColor(RGBIndicator.Color.BLACK);
             }
 
-             */
-            // if (limelight.isDisconnected) rgbIndicator.setColor(RGBIndicator.Color.RED);telemetry.addData("Disconnected",""); // DISCONNECTED
+
+            if (limelight.isDisconnected) rgbIndicator.setColor(RGBIndicator.Color.RED);telemetry.addData("Disconnected",""); // DISCONNECTED
             double y, x, rx;
             if (TwoGamepads) {
                 y = -gamepad2.left_stick_y; // Remember, Y stick value is reversed
@@ -248,15 +255,13 @@ public class EraTeleOp extends LinearOpMode {
             if (gamepad1.x) {
                 intakeMotor.setPower(1);
                 transferMotor.setPower(0.5);
-            }
-
-            // In-take
-            if (gamepad1.dpad_right) {
-                intakeMotor.setPower(-1);
             } else {
-                //intakeMotor.setPower(0);
-            }
 
+                // In-take
+                double intakePower = gamepad1.right_trigger - gamepad1.left_trigger;
+                intakePower = intakePower * 1.5;
+                intakeMotor.setPower(intakePower);
+            }
             if (gamepad1.b) {
                 OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);
                 transferMotor.setPower(0);
@@ -276,12 +281,7 @@ public class EraTeleOp extends LinearOpMode {
                 }
             }
 
-            // Reverse In-take Send balls out of the motor, opposite of Intake
-            if (gamepad1.dpad_left) {
-                intakeMotor.setPower(1);
-            } else {
-                intakeMotor.setPower(0);
-            }
+
 
             telemetry.addData("Intake Motor power", intakeMotor.getPower());
             telemetry.addData("Transfer Motor power", transferMotor.getPower());
