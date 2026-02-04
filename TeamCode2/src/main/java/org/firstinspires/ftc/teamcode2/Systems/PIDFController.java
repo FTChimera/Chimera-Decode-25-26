@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 /**
  * PIDF controller with anti-windup, output clamping and optional feedforward based on setpoint velocity.
  */
+@SuppressWarnings("SpellCheckingInspection")
 public class PIDFController {
     private final double kP, kI, kD, kF;
     private final double minOutput, maxOutput;

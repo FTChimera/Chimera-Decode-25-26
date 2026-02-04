@@ -9,8 +9,10 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
+import org.firstinspires.ftc.teamcode2.Systems.Constants;
+
+@SuppressWarnings("SpellCheckingInspection")
 @Disabled
 @Autonomous(name = "BLUE ARCHIVE", group = "Pedro Auto", preselectTeleOp = "Pedro_TeleOp")
 public class BLUE_AUTO_ARCHIVE extends OpMode {
@@ -319,7 +321,7 @@ public class BLUE_AUTO_ARCHIVE extends OpMode {
     public void init() {
         autoHelper = new AutoHelper(hardwareMap);
         pathTimer = new Timer();
-        follower = Constants.createFollower(hardwareMap);
+        follower = Constants.createPedroFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
         setPathState(PathState.LAUNCH);

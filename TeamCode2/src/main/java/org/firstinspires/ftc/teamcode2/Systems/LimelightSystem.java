@@ -9,27 +9,33 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.List;
 
+@SuppressWarnings("SpellCheckingInspection")
 public class LimelightSystem {
+    private final boolean isBeingUsed;
     public LimelightSystem(HardwareMap hwMap) {
         limelight1 = hwMap.get(Limelight3A.class, "limelight");
+        isBeingUsed = true;
     }
-    private static int changePipeline(int curPipe, boolean isRed) {
-        // CHANGE PIPELINES
-        switch (curPipe) {
-            case 1:
-                return 2; // purple → green
-            case 2:
-                return 3; // green → obelisk
-            case 3:
-                return isRed ? 4 : 5; // obelisk → red or blue
-            case 4:
-                return 1;
-            case 5:
-                return 1; // back to purple
-            default:
-                return 1; // start at purple
-        }
+    public LimelightSystem() {
+        isBeingUsed = false;
     }
+//    private static int changePipeline(int curPipe, boolean isRed) {
+//        // CHANGE PIPELINES
+//        switch (curPipe) {
+//            case 1:
+//                return 2; // purple → green
+//            case 2:
+//                return 3; // green → obelisk
+//            case 3:
+//                return isRed ? 4 : 5; // obelisk → red or blue
+//            case 4:
+//                return 1;
+//            case 5:
+//                return 1; // back to purple
+//            default:
+//                return 1; // start at purple
+//        }
+//    }
 
     private static double calculateDistanceCurve(double x) {
         return 0;
@@ -45,9 +51,13 @@ public class LimelightSystem {
     public Pose3D botpose;
     public LLResult result;
     public void start(int pipeline) {startLLWithPipeline(pipeline);}
-    private void startLLWithPipeline(int pipeline){limelight1.start();limelight1.pipelineSwitch(pipeline);}
-    public int pipelineChange(Consts.AllianceColor allianceColor){int newPipe = changePipeline(limelight1.getLatestResult().getPipelineIndex(), allianceColor==Consts.AllianceColor.RED);limelight1.pipelineSwitch(newPipe);return newPipe;}
+    private void startLLWithPipeline(int pipeline){
+        if (!isBeingUsed) return;
+        limelight1.start();limelight1.pipelineSwitch(pipeline);
+    }
+    //public int pipelineChange(Constants.AllianceColor allianceColor){int newPipe = changePipeline(limelight1.getLatestResult().getPipelineIndex(), allianceColor== Constants.AllianceColor.RED);limelight1.pipelineSwitch(newPipe);return newPipe;}
     public void LLUpdate() {
+        if (!isBeingUsed) return;
         result = limelight1.getLatestResult();
         if (result!=null && result.isValid()) {
             tx=result.getTx();
@@ -61,6 +71,7 @@ public class LimelightSystem {
         }
     }
     public double getLLScore() {
+        if (!isBeingUsed) return Double.NaN;
         return Math.abs(tx);
     }
 

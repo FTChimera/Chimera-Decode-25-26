@@ -8,9 +8,11 @@ import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import org.firstinspires.ftc.teamcode2.pedroPathing.Constants;
 
-@Autonomous(name = "Red Far Auto", group = "Pedro Auto", preselectTeleOp = "Pedro_TeleOp")
+import org.firstinspires.ftc.teamcode2.Systems.Constants;
+
+@SuppressWarnings("SpellCheckingInspection")
+@Autonomous(name = "Red Auto", group = "Pedro Auto", preselectTeleOp = "EraTeleOp")
 public class Red_Far extends OpMode {
 
     private Follower follower;
@@ -21,36 +23,39 @@ public class Red_Far extends OpMode {
     public enum PathState {
         IDLE,
         LAUNCH,
-        SET1,
+        SET_1,
         INTAKE1,
         LAUNCH_1,
         SET2,
         INTAKE2,
+        LAUNCHSET2,
+        SET3,
+        INTAKE3,
         LAUNCH_2,
         END
     }
 
     public static final Pose startPose = new Pose(
-            86.59142857142857,
-            9.184285714285714,
-            Math.toRadians(90)
+            123.5,
+            122.8,
+            Math.toRadians(37)
     );
 
     public static final Pose launchPose = new Pose(
-            84,
-            12,
-            Math.toRadians(65.5560452)
+            114,
+            114,
+            Math.toRadians(45)
     );
 
-    public static final Pose set1Pose = new Pose(
+    public static final Pose set_1Pose = new Pose(
             96,
-            36,
+            84,
             Math.toRadians(0)
     );
 
     public static final Pose intake1Pose = new Pose(
             126,
-            36,
+            84,
             0
     );
 
@@ -66,18 +71,39 @@ public class Red_Far extends OpMode {
             0
     );
 
-    public static final Pose endPose = new Pose(
+    public static final Pose launchset2ControlPoint1 = new Pose(
+            108,
+            60,
+            0
+    );
+
+    public static final Pose set3Pose = new Pose(
             96,
             36,
-            Math.toRadians(45)
+            Math.toRadians(0)
+    );
+
+    public static final Pose intake3Pose = new Pose(
+            126,
+            36,
+            0
+    );
+
+    public static final Pose endPose = new Pose(
+            108,
+            72,
+            Math.toRadians(0)
     );
 
     public Path launchPath;
-    public Path set1Path;
+    public Path set_1Path;
     public Path intake1Path;
     public Path launchPath_1;
     public Path set2Path;
     public Path intake2Path;
+    public Path launchset2Path;
+    public Path set3Path;
+    public Path intake3Path;
     public Path launchPath_2;
     public Path endPath;
 
@@ -90,19 +116,19 @@ public class Red_Far extends OpMode {
                 launchPose.getHeading()
         );
 
-        set1Path = new Path(
-                new BezierLine(launchPose, set1Pose)
+        set_1Path = new Path(
+                new BezierLine(launchPose, set_1Pose)
         );
-        set1Path.setLinearHeadingInterpolation(
+        set_1Path.setLinearHeadingInterpolation(
                 launchPose.getHeading(),
-                set1Pose.getHeading()
+                set_1Pose.getHeading()
         );
 
         intake1Path = new Path(
-                new BezierLine(set1Pose, intake1Pose)
+                new BezierLine(set_1Pose, intake1Pose)
         );
         intake1Path.setLinearHeadingInterpolation(
-                set1Pose.getHeading(),
+                set_1Pose.getHeading(),
                 intake1Pose.getHeading()
         );
 
@@ -130,11 +156,37 @@ public class Red_Far extends OpMode {
                 intake2Pose.getHeading()
         );
 
+        launchset2Path = new Path(
+                new BezierCurve(intake2Pose,
+                        launchset2ControlPoint1,
+                        launchPose)
+        );
+        launchset2Path.setLinearHeadingInterpolation(
+                intake2Pose.getHeading(),
+                launchPose.getHeading()
+        );
+
+        set3Path = new Path(
+                new BezierLine(launchPose, set3Pose)
+        );
+        set3Path.setLinearHeadingInterpolation(
+                launchPose.getHeading(),
+                set3Pose.getHeading()
+        );
+
+        intake3Path = new Path(
+                new BezierLine(set3Pose, intake3Pose)
+        );
+        intake3Path.setLinearHeadingInterpolation(
+                set3Pose.getHeading(),
+                intake3Pose.getHeading()
+        );
+
         launchPath_2 = new Path(
-                new BezierLine(intake2Pose, launchPose)
+                new BezierLine(intake3Pose, launchPose)
         );
         launchPath_2.setLinearHeadingInterpolation(
-                intake2Pose.getHeading(),
+                intake3Pose.getHeading(),
                 launchPose.getHeading()
         );
 
@@ -153,11 +205,11 @@ public class Red_Far extends OpMode {
         switch (pathState) {
             case LAUNCH:
                 follower.followPath(launchPath);
-                if (autoHelper.runLauncherSequence(true, 3)) setPathState(PathState.SET1);
+                if (autoHelper.runLauncherSequence(true, 3)) setPathState(PathState.SET_1);
                 break;
 
-            case SET1:
-                follower.followPath(set1Path);
+            case SET_1:
+                follower.followPath(set_1Path);
                 autoHelper.Intake();
                 setPathState(PathState.INTAKE1);
                 break;
@@ -182,12 +234,29 @@ public class Red_Far extends OpMode {
             case INTAKE2:
                 follower.followPath(intake2Path);
                 autoHelper.IntakeStop();
+                setPathState(PathState.LAUNCHSET2);
+                break;
+
+            case LAUNCHSET2:
+                follower.followPath(launchset2Path);
+                if (autoHelper.runLauncherSequence(true, 3)) setPathState(PathState.SET3);
+                break;
+
+            case SET3:
+                follower.followPath(set3Path);
+                autoHelper.Intake();
+                setPathState(PathState.INTAKE3);
+                break;
+
+            case INTAKE3:
+                follower.followPath(intake3Path);
+                autoHelper.IntakeStop();
                 setPathState(PathState.LAUNCH_2);
                 break;
 
             case LAUNCH_2:
                 follower.followPath(launchPath_2);
-                if (autoHelper.runLauncherSequence(true, 3)) setPathState(PathState.SET2);
+                if (autoHelper.runLauncherSequence(true, 3)) setPathState(PathState.END);
                 break;
 
             case END:
@@ -206,7 +275,7 @@ public class Red_Far extends OpMode {
     public void init() {
         pathTimer = new Timer();
         autoHelper = new AutoHelper(hardwareMap);
-        follower = Constants.createFollower(hardwareMap);
+        follower = Constants.createPedroFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
         setPathState(PathState.LAUNCH);

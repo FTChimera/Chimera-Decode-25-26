@@ -222,6 +222,8 @@ public class ChimeraTeleOp extends LinearOpMode {
             double x = gamepad1.left_stick_x * 1.1;
             double rx = gamepad1.right_stick_x;
 
+            y*= Math.abs(y); x*= Math.abs(x); rx*= Math.abs(rx);
+
             follower.update();
 
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
