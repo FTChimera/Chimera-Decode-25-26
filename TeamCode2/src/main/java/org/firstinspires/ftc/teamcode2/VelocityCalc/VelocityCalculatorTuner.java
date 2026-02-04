@@ -84,7 +84,7 @@ public class VelocityCalculatorTuner extends OpMode {
     @Override
     public void init() {
         limelight = new LimelightSystem(hardwareMap);
-        rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
+        rgbIndicator = new RGBIndicator(hardwareMap);
         follower = Constants.createPedroFollower(hardwareMap);
         pushServo_timer = new Timer();
         

@@ -30,9 +30,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
-import org.firstinspires.ftc.teamcode2.Auto.Blue_Close;
 import org.firstinspires.ftc.teamcode2.Auto.Blue_Far;
-import org.firstinspires.ftc.teamcode2.Auto.Red_Close;
 import org.firstinspires.ftc.teamcode2.Auto.Red_Far;
 import org.firstinspires.ftc.teamcode2.Systems.AutoAlignSystem;
 import org.firstinspires.ftc.teamcode2.Systems.Constants;
@@ -103,7 +101,7 @@ public class Pedro_TeleOp extends OpMode {
         }
 
         limelight = new LimelightSystem(hardwareMap);
-        rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
+        rgbIndicator = new RGBIndicator(hardwareMap);
         transfer = hardwareMap.get(DcMotor.class, "transfer");
         transfer_timer = new Timer();
         follower = Constants.createPedroFollower(hardwareMap);
@@ -134,9 +132,9 @@ public class Pedro_TeleOp extends OpMode {
         }
         // Set starting pose based on alliance color
         if (auto == Constants.Auto.RED_CLOSE) {
-            startingPose = Red_Close.endPose; // Auto end pose is TeleOp start pose
+            startingPose = Red_Far.endPose; // Auto end pose is TeleOp start pose
         } else if (auto == Constants.Auto.BLUE_CLOSE) {
-            startingPose = Blue_Close.endPose;
+            startingPose = Blue_Far.endPose;
         } else if (auto == Constants.Auto.BLUE_FAR) {
             startingPose = Blue_Far.endPose;
         } else if (auto == Constants.Auto.RED_FAR) {
@@ -194,7 +192,7 @@ public class Pedro_TeleOp extends OpMode {
              follower.setPose(follower.getPose().setHeading(90)); // Facing Up
         }
         if (gamepad1.dpadDownWasPressed()) {
-             follower.setPose(allianceColor == Constants.AllianceColor.RED ? Red_Close.startPose : Blue_Close.startPose); // Reset to starting pose
+             follower.setPose(allianceColor == Constants.AllianceColor.RED ? Red_Far.startPose : Blue_Far.startPose); // Reset to starting pose
         }
 
         //Automated Path Following

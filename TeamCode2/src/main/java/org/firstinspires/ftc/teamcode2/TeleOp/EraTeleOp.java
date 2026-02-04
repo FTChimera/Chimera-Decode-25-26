@@ -11,6 +11,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode2.Systems.Constants;
+import org.firstinspires.ftc.teamcode2.Systems.LimelightSystem;
+import org.firstinspires.ftc.teamcode2.Systems.RGBIndicator;
 
 
 @TeleOp(name = "Era TeleOp", group = "TeleOp")// Name and Group
@@ -20,18 +22,20 @@ public class EraTeleOp extends LinearOpMode {
     //public LimelightSystem limelight;
 
     // declaring our PIDF tuning values
-    double  setTargetVelocity = 0;
+    double setTargetVelocity = 0;
     double setMinVelocity = 0;
    // private Follower follower;
     public static Pose startingPose;
     Constants.AllianceColor allianceColor;
+    LimelightSystem limelight;
 
-    ElapsedTime feederTimer = new ElapsedTime();
-    //   RGBIndicator rgbIndicator;
+    RGBIndicator rgbIndicator;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        //limelight = new LimelightSystem(hardwareMap);
+        // For now - don't pass in hardware Map because then it won't throw an error.
+        // When Limelight is added, pass in hardwareMap
+        limelight = new LimelightSystem();
         //  rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
         //    rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
         //while (!isStarted() && !isStopRequested())
@@ -230,9 +234,6 @@ public class EraTeleOp extends LinearOpMode {
                 OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
 
-                telemetry.addData("Outake Motor Velocity Front:", OuttakeMotor.getVelocity());
-                telemetry.addData("Target Velocity front", setTargetVelocity);
-                telemetry.addData("Min Velocity front", setMinVelocity);
             }
 
             if (gamepad1.a)
@@ -241,17 +242,12 @@ public class EraTeleOp extends LinearOpMode {
                 setTargetVelocity = Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
                 OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
-                telemetry.addData("Outake Motor Velocity Back", OuttakeMotor.getVelocity());
-                telemetry.addData("Target Velocity Back", setTargetVelocity);
-                telemetry.addData("Min Velocity Back", setMinVelocity);
 
             }
 
             if (gamepad1.x) {
                 intakeMotor.setPower(1);
                 transferMotor.setPower(0.5);
-                telemetry.addData("Intake Motor power", intakeMotor.getPower());
-                telemetry.addData("Transfer Motor power", transferMotor.getPower());
             }
 
             // In-take
@@ -264,17 +260,19 @@ public class EraTeleOp extends LinearOpMode {
             if (gamepad1.b) {
                 OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);
                 transferMotor.setPower(0);
+                setTargetVelocity = 0;
+                setMinVelocity = 0;
             }
 
-            if (gamepad1.dpadUpWasPressed()) {
+            if (gamepad1.rightBumperWasPressed()) {
                 setTargetVelocity += Constants.INCREMENT_CHANGE_IN_VELOCITY;
-                telemetry.addData("Target Velocity Back", setTargetVelocity);
+                OuttakeMotor.setVelocity(setTargetVelocity);
             }
 
-            if (gamepad1.dpadDownWasPressed()) {
+            if (gamepad1.leftBumperWasPressed()) {
                 if (setTargetVelocity > Constants.INCREMENT_CHANGE_IN_VELOCITY) {
                     setTargetVelocity -= Constants.INCREMENT_CHANGE_IN_VELOCITY;
-                    telemetry.addData("Target Velocity Back", setTargetVelocity);
+                    OuttakeMotor.setVelocity(setTargetVelocity);
                 }
             }
 
@@ -285,7 +283,11 @@ public class EraTeleOp extends LinearOpMode {
                 intakeMotor.setPower(0);
             }
 
-
+            telemetry.addData("Intake Motor power", intakeMotor.getPower());
+            telemetry.addData("Transfer Motor power", transferMotor.getPower());
+            telemetry.addData("Outake Motor Velocity:", OuttakeMotor.getVelocity());
+            telemetry.addData("Target Velocity", setTargetVelocity);
+            telemetry.addData("Min Velocity", setMinVelocity);
             telemetry.update();
         }
     }

@@ -21,7 +21,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 @SuppressWarnings("SpellCheckingInspection")
 public class Constants {
 
-    public static final double INCREMENT_CHANGE_IN_VELOCITY = ;
+    public static final double INCREMENT_CHANGE_IN_VELOCITY = 25;
 
     public static double applyPolynomialToDriveInputs(double input) {
         double output = input;
@@ -43,9 +43,10 @@ public class Constants {
     public static final double TRANSFER_DOWN_POSITION = 0;
     public static final double SLEEP_BEFORE_INTAKE_START = 1020;
     public static final double SLEEP_BEFORE_INTAKE_RESET_LAUNCHING = 1600;
+    public static final double RAPID_FIRE_TIME = 1000;
     public static final double VELOCITY_TOLERANCE = 70;
-    public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 550;// Set target velocity from back launch zone
-    public static double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 1100;// Set target velocity from front launch zone
+    public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1100;// Set target velocity from front launch zone
+    public static double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 900;// Set target velocity from goal
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     public static int[] BALL_NUM_INTAKE_NEEDED = {2,3};
     public static PIDFCoefficients LaunchPIDF = new PIDFCoefficients(

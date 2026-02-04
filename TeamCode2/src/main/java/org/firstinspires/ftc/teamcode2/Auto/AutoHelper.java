@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode2.Auto;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 
+import static org.firstinspires.ftc.teamcode2.Systems.Constants.RAPID_FIRE_TIME;
 import static org.firstinspires.ftc.teamcode2.Systems.Constants.SLEEP_BEFORE_INTAKE_START;
 import static org.firstinspires.ftc.teamcode2.Systems.Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
 import static org.firstinspires.ftc.teamcode2.Systems.Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
@@ -63,7 +64,12 @@ public class AutoHelper {
     }
 
     // The boolean is to indicate whether the sequence was completed (false: continue, true: sequence done)
-    public boolean runLauncherSequence(boolean back, int numBalls) {
+    public boolean runLauncherSequence(boolean backLaunchZone, int numberOfBalls) {
+        // return runLauncherSequenceOld(backLaunchZone, numberOfBalls);
+        return runLauncherSequenceRapidFire(backLaunchZone);
+    }
+    // OLD ONE BALL LAUNCHING
+    public boolean runLauncherSequenceOld(boolean back, int numBalls) {
         double velocity = back? TARGET_VELOCITY_BACK_LAUNCH_ZONE : TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
         if (launchState == LaunchState.IDLE) {
             launcher.setVelocity(velocity - VELOCITY_TOLERANCE);
@@ -109,6 +115,46 @@ public class AutoHelper {
                         ballLaunchTimer.resetTimer();
                     }
                 }
+            }
+            return false;
+        } else if (launchState == LaunchState.SPIN_DOWN) {
+            launcher.setVelocity(0);
+            transfer.setPower(TRANSFER_DOWN_POSITION);
+            IntakeStop();
+            iterations = 0; // RESET FOR NEXT LAUNCH
+            next();
+            return true; // Sequence complete
+        }
+        return false;
+    }
+
+    // NEW RAPIDFIRE LAUNCHING
+    // maybe todo: increase velocity while shooting?? depends on PIDF?
+    public boolean runLauncherSequenceRapidFire(boolean back) {
+        double velocity = back? TARGET_VELOCITY_BACK_LAUNCH_ZONE : TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+        if (launchState == LaunchState.IDLE) {
+            launcher.setVelocity(velocity - VELOCITY_TOLERANCE);
+            launcher.setVelocity(velocity);
+            next();
+            return false;
+        } else if (launchState == LaunchState.SPINUP_LAUNCHER) {
+            if (launcher.getVelocity() >= velocity - VELOCITY_TOLERANCE) {
+                transfer.setPower(TRANSFER_UP_POSITION);
+                next();
+                isLaunching = false;
+            }
+            return false;
+        } else if (launchState == LaunchState.SPINUP_TRANSFER) {
+            if (launchSequenceTimer.getElapsedTimeSeconds()*1000 >= SLEEP_BEFORE_INTAKE_START) {
+                Intake();
+                isLaunching = false;
+                next();
+            }
+            return false;
+        } else if (launchState == LaunchState.INTAKE) {
+            if (ballLaunchTimer.getElapsedTimeSeconds()*1000 >= RAPID_FIRE_TIME) {
+                isLaunching = false;
+                next();
             }
             return false;
         } else if (launchState == LaunchState.SPIN_DOWN) {

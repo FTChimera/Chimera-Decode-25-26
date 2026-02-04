@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode2.Systems;
 
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 @SuppressWarnings("SpellCheckingInspection")
 /*
@@ -48,9 +49,20 @@ public class RGBIndicator {
     public static double WHITE_PWM = 1.0;
 
     private Servo rgb;
-    public RGBIndicator(Servo indicator){this.rgb = indicator;rgb.setPosition(BLACK_PWM);}
-    public void setCustomPWM(double val) {rgb.setPosition(val);}
+    private boolean isBeingUsed;
+    public RGBIndicator(HardwareMap hardwareMap){
+        Servo indicator = hardwareMap.get(Servo.class, "rgb");
+        this.rgb = indicator;rgb.setPosition(BLACK_PWM); isBeingUsed=true;
+    }
+    public RGBIndicator() {
+        isBeingUsed = false;
+    }
+    public void setCustomPWM(double val) {
+        if (!isBeingUsed) return;
+        rgb.setPosition(val);
+    }
     public void setColor(Color col) {
+        if (!isBeingUsed) return;
         if (col==Color.BLACK) rgb.setPosition(BLACK_PWM);
         if (col==Color.RED) rgb.setPosition(RED_PWM);
         if (col==Color.ORANGE) rgb.setPosition(ORANGE_PWM);
@@ -65,6 +77,7 @@ public class RGBIndicator {
         if (col==Color.WHITE) rgb.setPosition(WHITE_PWM);
     }
     public void updateUsingLL(LimelightSystem ll) {
+        if (!isBeingUsed) return;
         if (ll.isDisconnected) {
             this.setColor(RGBIndicator.Color.BLACK); // Limelight not looking at target
         }
