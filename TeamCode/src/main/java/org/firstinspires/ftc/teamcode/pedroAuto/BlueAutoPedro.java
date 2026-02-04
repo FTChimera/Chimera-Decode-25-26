@@ -43,7 +43,7 @@ public class BlueAutoPedro extends OpMode {
     final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
     final double SERVO_LAUNCH_POSITION = 0.5;
     final int SERVO_REST_POSITION = 1;
-    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 875;
+    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 900;
     final int MAX_RPM_WAIT_TIME_SECONDS = 1000;
     final int CHIMERA_LAUNCH = 1;
     final int CHIMERA_LAUNCH_INTAKE = 2;

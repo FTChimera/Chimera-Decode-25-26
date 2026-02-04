@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedroAuto;
-import static android.os.SystemClock.sleep;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
@@ -11,24 +11,25 @@ import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Systems.Consts;
 
-@Autonomous(name = "BlueAutoFarPark", group = "pedroAuto")
-public class BlueAutoFarPark extends OpMode {
+@Autonomous(name = "BlueAutoFar", group = "pedroAuto")
+public class BlueAutoFar extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherShotCount = 0, launcherStage = 0;
     private final Pose startPose = new Pose(56.2, 8.2, Math.toRadians(270)); // Start Pose of our robot.
     private final Pose launchPose = new Pose(56.7, 17.2, Math.toRadians(294));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose blue1Intake = new Pose(10.2,9.1,Math.toRadians(180));
+    private final Pose launchControl = new Pose(56,18.9,Math.toRadians(180));
     private final Pose finalpose = new Pose(37.4, 8.8, Math.toRadians(90));
 
 
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen;
 
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1200;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1250;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double SERVO_LAUNCH_POSITION = 0.5;
@@ -66,8 +67,14 @@ public class BlueAutoFarPark extends OpMode {
         pathOne = new Path(new BezierLine(startPose, launchPose));
         pathOne.setLinearHeadingInterpolation(startPose.getHeading(), launchPose.getHeading());
 
-        pathTwo = new Path(new BezierLine(launchPose, finalpose));
-        pathTwo.setLinearHeadingInterpolation(launchPose.getHeading(), finalpose.getHeading());
+        pathTwo = new Path(new BezierCurve(launchPose, launchControl, blue1Intake));
+        pathTwo.setLinearHeadingInterpolation(launchPose.getHeading(), blue1Intake.getHeading());
+
+        pathThree = new Path(new BezierLine(blue1Intake, launchPose));
+        pathThree.setLinearHeadingInterpolation(blue1Intake.getHeading(), launchPose.getHeading());
+
+        pathFour = new Path(new BezierLine(launchPose, finalpose));
+        pathFour.setLinearHeadingInterpolation(launchPose.getHeading(), finalpose.getHeading());
 
     }
     public void autonomousPathUpdate() {
@@ -89,8 +96,9 @@ public class BlueAutoFarPark extends OpMode {
                 if(!first_iteration) {
                     setPathState(CHIMERA_PATH_TWO);
                     first_iteration = true;
-                } else {
-                    setPathState(CHIMERA_STOP);
+                } else if (!second_iteration) {
+                   setPathState(CHIMERA_PATH_FOUR);
+                   second_iteration = true;
                 }
 
                 break;
@@ -98,9 +106,21 @@ public class BlueAutoFarPark extends OpMode {
                 if (!follower.isBusy()) {
                     Intake();
                     follower.followPath(pathTwo);
-                    setPathState(CHIMERA_STOP);
+                    setPathState(CHIMERA_PATH_THREE);
                 }
                 break;
+            case CHIMERA_PATH_THREE:
+                if (!follower.isBusy()){
+                    IntakeStop();
+                    follower.followPath(pathThree);
+                    setPathState(CHIMERA_LAUNCH);
+                }
+                break;
+            case CHIMERA_PATH_FOUR:
+                if(!follower.isBusy()) {
+                    follower.followPath(pathFour);
+                    setPathState(CHIMERA_STOP);
+                }
             case CHIMERA_STOP:
                 IntakeStop();
                 LauncherStop();

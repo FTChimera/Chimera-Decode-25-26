@@ -42,7 +42,7 @@ public class RedAutoPedro extends OpMode {
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double SERVO_LAUNCH_POSITION = 0.5;
     final double SERVO_REST_POSITION = 1;
-    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 1000;
+    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 900;
     final int MAX_RPM_WAIT_TIME_SECONDS = 1000;
     final int CHIMERA_LAUNCH = 1;
     final int CHIMERA_LAUNCH_INTAKE = 2;

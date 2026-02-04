@@ -17,6 +17,13 @@ apply from: '../build.dependencies.gradle'
 
 android {
     namespace = 'org.firstinspires.ftc.teamcode'
+    sourceSets {
+        main {
+            java {
+                srcDirs 'src/main/java', '~Documents/projects/Chimera-Decode-25-26-main2/TeamCode/java/org/firstinspires/ftc/teamcode'
+            }
+        }
+    }
 
     packagingOptions {
         jniLibs.useLegacyPackaging true

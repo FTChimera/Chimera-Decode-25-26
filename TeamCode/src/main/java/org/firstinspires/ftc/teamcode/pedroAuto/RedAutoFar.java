@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedroAuto;
-import static android.os.SystemClock.sleep;
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.BRAKE;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
@@ -11,31 +11,30 @@ import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Systems.Consts;
 
-@Autonomous(name = "BlueAutoPedroFar", group = "pedroAuto")
-public class BlueAutoPedroFar extends OpMode {
+@Autonomous(name = "RedAutoFar", group = "pedroAuto")
+public class RedAutoFar extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherShotCount = 0, launcherStage = 0;
-    private final Pose startPose = new Pose(56.2, 8.2, Math.toRadians(270)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(56.7, 17.2, Math.toRadians(290));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-    private final Pose intakePrep = new Pose(44.5,34.8, Math.toRadians(180));
-    private final Pose blue1Intake = new Pose(21, 34.8, Math.toRadians(180));
-    private final Pose finalpose = new Pose(35.1, 16.4, Math.toRadians(90));
+    private final Pose startPose = new Pose(87.8, 8.2, Math.toRadians(270)); // Start Pose of our robot.
+    private final Pose launchPose = new Pose(87.3, 17.2, Math.toRadians(246));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose blue1Intake = new Pose(133.8,9.1,Math.toRadians(0));
+    private final Pose launchControl = new Pose(88,18.9,Math.toRadians(0));
+    private final Pose finalpose = new Pose(106.6, 8.8, Math.toRadians(90));
 
 
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen;
 
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1200;// Set target velocity from back launch zone
+    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1250;// Set target velocity from back launch zone
     final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     final double SERVO_LAUNCH_POSITION = 0.5;
     final int SERVO_REST_POSITION = 1;
-    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 1500;
+    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 1750;
     final int MAX_RPM_WAIT_TIME_SECONDS = 1000;
     final int CHIMERA_LAUNCH = 1;
     final int CHIMERA_LAUNCH_INTAKE = 2;
@@ -68,17 +67,14 @@ public class BlueAutoPedroFar extends OpMode {
         pathOne = new Path(new BezierLine(startPose, launchPose));
         pathOne.setLinearHeadingInterpolation(startPose.getHeading(), launchPose.getHeading());
 
-        pathTwo = new Path(new BezierLine(launchPose, intakePrep));
-        pathTwo.setLinearHeadingInterpolation(launchPose.getHeading(), intakePrep.getHeading());
+        pathTwo = new Path(new BezierCurve(launchPose, launchControl, blue1Intake));
+        pathTwo.setLinearHeadingInterpolation(launchPose.getHeading(), blue1Intake.getHeading());
 
-        pathThree = new Path(new BezierLine(intakePrep, blue1Intake));
-        pathThree.setLinearHeadingInterpolation(intakePrep.getHeading(), blue1Intake.getHeading());
+        pathThree = new Path(new BezierLine(blue1Intake, launchPose));
+        pathThree.setLinearHeadingInterpolation(blue1Intake.getHeading(), launchPose.getHeading());
 
-        pathFour = new Path(new BezierLine(blue1Intake, launchPose));
-        pathFour.setLinearHeadingInterpolation(blue1Intake.getHeading(), launchPose.getHeading());
-
-        pathFive = new Path(new BezierLine(launchPose, finalpose));
-        pathFive.setLinearHeadingInterpolation(launchPose.getHeading(), finalpose.getHeading());
+        pathFour = new Path(new BezierLine(launchPose, finalpose));
+        pathFour.setLinearHeadingInterpolation(launchPose.getHeading(), finalpose.getHeading());
 
     }
     public void autonomousPathUpdate() {
@@ -101,10 +97,8 @@ public class BlueAutoPedroFar extends OpMode {
                     setPathState(CHIMERA_PATH_TWO);
                     first_iteration = true;
                 } else if (!second_iteration) {
-                    setPathState(CHIMERA_PATH_FIVE);
+                    setPathState(CHIMERA_PATH_FOUR);
                     second_iteration = true;
-                } else {
-                    setPathState(CHIMERA_STOP);
                 }
 
                 break;
@@ -116,25 +110,17 @@ public class BlueAutoPedroFar extends OpMode {
                 }
                 break;
             case CHIMERA_PATH_THREE:
-                if (!follower.isBusy()) {
+                if (!follower.isBusy()){
+                    IntakeStop();
                     follower.followPath(pathThree);
-                    setPathState(CHIMERA_PATH_FOUR);
+                    setPathState(CHIMERA_LAUNCH);
                 }
                 break;
             case CHIMERA_PATH_FOUR:
-                if (!follower.isBusy()) {
+                if(!follower.isBusy()) {
                     follower.followPath(pathFour);
-                    setPathState(CHIMERA_LAUNCH);
-                    IntakeStop();
-                }
-                break;
-            case CHIMERA_PATH_FIVE:
-                if (!follower.isBusy()) {
-                    Intake();
-                    follower.followPath(pathFive);
                     setPathState(CHIMERA_STOP);
                 }
-                break;
             case CHIMERA_STOP:
                 IntakeStop();
                 LauncherStop();
@@ -313,6 +299,7 @@ public class BlueAutoPedroFar extends OpMode {
     }
     public void Intake() {
         intakeMotor.setPower(1);
+
     }
     public void IntakeStop() {
         intakeMotor.setPower(0);
