@@ -36,7 +36,7 @@ public class EraTeleOp extends LinearOpMode {
         // For now - don't pass in hardware Map because then it won't throw an error.
         // When Limelight is added, pass in hardwareMap
         limelight = new LimelightSystem(hardwareMap);
-        rgbIndicator = new RGBIndicator();
+        rgbIndicator = new RGBIndicator(hardwareMap);
         rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
         //while (!isStarted() && !isStopRequested())
         allianceColor = Constants.AllianceColor.RED;
@@ -71,14 +71,14 @@ public class EraTeleOp extends LinearOpMode {
 
         // Declare our motors
         // Make sure your ID's match your configuration
-        DcMotor frontLeftMotor = hardwareMap.dcMotor.get("flm");
-        DcMotor backLeftMotor = hardwareMap.dcMotor.get("blm");
-        DcMotor frontRightMotor = hardwareMap.dcMotor.get("frm");
-        DcMotor backRightMotor = hardwareMap.dcMotor.get("brm");
+        DcMotor frontLeftMotor = hardwareMap.dcMotor.get(Constants.pedroMecanumDriveConstants.leftFrontMotorName);
+        DcMotor backLeftMotor = hardwareMap.dcMotor.get(Constants.pedroMecanumDriveConstants.leftRearMotorName);
+        DcMotor frontRightMotor = hardwareMap.dcMotor.get(Constants.pedroMecanumDriveConstants.rightFrontMotorName);
+        DcMotor backRightMotor = hardwareMap.dcMotor.get(Constants.pedroMecanumDriveConstants.rightRearMotorName);
         // Using DcMotorEx instead of DcMotor to use PID controller
-        DcMotorEx OuttakeMotor = hardwareMap.get(DcMotorEx.class,"launcher");
-        DcMotor intakeMotor = hardwareMap.dcMotor.get("intake");
-        DcMotor transferMotor = hardwareMap.dcMotor.get("transfer");
+        DcMotorEx OuttakeMotor = hardwareMap.get(DcMotorEx.class,"OuttakeMotor");
+        DcMotor intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
+        DcMotor transferMotor = hardwareMap.dcMotor.get("transferMotor");
 
         //follower = Constants.createPedroFollower(hardwareMap);
 
@@ -254,7 +254,7 @@ public class EraTeleOp extends LinearOpMode {
 
             if (gamepad1.x) {
                 intakeMotor.setPower(1);
-                transferMotor.setPower(0.5);
+                transferMotor.setPower(Constants.TRANSFER_UP_POSITION);
             } else {
 
                 // In-take
@@ -264,7 +264,7 @@ public class EraTeleOp extends LinearOpMode {
             }
             if (gamepad1.b) {
                 OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);
-                transferMotor.setPower(0);
+                transferMotor.setPower(Constants.TRANSFER_DOWN_POSITION);
                 setTargetVelocity = 0;
                 setMinVelocity = 0;
             }

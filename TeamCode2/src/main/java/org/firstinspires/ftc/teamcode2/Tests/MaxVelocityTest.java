@@ -17,7 +17,7 @@ public class MaxVelocityTest extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        motor = hardwareMap.get(DcMotorEx.class, "launcher");
+        motor = hardwareMap.get(DcMotorEx.class, "OuttakeMotor");
         waitForStart();
         while (opModeIsActive()) {
             currentVelocity = motor.getVelocity();

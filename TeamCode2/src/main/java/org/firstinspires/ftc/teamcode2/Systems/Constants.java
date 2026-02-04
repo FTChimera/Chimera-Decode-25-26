@@ -39,7 +39,7 @@ public class Constants {
     public static final double LIMELIGHT_PIDF_INTEGRAL_LIMIT = 10;
 
 
-    public static final double TRANSFER_UP_POSITION = 0.9;
+    public static final double TRANSFER_UP_POSITION = 0.5;
     public static final double TRANSFER_DOWN_POSITION = 0;
     public static final double SLEEP_BEFORE_INTAKE_START = 1020;
     public static final double SLEEP_BEFORE_INTAKE_RESET_LAUNCHING = 1600;
@@ -79,10 +79,10 @@ public class Constants {
     }
     public static Pose RED_GOAL = new Pose(130.37, 127.64, Math.toRadians(45));
     public static Pose BLUE_GOAL = new Pose(13.63, 127.64, Math.toRadians(135));
-    public static Pose RED_SHOOTING_FRONT = new Pose(85, 40, Math.toRadians(0));
-    public static Pose RED_SHOOTING_BACK = new Pose(45, 98, Math.toRadians(0));
-    public static Pose BLUE_SHOOTING_FRONT = new Pose(60, 85, Math.toRadians(180));
-    public static Pose BLUE_SHOOTING_BACK = new Pose(100, 40, Math.toRadians(180));
+    public static Pose RED_SHOOTING_FRONT = new Pose(123.5, 122.8, Math.toRadians(37));
+    public static Pose RED_SHOOTING_BACK = new Pose(114, 114, Math.toRadians(45));
+    public static Pose BLUE_SHOOTING_FRONT = new Pose(20.5, 122.8, Math.toRadians(143));
+    public static Pose BLUE_SHOOTING_BACK = new Pose(30, 114, Math.toRadians(180));
     public static Pose RED_PARKING = new Pose((double) 270/7, (double) 234/7);
     public static Pose BLUE_PARKING = new Pose((double) 738/7, (double) 234/7);
     // PEDRO PATHING CONSTANTS
@@ -106,10 +106,10 @@ public class Constants {
     public static final double VELOCITY_SCALING_FACTOR = 1;
     public static MecanumConstants pedroMecanumDriveConstants = new MecanumConstants()
             .maxPower(1)
-            .rightFrontMotorName("frm")
-            .rightRearMotorName("brm")
-            .leftRearMotorName("blm")
-            .leftFrontMotorName("flm")
+            .rightFrontMotorName("frontLeftMotor")
+            .rightRearMotorName("backRightMotor")
+            .leftRearMotorName("backLeftMotor")
+            .leftFrontMotorName("frontLeftMotor")
             // intake and launcher are "intake" and "launcher". transfer is "transfer"
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)

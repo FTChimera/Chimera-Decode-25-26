@@ -27,7 +27,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode2.Auto.Blue_Far;
@@ -54,7 +53,7 @@ public class Pedro_TeleOp extends OpMode {
     * Right trigger - intake
     * Left trigger - reverse intake
     * Left bumper - run/stop launcher
-    * Right bumper - run CRServo to launch ball
+    * Right bumper - run transfer and intake to launch ball
     * A - automated drive to launch zone (which ever is closest)
     * Y - Pedro pathing automated parking aid
     * B - Stop automated drive
@@ -80,10 +79,8 @@ public class Pedro_TeleOp extends OpMode {
     double dt;
     private enum LaunchingState {
         IDLE,
-        LAUNCHER_GOING_UP,
-        TRANSFER_GOING_UP,
-        INTAKE,
-        GOING_DOWN
+        LAUNCHER_SPINNING_UP,
+        FIRING
     }
     private LaunchingState launchingState = LaunchingState.IDLE;
     protected MultipleTelemetry telemetryM;
@@ -102,7 +99,7 @@ public class Pedro_TeleOp extends OpMode {
 
         limelight = new LimelightSystem(hardwareMap);
         rgbIndicator = new RGBIndicator(hardwareMap);
-        transfer = hardwareMap.get(DcMotor.class, "transfer");
+        transfer = hardwareMap.get(DcMotor.class, "transferMotor");
         transfer_timer = new Timer();
         follower = Constants.createPedroFollower(hardwareMap);
         follower.update();
@@ -110,9 +107,10 @@ public class Pedro_TeleOp extends OpMode {
                 telemetry,
                 FtcDashboard.getInstance().getTelemetry()
         ); // cannot combine panels telemetry with normal so need to send update from panels
+        // configure to update FTC Dashboard and normal at the same time
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
-        launcher = hardwareMap.get(DcMotorEx.class, "launcher");
-        intake = hardwareMap.dcMotor.get("intake");
+        launcher = hardwareMap.get(DcMotorEx.class, "OuttakeMotor");
+        intake = hardwareMap.dcMotor.get("intakeMotor");
 
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
         launcher.setZeroPowerBehavior(FLOAT);
@@ -192,7 +190,7 @@ public class Pedro_TeleOp extends OpMode {
              follower.setPose(follower.getPose().setHeading(90)); // Facing Up
         }
         if (gamepad1.dpadDownWasPressed()) {
-             follower.setPose(allianceColor == Constants.AllianceColor.RED ? Red_Far.startPose : Blue_Far.startPose); // Reset to starting pose
+             follower.setPose(allianceColor == Constants.AllianceColor.RED ? Constants.RED_SHOOTING_FRONT : Constants.BLUE_SHOOTING_FRONT); // Reset to front launching pose
         }
 
         //Automated Path Following
@@ -259,6 +257,7 @@ public class Pedro_TeleOp extends OpMode {
         } else {
             // Not auto-aiming, ensure normal teleop drive continues
             // No additional action needed as setTeleOpDrive handles this
+            automatedDrive = false;
             autoAlignSystem.resetPIDController();
         }
 
@@ -278,44 +277,33 @@ public class Pedro_TeleOp extends OpMode {
                 launcherOn = false;
             }
         }
-        // ALL BALL LAUNCHING LOGIC - LAUNCHER THEN INTAKE THEN TRANSFER
+        // ALL BALL LAUNCHING LOGIC - WITH VELOCITY CHECK
         if (gamepad1.right_bumper && launchingState==LaunchingState.IDLE) {
-            // In IDLE, we don't do anything
-            launchingState = LaunchingState.LAUNCHER_GOING_UP;
-            transfer_timer.resetTimer();
+
+            launchingState = LaunchingState.LAUNCHER_SPINNING_UP;
         }
 
-        if (launchingState==LaunchingState.LAUNCHER_GOING_UP) {
-            // This is the Fire logic.
+        if (launchingState == LaunchingState.LAUNCHER_SPINNING_UP) {
+            // Wait for launcher to reach minimum velocity before starting transfer and intake
             double velocity = IsBackLaunchZoneCloser() ?
                     Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE : Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
             double min_velocity = velocity - VELOCITY_TOLERANCE;
-            // Wait until the launcher reaches past the velocity tolerance
+            
             if (launcher.getVelocity() >= min_velocity) {
                 transfer.setPower(TRANSFER_UP_POSITION);
-                launchingState = LaunchingState.TRANSFER_GOING_UP;
-                transfer_timer.resetTimer();
-            }
-
-        }
-        if (launchingState==LaunchingState.TRANSFER_GOING_UP) {
-            if (transfer_timer.getElapsedTimeSeconds()*1000 >= Constants.SLEEP_BEFORE_INTAKE_START) {
-                launchingState = LaunchingState.INTAKE;
+                intake.setPower(1);
+                launchingState = LaunchingState.FIRING;
                 transfer_timer.resetTimer();
             }
         }
 
-        if (launchingState==LaunchingState.INTAKE) {
-            intake.setPower(1);
-            if (transfer_timer.getElapsedTimeSeconds()*1000 >= Constants.SLEEP_BEFORE_INTAKE_RESET_LAUNCHING) {
-                launchingState = LaunchingState.GOING_DOWN;
-                transfer_timer.resetTimer();
+        if (launchingState == LaunchingState.FIRING) {
+            // Wait for RAPID_FIRE_TIME then reset everything
+            if (transfer_timer.getElapsedTimeSeconds() * 1000 >= Constants.RAPID_FIRE_TIME) {
+                transfer.setPower(Constants.TRANSFER_DOWN_POSITION);
+                intake.setPower(0);
+                launchingState = LaunchingState.IDLE;
             }
-        }
-        if (launchingState==LaunchingState.GOING_DOWN) {
-            transfer.setPower(Constants.TRANSFER_DOWN_POSITION);
-            launchingState = LaunchingState.IDLE;
-            transfer_timer.resetTimer();
         }
         // INCREASE/DECREASE LAUNCHER VELOCITY
         if (gamepad1.rightStickButtonWasPressed()) {
@@ -323,16 +311,16 @@ public class Pedro_TeleOp extends OpMode {
         } else if (gamepad1.leftStickButtonWasPressed()) {
             launcher.setVelocity(launcher.getVelocity()-Constants.INCREMENT_CHANGE_IN_VELOCITY);
         }
-        // INTAKE CONTROL
-        if (!(launchingState == LaunchingState.GOING_DOWN)) {
+        // INTAKE CONTROL - Only manual control when not firing
+        if (launchingState == LaunchingState.IDLE) {
             intake.setPower(Math.max(Math.min(
                     gamepad1.right_trigger - gamepad1.left_trigger * 1.1, 1
             ), -1)); //Counteract imperfect intake power
         }
         panelsTelemetry.addData("Angle (in degrees)", limelight.tx); // LLScore is negative/positive
         panelsTelemetry.addData("Launcher Velocity", launcher.getVelocity());
-        panelsTelemetry.addData("Servo data", launchingState);
-        if (launchingState != LaunchingState.IDLE) panelsTelemetry.addData("Servo Timer (ms)", transfer_timer.getElapsedTimeSeconds()*1000);
+        panelsTelemetry.addData("Launching State", launchingState);
+        if (launchingState != LaunchingState.IDLE) panelsTelemetry.addData("Launch Timer (ms)", transfer_timer.getElapsedTimeSeconds()*1000);
     }
     private Pose getRobotPoseFromCamera() {
         // Thanks to team 20367 RMS Overdrive for this code snippet
