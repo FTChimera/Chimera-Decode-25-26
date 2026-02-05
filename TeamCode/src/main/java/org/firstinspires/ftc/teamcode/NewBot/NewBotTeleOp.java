@@ -11,8 +11,8 @@ import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 
 
-@TeleOp(name = "Era TeleOp", group = "TeleOp")// Name and Group
-public class EraTeleOp extends LinearOpMode {
+@TeleOp(name = "NewBotTeleOp", group = "TeleOp")// Name and Group
+public class NewBotTeleOp extends LinearOpMode {
 
     boolean TwoGamepads = false;
     //public LimelightSystem limelight;
@@ -80,10 +80,6 @@ public class EraTeleOp extends LinearOpMode {
 
         telemetry.addLine("Setting the motors now");
 
-        // Reverse the right side motors. This may be wrong for your setup.
-        // If your robot moves backwards when commanded to go forwards,
-        // reverse the left side instead.
-        // See the note about this earlier on this page.
         frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -91,21 +87,10 @@ public class EraTeleOp extends LinearOpMode {
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         transferMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        /*
-         * Here we set our Left and Right Outtake Motor to the RUN_USING_ENCODER runmode.
-         * If you notice that you have no control over the velocity of the motor, it just jumps
-         * right to a number much higher than your set point, make sure that your encoders are plugged
-         * into the port right beside the motor itself. And that the motors polarity is consistent
-         * through any wiring.
-         */
         OuttakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         transferMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        /*
-         * Setting zeroPowerBehavior to BRAKE enables a "brake mode". This causes the motor to
-         * slow down much faster when it is coasting. This creates a much more controllable
-         * drivetrain. As the robot stops much quicker.
-         */
+
         OuttakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         transferMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
@@ -133,7 +118,7 @@ public class EraTeleOp extends LinearOpMode {
             //follower.setStartingPose(startingPose);
             // follower.update();
             telemetry.addData("Alliance Color", "Red");
-            //  telemetry.addData("Starting Pose", follower.getPose());
+            // telemetry.addData("Starting Pose", follower.getPose());
             telemetry.addData("Alliance Color Variable", allianceColor);
         }
 
@@ -143,14 +128,20 @@ public class EraTeleOp extends LinearOpMode {
          */
 
         telemetry.addData("Status", "Initialized");telemetry.update();
-        //      limelight.setDevice(hardwareMap.get(Limelight3A.class, "limelight"));
+        // limelight.setDevice(hardwareMap.get(Limelight3A.class, "limelight"));
         waitForStart();
-        //   limelight.startLLWithPipeline(0);
-        //   follower.startTeleopDrive();
+        // limelight.startLLWithPipeline(0);
+        // follower.startTeleopDrive();
 
         if (isStopRequested()) return;
         limelight.start(0);
         telemetry.addData("Status", "Running");
+
+        // --- NEW VARIABLES FOR BUTTON TOGGLES ---
+        boolean lastDpadUp = false;
+        boolean lastDpadDown = false;
+        // ----------------------------------------
+
         while (opModeIsActive()) {
 
             limelight.LLUpdate();
@@ -184,22 +175,6 @@ public class EraTeleOp extends LinearOpMode {
             x *= Math.abs(x);
             rx *= Math.abs(rx);
 
-            // follower.update();
-//            telemetryM.update();
-            /*
-           if (!automatedDrive)
-            {
-                if (!slowMode) follower.setTeleOpDrive(
-                       -gamepad1.left_stick_y, // Remember, Y stick value is reversed
-                        gamepad1.left_stick_x * 1.1,
-                       gamepad1.right_stick_x,
-                       true // Robot Centric
-               );
-            }
-            */
-            // Denominator is the largest motor power (absolute value) or 1
-            // This ensures all the powers maintain the same ratio,
-            // but only if at least one is out of the range [-1, 1]
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
             double frontLeftPower = 1 *(y + x + rx) / denominator;
             double backLeftPower = 1 *(y - x + rx) / denominator;
@@ -211,26 +186,6 @@ public class EraTeleOp extends LinearOpMode {
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
 
-
-            /*
-             * LL:
-             * * ------- gamepad2.a:
-             * Step 1. Find the heading and rotate to face the goal
-             * Step 2. Move forward/backward so that the robot is the correct distance from the goal
-             * Step 3. Start the outtake motors
-             * ------- dpad_up:
-             * Step 4. Check if the velocity of the motors is more than the min velocity
-             * Step 5. position servo into launch position
-             * NORMAL:
-             * When driver presses the button to launch, 7 things need to happen
-             * Step 1. Find the position of the robot on the field
-             * Step 2. Determine the TARGET_VELOCITY based on robot position
-             * Step 3. Determine the current heading of the robot in the field
-             * Step 4. Change direction of the robot so its aimed at the goal
-             * Step 5. Set TARGET_VELOCITY determined in Step 2 to start the left and right outake motors
-             * Step 6. Check if the velocity of the motors is more than the min velocity
-             * Step 7. position servo into launch position
-             */
 
             if (gamepad1.y) {
                 setMinVelocity = ConstantsTeleOp.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - ConstantsTeleOp.VELOCITY_TOLERANCE;
@@ -266,19 +221,25 @@ public class EraTeleOp extends LinearOpMode {
                 setMinVelocity = 0;
             }
 
-            if (gamepad1.rightBumperWasPressed()) {
-                setTargetVelocity += ConstantsTeleOp.INCREMENT_CHANGE_IN_VELOCITY;
+            // Check for Dpad Up (Increase Velocity)
+            boolean currentDpadUp = gamepad1.dpad_up;
+            if (currentDpadUp && !lastDpadUp) {
+                setTargetVelocity += 25;
                 OuttakeMotor.setVelocity(setTargetVelocity);
             }
+            lastDpadUp = currentDpadUp;
 
-            if (gamepad1.leftBumperWasPressed()) {
-                if (setTargetVelocity > ConstantsTeleOp.INCREMENT_CHANGE_IN_VELOCITY) {
-                    setTargetVelocity -= ConstantsTeleOp.INCREMENT_CHANGE_IN_VELOCITY;
+            // Check for Dpad Down (Decrease Velocity)
+            boolean currentDpadDown = gamepad1.dpad_down;
+            if (currentDpadDown && !lastDpadDown) {
+                if (setTargetVelocity > 25) {
+                    setTargetVelocity -= 25;
                     OuttakeMotor.setVelocity(setTargetVelocity);
                 }
             }
+            lastDpadDown = currentDpadDown;
 
-
+            // ------------------------------------
 
             telemetry.addData("Intake Motor power", intakeMotor.getPower());
             telemetry.addData("Transfer Motor power", transferMotor.getPower());

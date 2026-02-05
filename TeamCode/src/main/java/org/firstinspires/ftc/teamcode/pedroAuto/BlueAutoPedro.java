@@ -22,7 +22,7 @@ public class BlueAutoPedro extends OpMode {
     private Follower follower;
     public Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherShotCount = 0, launcherStage = 0;
-    private final Pose startPose = new Pose(20.1, 122.2, Math.toRadians(322)); // Start Pose of our robot.
+    private final Pose startPose = new Pose(20, 122.2, Math.toRadians(322)); // Start Pose of our robot.
     private final Pose launchPose = new Pose(48.1, 95.6, Math.toRadians(320));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose intakePrep = new Pose(55,85, Math.toRadians(180));
     private final Pose blue1Intake = new Pose(25.5, 85, Math.toRadians(180));

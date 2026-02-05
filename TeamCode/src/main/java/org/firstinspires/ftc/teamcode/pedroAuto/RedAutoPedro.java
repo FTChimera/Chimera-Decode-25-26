@@ -25,16 +25,16 @@ public class RedAutoPedro extends OpMode {
     private Follower follower;
     private Timer pathTimer, actionTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherShotCount = 0, launcherStage = 0;
-    private final Pose startPose = new Pose(123.9, 122.2, Math.toRadians(219.5)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(97.1, 97.2, Math.toRadians(225));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose startPose = new Pose(123.9, 122.2, Math.toRadians(38)); // Start Pose of our robot.
+    private final Pose launchPose = new Pose(97.1, 97.1, Math.toRadians(38));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose intakePrep = new Pose(92,75, Math.toRadians(0));
-    private final Pose red1Intake = new Pose(123, 76.5, Math.toRadians(0));
-    private final Pose intakePrep2 = new Pose(100.38,52, Math.toRadians(0));
+    private final Pose red1Intake = new Pose(123, 75, Math.toRadians(0));
+    private final Pose intakePrep2 = new Pose(100.3,52, Math.toRadians(0));
     private final Pose red2Intake = new Pose(135.02, 52, Math.toRadians(0));
-    private final Pose launchControl = new Pose (118.9, 55.3, Math.toRadians(0));
+    private final Pose launchControl = new Pose (118.4, 54.6, Math.toRadians(0));
     private final Pose intakePrep3 = new Pose(100.27, 37.14, Math.toRadians(0));
-    private final Pose red3intake = new Pose(135,36.73, Math.toRadians(0));
-    private final Pose finalPose = new Pose(105.2, 75.3, Math.toRadians(228));
+    private final Pose red3intake = new Pose(135.8,30.4, Math.toRadians(0));
+    private final Pose finalPose = new Pose(94.8, 130.2, Math.toRadians(360));
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 
     final double TARGET_VELOCITY = 943; // Set target velocity- in RPM(e.g., 3000 RPM)
