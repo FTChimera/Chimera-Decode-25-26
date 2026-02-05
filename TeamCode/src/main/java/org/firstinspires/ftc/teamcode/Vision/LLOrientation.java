@@ -22,7 +22,7 @@ public class LLOrientation extends LinearOpMode {
     public String[] options = {"April Heading Rotation", "Distance Test", "April Tag Test", "RGB Indicator Test", "PIDF Tuning Test"};
     public int mode;
     private Follower follower;
-    public LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
+    public LimelightSystem limelight = new LimelightSystem(hardwareMap);
     void renderSelectMode(int selected) {
         telemetry.addData("Button to change between testing modes", "Gamepad 2 Dpad up/down");
         telemetry.addData("Button to select testing mode", "Gamepad2 A");
@@ -62,7 +62,6 @@ public class LLOrientation extends LinearOpMode {
     @Override
     public void runOpMode() {
         follower = Constants.createFollower(hardwareMap);int pipe = 0; // int pipe = allianceColor==Consts.AllianceColor.RED?4:5
-        limelight.setDevice(hardwareMap.get(Limelight3A.class, "limelight"));
         int selected=0;
         while (opModeInInit()) {
             renderSelectMode(selected);
@@ -72,7 +71,7 @@ public class LLOrientation extends LinearOpMode {
         }
         double[] maxVelocity = {0,0,0,0};
         double[] currentVelocity = {0,0,0,0};
-        waitForStart();limelight.startLLWithPipeline(pipe);follower.startTeleopDrive();
+        waitForStart();limelight.start(pipe);follower.startTeleopDrive();
 
         while (opModeIsActive()) {
             limelight.LLUpdate();

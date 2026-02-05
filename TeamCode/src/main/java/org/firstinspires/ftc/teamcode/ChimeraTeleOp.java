@@ -26,7 +26,7 @@ import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
 
 @TeleOp(name = "ChimeraTeleOp", group = "AbsolutePriority")
 public class ChimeraTeleOp extends LinearOpMode {
-    public LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
+    public LimelightSystem limelight = new LimelightSystem(hardwareMap);
     double setTargetVelocity;
     double setMinVelocity = 0;
     private Follower follower;
@@ -122,7 +122,7 @@ public class ChimeraTeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
+        rgbIndicator = new RGBIndicator(hardwareMap);
         rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
        // telemetry = new MultipleTelemetry(opMode.telemetry, FtcDashboard.getInstance().getTelemetry());
         // --- INIT LOOP ---
@@ -194,11 +194,10 @@ public class ChimeraTeleOp extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        limelight.setDevice(hardwareMap.get(Limelight3A.class, "limelight"));
 
         waitForStart();
 
-        limelight.startLLWithPipeline(0);
+        limelight.start(0);
         follower.startTeleopDrive();
 
         if (isStopRequested()) return;

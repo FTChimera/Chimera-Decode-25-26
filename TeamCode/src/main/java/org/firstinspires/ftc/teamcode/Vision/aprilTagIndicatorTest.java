@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 @TeleOp
 public class aprilTagIndicatorTest extends LinearOpMode {
     Consts.AllianceColor allianceColor;
-    LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
+    LimelightSystem limelight = new LimelightSystem();
     Servo rgbIndicator;
 
 
@@ -19,10 +19,9 @@ public class aprilTagIndicatorTest extends LinearOpMode {
         allianceColor = Consts.AllianceColor.RED; // TEST
         telemetry.addData("ALLIANCE COLOR", allianceColor);telemetry.update();
         rgbIndicator = hardwareMap.get(Servo.class, "rgb");
-        limelight.setDevice(hardwareMap.get(Limelight3A.class, "limelight"));
 
         waitForStart();
-        limelight.startLLWithPipeline(allianceColor==Consts.AllianceColor.RED?4:5);
+        limelight.start(allianceColor==Consts.AllianceColor.RED?4:5);
 
         while (opModeIsActive()) {
             limelight.LLUpdate();
