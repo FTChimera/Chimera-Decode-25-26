@@ -1,105 +1,64 @@
 package org.firstinspires.ftc.teamcode.NewBot;
 
-import com.bylazar.telemetry.TelemetryManager;
-import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 
-@TeleOp(name = "NewBotTeleOp", group = "AbsolutePriority")// Name and Group
-public class NewBotTeleOp extends LinearOpMode {
 
-    final double TARGET_VELOCITY = 500; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 500;// Set target velocity from back launch zone
-    final double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 1100;// Set target velocity from front launch zone
-    final double INCREMENT_CHANGE_IN_VELOCITY = 50;
-    final double MIN_VELOCITY_BACK_LAUNCH_ZONE = 200;// Set target velocity from back launch zone
-    final double MIN_VELOCITY_FRONT_LAUNCH_ZONE = 100;// Set target velocity from back launch zone
-    final double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
-    final double MIN_VELOCITY = 1075;
-    final double FEED_TIME_SECONDS = 0.20; //The feeder servos run this long when a shot is requested.
-    final double STOP_SPEED = 0.0; //We send this power to the servos when we want them to stop.
-    final double FULL_SPEED = 1.0;
-    final int SERVO_LAUNCH_POSITION = 0;
-    final int SERVO_REST_POSITION = 1;
-    final int SLEEP_BEFORE_RESET_SERVO_POSITION = 200;
+@TeleOp(name = "Era TeleOp", group = "TeleOp")// Name and Group
+public class EraTeleOp extends LinearOpMode {
 
-    public LimelightSystem.ChimeraLL limelight = new LimelightSystem.ChimeraLL();
+    boolean TwoGamepads = false;
+    //public LimelightSystem limelight;
 
     // declaring our PIDF tuning values
-    final double Kp = 300;
-    final double Ki = 0.0;
-    final double Kd = 0.0;
-    final double Kf = 10;
-    double  setTargetVelocity = 0;
+    double setTargetVelocity = 0;
     double setMinVelocity = 0;
-    private Follower follower;
+    // private Follower follower;
     public static Pose startingPose;
-    private boolean automatedDrive = false;
-    private boolean slowMode = false;
-    private TelemetryManager telemetryM;
-    double X_Coordinate_Blue_Goal = 0;
-    double Y_Coordinate_Blue_Goal = 144;
-    double X_Coordinate_Red_Goal = 144;
-    double Y_Coordinate_Red_Goal = 144;
-    double X_Coordinate = 0.0;
-    double Y_Coordinate = 0.0;
-    double Distance_To_Goal = 0;
-    double Distance_To_Goal_Blue = 0;
-    double currentHeading = 0.0;
-    double launchPositionHeadingRadians = 0;
-    final double SHOOTING_ZONE_CLOSE_FRONT_LAUNCH_ZONE = 20;
-    final double SHOOTING_ZONE_FAR_FRONT_LAUNCH_ZONE = 60;
-    final double SHOOTING_ZONE_BACK_LAUNCH_ZONE = 65;
+    ConstantsTeleOp.AllianceColor allianceColor;
+    LimelightSystem limelight;
 
-    // TODO Change Starting position. Temporarily set starting position to back launch
-    // zone, (x,y) = (72,0)
-    final double RED_ALLIANCE_STARTING_X_COORDINATE = 104;
-    final double RED_ALLIANCE_STARTING_Y_COORDINATE = 60;
-    final double RED_ALLIANCE_STARTING_HEADING_POSITION = 180;
-
-    final double BLUE_ALLIANCE_STARTING_X_COORDINATE = 144;
-    final double BLUE_ALLIANCE_STARTING_Y_COORDINATE = 0;
-    final double BLUE_ALLIANCE_STARTING_HEADING_POSITION = 90;
-    enum AllianceColor {
-        BLUE,
-        RED
-    };
-    AllianceColor allianceColor;
-
-    ElapsedTime feederTimer = new ElapsedTime();
-    //   RGBIndicator rgbIndicator;
+    RGBIndicator rgbIndicator;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        //  rgbIndicator = new RGBIndicator(hardwareMap.get(Servo.class, "rgb"));
-        //    rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
+        // For now - don't pass in hardware Map because then it won't throw an error.
+        // When Limelight is added, pass in hardwareMap
+        limelight = new LimelightSystem(hardwareMap);
+        rgbIndicator = new RGBIndicator(hardwareMap);
+        rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
         //while (!isStarted() && !isStopRequested())
+        allianceColor = ConstantsTeleOp.AllianceColor.RED;
         while (opModeInInit())
         {
             telemetry.addData("Press 'GamePad1 Right Bumper'", "for BLUE");
             telemetry.addData("Press 'GamePad1 Left Bumper'", "for RED");
+            telemetry.addLine("Press A for 2 Gamepads, B for 1");
             // This method is called repeatedly during the init phase
-            allianceColor = AllianceColor.RED;
+            if (gamepad1.a) {
+                TwoGamepads = true;
+            }
+            if (gamepad1.b) {
+                TwoGamepads = false;
+            }
             if (gamepad1.right_bumper)
             {
-                allianceColor = AllianceColor.BLUE;
+                allianceColor = ConstantsTeleOp.AllianceColor.BLUE;
                 // Display the current selection on the Driver Station
                 telemetry.addData("Alliance", "Selected: ", "BLUE");
             } else if (gamepad1.left_bumper) {
-                allianceColor = AllianceColor.RED;
+                allianceColor = ConstantsTeleOp.AllianceColor.RED;
                 // Display the current selection on the Driver Station
                 telemetry.addData("Alliance", "Selected: ", "RED");
             } else {
-                allianceColor = AllianceColor.RED;
+                allianceColor = ConstantsTeleOp.AllianceColor.RED;
                 // Display the current selection on the Driver Station
                 telemetry.addData("Alliance", "Selected: ", "RED");
             }
@@ -108,16 +67,16 @@ public class NewBotTeleOp extends LinearOpMode {
 
         // Declare our motors
         // Make sure your ID's match your configuration
-        DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
-        DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
-        DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
-        DcMotor backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
+        DcMotor frontLeftMotor = hardwareMap.dcMotor.get(Constants.driveConstants.leftFrontMotorName);
+        DcMotor backLeftMotor = hardwareMap.dcMotor.get(Constants.driveConstants.leftRearMotorName);
+        DcMotor frontRightMotor = hardwareMap.dcMotor.get(Constants.driveConstants.rightFrontMotorName);
+        DcMotor backRightMotor = hardwareMap.dcMotor.get(Constants.driveConstants.rightRearMotorName);
         // Using DcMotorEx instead of DcMotor to use PID controller
         DcMotorEx OuttakeMotor = hardwareMap.get(DcMotorEx.class,"OuttakeMotor");
         DcMotor intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         DcMotor transferMotor = hardwareMap.dcMotor.get("transferMotor");
 
-        follower = Constants.createFollower(hardwareMap);
+        //follower = Constants.createPedroFollower(hardwareMap);
 
         telemetry.addLine("Setting the motors now");
 
@@ -126,9 +85,9 @@ public class NewBotTeleOp extends LinearOpMode {
         // reverse the left side instead.
         // See the note about this earlier on this page.
         frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         transferMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -150,34 +109,34 @@ public class NewBotTeleOp extends LinearOpMode {
         OuttakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         transferMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        OuttakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
+        OuttakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, ConstantsTeleOp.LaunchPIDF);
 
-        /*if (allianceColor == AllianceColor.RED)
+        if (allianceColor == ConstantsTeleOp.AllianceColor.RED)
         {
             // Starting position Red Goal
-            startingPose = Consts.RED_STARTING_POSE;
-            follower.setStartingPose(startingPose);
-            follower.update();
+            startingPose = new Pose();
+            //follower.setStartingPose(startingPose);
+            //follower.update();
             telemetry.addData("Alliance Color", "Red");
-            telemetry.addData("Starting Pose", follower.getPose());
+            //telemetry.addData("Starting Pose", follower.getPose());
         }
-        else if(allianceColor == AllianceColor.BLUE)
+        else if(allianceColor == ConstantsTeleOp.AllianceColor.BLUE)
         {
-            startingPose = Consts.BLUE_STARTING_POSE;
-            follower.setStartingPose(startingPose);
-            follower.update();
+            startingPose = new Pose();
+            //follower.setStartingPose(startingPose);
+            //follower.update();
             telemetry.addData("Alliance Color", "Blue");
-            telemetry.addData("Starting Pose", follower.getPose());
+            //telemetry.addData("Starting Pose", follower.getPose());
         } else {
             // Starting position Red Goal
-            startingPose = Consts.RED_STARTING_POSE;
-            follower.setStartingPose(startingPose);
-            follower.update();
+            startingPose = new Pose();
+            //follower.setStartingPose(startingPose);
+            // follower.update();
             telemetry.addData("Alliance Color", "Red");
-            telemetry.addData("Starting Pose", follower.getPose());
+            //  telemetry.addData("Starting Pose", follower.getPose());
             telemetry.addData("Alliance Color Variable", allianceColor);
         }
-*/
+
         //telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         /*
          * Tell the driver that initialization is complete.
@@ -192,10 +151,10 @@ public class NewBotTeleOp extends LinearOpMode {
         if (isStopRequested()) return;
         telemetry.addData("Status", "Running");
         while (opModeIsActive()) {
-            /*
+
             limelight.LLUpdate();
             telemetry.addData("Limelight Score", limelight.getLLScore());
-            if (limelight.getLLScore() == 0) rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
+            if (limelight.getLLScore() == 0) rgbIndicator.setColor(RGBIndicator.Color.BLACK);
             else if (limelight.getLLScore() < 6) {
                 // GREEN
                 rgbIndicator.setColor(RGBIndicator.Color.GREEN);
@@ -207,13 +166,24 @@ public class NewBotTeleOp extends LinearOpMode {
                 rgbIndicator.setColor(RGBIndicator.Color.BLACK);
             }
 
-             */
-            // if (limelight.isDisconnected) rgbIndicator.setColor(RGBIndicator.Color.RED);telemetry.addData("Disconnected",""); // DISCONNECTED
-            double y = -gamepad2.left_stick_y; // Remember, Y stick value is reversed
-            double x = gamepad2.left_stick_x * 1.1; // Counteract imperfect strafing
-            double rx = gamepad2.right_stick_x;
 
-            follower.update();
+            if (limelight.isDisconnected) rgbIndicator.setColor(RGBIndicator.Color.RED);telemetry.addData("Disconnected",""); // DISCONNECTED
+            double y, x, rx;
+            if (TwoGamepads) {
+                y = -gamepad2.left_stick_y; // Remember, Y stick value is reversed
+                x = gamepad2.left_stick_x * 1.1; // Counteract imperfect strafing
+                rx = gamepad2.right_stick_x;
+            } else {
+                y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
+                x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+                rx = gamepad1.right_stick_x;
+            }
+
+            y *= Math.abs(y);
+            x *= Math.abs(x);
+            rx *= Math.abs(rx);
+
+            // follower.update();
 //            telemetryM.update();
             /*
            if (!automatedDrive)
@@ -261,67 +231,59 @@ public class NewBotTeleOp extends LinearOpMode {
              * Step 7. position servo into launch position
              */
 
-            if (gamepad2.y) {
-                setMinVelocity = MIN_VELOCITY_FRONT_LAUNCH_ZONE;
-                setTargetVelocity = TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
-
+            if (gamepad1.y) {
+                setMinVelocity = ConstantsTeleOp.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - ConstantsTeleOp.VELOCITY_TOLERANCE;
+                setTargetVelocity = ConstantsTeleOp.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+                OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
 
-                telemetry.addData("Outake Motor Velocity Front:", OuttakeMotor.getVelocity());
-                telemetry.addData("Target Velocity front", setTargetVelocity);
-                telemetry.addData("Min Velocity front", setMinVelocity);
             }
 
-            if (gamepad2.a)
+            if (gamepad1.a)
             {
-                setMinVelocity = MIN_VELOCITY_BACK_LAUNCH_ZONE;
-                setTargetVelocity = TARGET_VELOCITY_BACK_LAUNCH_ZONE;
+                setMinVelocity = ConstantsTeleOp.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - ConstantsTeleOp.VELOCITY_TOLERANCE;
+                setTargetVelocity = ConstantsTeleOp.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
+                OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
-                telemetry.addData("Outake Motor Velocity Back", OuttakeMotor.getVelocity());
-                telemetry.addData("Target Velocity Back", setTargetVelocity);
-                telemetry.addData("Min Velocity Back", setMinVelocity);
 
             }
 
-            if (gamepad2.x) {
+            if (gamepad1.x) {
                 intakeMotor.setPower(1);
-                transferMotor.setPower(0.5);
-                telemetry.addData("Intake Motor power", intakeMotor.getPower());
-                telemetry.addData("Transfer Motor power", transferMotor.getPower());
-            }
-
-            // In-take
-            if (gamepad2.dpad_right) {
-                intakeMotor.setPower(-1);
+                transferMotor.setPower(ConstantsTeleOp.TRANSFER_UP_POSITION);
             } else {
-                intakeMotor.setPower(0);
+
+                // In-take
+                double intakePower = gamepad1.right_trigger - gamepad1.left_trigger;
+                intakePower = intakePower * 1.5;
+                intakeMotor.setPower(intakePower);
+            }
+            if (gamepad1.b) {
+                OuttakeMotor.setVelocity(ConstantsTeleOp.STOP_VELOCITY);
+                transferMotor.setPower(ConstantsTeleOp.TRANSFER_DOWN_POSITION);
+                setTargetVelocity = 0;
+                setMinVelocity = 0;
             }
 
-            if (gamepad2.b) {
-                OuttakeMotor.setVelocity(STOP_VELOCITY);
-                transferMotor.setPower(0);
+            if (gamepad1.rightBumperWasPressed()) {
+                setTargetVelocity += ConstantsTeleOp.INCREMENT_CHANGE_IN_VELOCITY;
+                OuttakeMotor.setVelocity(setTargetVelocity);
             }
 
-            if (gamepad2.dpadUpWasPressed()) {
-                setTargetVelocity += INCREMENT_CHANGE_IN_VELOCITY;
-                telemetry.addData("Target Velocity Back", setTargetVelocity);
-            }
-
-            if (gamepad2.dpadDownWasPressed()) {
-                if (setTargetVelocity > INCREMENT_CHANGE_IN_VELOCITY) {
-                    setTargetVelocity -= INCREMENT_CHANGE_IN_VELOCITY;
-                    telemetry.addData("Target Velocity Back", setTargetVelocity);
+            if (gamepad1.leftBumperWasPressed()) {
+                if (setTargetVelocity > ConstantsTeleOp.INCREMENT_CHANGE_IN_VELOCITY) {
+                    setTargetVelocity -= ConstantsTeleOp.INCREMENT_CHANGE_IN_VELOCITY;
+                    OuttakeMotor.setVelocity(setTargetVelocity);
                 }
             }
 
-            // Reverse In-take Send balls out of the motor, opposite of Intake
-            if (gamepad2.dpad_left) {
-                intakeMotor.setPower(1);
-            } else {
-                intakeMotor.setPower(0);
-            }
 
 
+            telemetry.addData("Intake Motor power", intakeMotor.getPower());
+            telemetry.addData("Transfer Motor power", transferMotor.getPower());
+            telemetry.addData("Outake Motor Velocity:", OuttakeMotor.getVelocity());
+            telemetry.addData("Target Velocity", setTargetVelocity);
+            telemetry.addData("Min Velocity", setMinVelocity);
             telemetry.update();
         }
     }

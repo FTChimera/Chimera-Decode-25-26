@@ -158,7 +158,7 @@ public class EraTeleOp extends LinearOpMode {
 
             limelight.LLUpdate();
             telemetry.addData("Limelight Score", limelight.getLLScore());
-            if (limelight.getLLScore() == 0) rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
+            if (limelight.getLLScore() == 0) rgbIndicator.setColor(RGBIndicator.Color.BLACK);
             else if (limelight.getLLScore() < 6) {
                 // GREEN
                 rgbIndicator.setColor(RGBIndicator.Color.GREEN);

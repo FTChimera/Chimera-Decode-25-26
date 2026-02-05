@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.Systems;
 
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+@SuppressWarnings("SpellCheckingInspection")
 /*
-* GOBILDA PRODUCT INSIGHT: https://cdn11.bigcommerce.com/s-x56mtydx1w/images/stencil/original/products/2275/15126/3118-0808-0002-Product-Insight-4__88285.1757516465.png?c=1
-*/
-
+ * GOBILDA PRODUCT INSIGHT: https://cdn11.bigcommerce.com/s-x56mtydx1w/images/stencil/original/products/2275/15126/3118-0808-0002-Product-Insight-4__88285.1757516465.png?c=1
+ */
 public class RGBIndicator {
     public enum Color {
         BLACK,
@@ -48,9 +49,20 @@ public class RGBIndicator {
     public static double WHITE_PWM = 1.0;
 
     private Servo rgb;
-    public RGBIndicator(Servo indicator){this.rgb = indicator;rgb.setPosition(BLACK_PWM);}
-    public void setCustomPWM(double val) {rgb.setPosition(val);}
+    private boolean isBeingUsed;
+    public RGBIndicator(HardwareMap hardwareMap){
+        Servo indicator = hardwareMap.get(Servo.class, "rgb");
+        this.rgb = indicator;rgb.setPosition(BLACK_PWM); isBeingUsed=true;
+    }
+    public RGBIndicator() {
+        isBeingUsed = false;
+    }
+    public void setCustomPWM(double val) {
+        if (!isBeingUsed) return;
+        rgb.setPosition(val);
+    }
     public void setColor(Color col) {
+        if (!isBeingUsed) return;
         if (col==Color.BLACK) rgb.setPosition(BLACK_PWM);
         if (col==Color.RED) rgb.setPosition(RED_PWM);
         if (col==Color.ORANGE) rgb.setPosition(ORANGE_PWM);
@@ -63,6 +75,25 @@ public class RGBIndicator {
         if (col==Color.INDIGO) rgb.setPosition(INDIGO_PWM);
         if (col==Color.VIOLET) rgb.setPosition(VIOLET_PWM);
         if (col==Color.WHITE) rgb.setPosition(WHITE_PWM);
+    }
+    public void updateUsingLL(LimelightSystem ll) {
+        if (!isBeingUsed) return;
+        if (ll.isDisconnected) {
+            this.setColor(RGBIndicator.Color.BLACK); // Limelight not looking at target
+        }
+        else if (ll.getLLScore() < 1.5) {
+            // GREEN
+            this.setColor(RGBIndicator.Color.GREEN);
+        } else if (ll.getLLScore() < 5) {
+            // YELLOW
+            this.setColor(RGBIndicator.Color.YELLOW);
+        } else if (ll.getLLScore() < 12.5) {
+            // ORANGE
+            this.setColor(RGBIndicator.Color.ORANGE);
+        } else {
+            // OFF
+            this.setColor(RGBIndicator.Color.BLACK);
+        }
     }
 
 }

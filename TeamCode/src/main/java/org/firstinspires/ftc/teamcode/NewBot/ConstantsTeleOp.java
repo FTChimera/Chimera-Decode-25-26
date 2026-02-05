@@ -1,7 +1,7 @@
-package org.firstinspires.ftc.teamcode2.Systems;
+package org.firstinspires.ftc.teamcode.NewBot;
 
-import static org.firstinspires.ftc.teamcode2.Systems.Constants.AllianceColor.BLUE;
-import static org.firstinspires.ftc.teamcode2.Systems.Constants.AllianceColor.RED;
+import static org.firstinspires.ftc.teamcode.NewBot.ConstantsTeleOp.AllianceColor.BLUE;
+import static org.firstinspires.ftc.teamcode.NewBot.ConstantsTeleOp.AllianceColor.RED;
 
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.follower.Follower;
@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @SuppressWarnings("SpellCheckingInspection")
-public class Constants {
+public class ConstantsTeleOp {
 
     public static final double INCREMENT_CHANGE_IN_VELOCITY = 25;
 
@@ -31,9 +31,9 @@ public class Constants {
     }
     // TUNE LL_PIDF VALUES FOR AUTO-ALIGNMENT
     public static PIDFCoefficients LimelightAutoAlignmentTurning =
-        new PIDFCoefficients(
-                0.03, 0.0, 0.0, 0.5
-        );
+            new PIDFCoefficients(
+                    0.03, 0.0, 0.0, 0.5
+            );
     public static final double LIMELIGHT_PIDF_MIN_OUTPUT = -1;
     public static final double LIMELIGHT_PIDF_MAX_OUTPUT = 1;
     public static final double LIMELIGHT_PIDF_INTEGRAL_LIMIT = 10;

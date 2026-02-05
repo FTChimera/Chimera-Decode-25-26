@@ -244,11 +244,11 @@ public class Pedro_TeleOp extends OpMode {
             follower.startTeleopDrive();
             automatedDrive = false;
         }
+
         // Auto Alignment using AutoAlignSystem
         long nowNs = System.nanoTime();
         dt = (nowNs - lastTimeNs) / 1e9;
         lastTimeNs = nowNs;
-
         // Manual-stick override: if driver is giving significant rotation input, disable auto-align
         if (gamepad1.x && Math.abs(gamepad1.right_stick_x) <= 0.12) {
             automatedDrive = true; // turning using pedro pathing.
