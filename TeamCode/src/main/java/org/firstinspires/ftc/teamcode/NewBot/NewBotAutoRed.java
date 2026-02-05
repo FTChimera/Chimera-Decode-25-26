@@ -253,7 +253,7 @@ public class NewBotAutoRed extends OpMode {
         transferMotor.setZeroPowerBehavior(FLOAT);
 
         // PID Tuning (Values from TeleOp)
-        OuttakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
+        OuttakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, ConstantsTeleOp.LaunchPIDF);
 
         follower = Constants.createPedroFollower(hardwareMap);
         buildPaths();
