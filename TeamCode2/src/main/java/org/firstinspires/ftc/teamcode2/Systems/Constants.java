@@ -88,13 +88,13 @@ public class Constants {
     // PEDRO PATHING CONSTANTS
     public static FollowerConstants pedroFollowerConstants = new FollowerConstants()
             .mass(11.4)
-            .forwardZeroPowerAcceleration(-41.031359746341444)
-            .lateralZeroPowerAcceleration(-71.62199686407405)
+            .forwardZeroPowerAcceleration(-36.816499666421194)
+            .lateralZeroPowerAcceleration(-61.537050148361466)
             .translationalPIDFCoefficients(new com.pedropathing.control.PIDFCoefficients(0.067, 0, 0.05, 0.01))
             .headingPIDFCoefficients(new com.pedropathing.control.PIDFCoefficients(0.9, 0, 0.08, 0.02))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.02,0,0.0001,3.5,0.00001))
-            .centripetalScaling(0.003);
-    public static PathConstraints pedroPathConstraints = new PathConstraints(0.99, 100, 1, 1.2);
+            .centripetalScaling(0.00003);
+    public static PathConstraints pedroPathConstraints = new PathConstraints(0.99, 100, 1, 1);
     public static PinpointConstants pedroLocalizerConstants = new PinpointConstants()
             .forwardPodY(-0.3125)
             .strafePodX(-3.5)
@@ -116,8 +116,8 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             // intake is reversed, transfer is reversed
-            .xVelocity(82.28564164769932*VELOCITY_SCALING_FACTOR)
-            .yVelocity(65.39811886764886*VELOCITY_SCALING_FACTOR);
+            .xVelocity(85.22694408987452*VELOCITY_SCALING_FACTOR)
+            .yVelocity(74.93444535863681*VELOCITY_SCALING_FACTOR);
 
     public static Follower createPedroFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(pedroFollowerConstants, hardwareMap)

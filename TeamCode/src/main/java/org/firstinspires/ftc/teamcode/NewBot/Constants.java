@@ -15,13 +15,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 //TODO- Change the robots mass(in kg)
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            .mass(5.2)
-            .forwardZeroPowerAcceleration(-43.86484666397469)
-            .lateralZeroPowerAcceleration(-81.63848969598853)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.01, 0.03))
-            .headingPIDFCoefficients(new PIDFCoefficients(1.1, 0, 0.01, 0.03))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.01,0,0.0001,0.6,0.003))
-            .centripetalScaling(0.0009);
+            .mass(11.4)
+            .forwardZeroPowerAcceleration(-36.816499666421194)
+            .lateralZeroPowerAcceleration(-61.537050148361466)
+            .translationalPIDFCoefficients(new com.pedropathing.control.PIDFCoefficients(0.067, 0, 0.05, 0.01))
+            .headingPIDFCoefficients(new com.pedropathing.control.PIDFCoefficients(0.9, 0, 0.08, 0.02))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.02,0,0.0001,3.5,0.00001))
+            .centripetalScaling(0.00003);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
 
@@ -36,29 +36,31 @@ public class Constants {
     // TODO- Change the X and Y pod offsets
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(6)
-            .strafePodX(-0.375)
+            .forwardPodY(-0.3125)
+            .strafePodX(-3.5)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
-            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
-            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
+            .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
+            .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
 
 
 
-    public static final double VELOCITY_SCALING_FACTOR = 1.2;
+    public static final double VELOCITY_SCALING_FACTOR = 1;
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
             .rightFrontMotorName("frontRightMotor")
             .rightRearMotorName("backRightMotor")
             .leftRearMotorName("backLeftMotor")
             .leftFrontMotorName("frontLeftMotor")
+            // intake and launcher are "intake" and "launcher". transfer is "transfer"
             .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            .leftRearMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE)
-            .xVelocity(59.25861989419292*VELOCITY_SCALING_FACTOR)
-            .yVelocity(49.53692626953125*VELOCITY_SCALING_FACTOR);
+            .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
+            // intake is reversed, transfer is reversed
+            .xVelocity(85.22694408987452*VELOCITY_SCALING_FACTOR)
+            .yVelocity(74.93444535863681*VELOCITY_SCALING_FACTOR);
 
 
     //  .lateralZeroPowerAcceleration(0.9);
