@@ -153,6 +153,7 @@ public class EraTeleOp extends LinearOpMode {
         //   follower.startTeleopDrive();
 
         if (isStopRequested()) return;
+        limelight.start(0);
         telemetry.addData("Status", "Running");
         while (opModeIsActive()) {
 
