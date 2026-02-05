@@ -1,41 +1,100 @@
 package org.firstinspires.ftc.teamcode.NewBot;
 
+import static org.firstinspires.ftc.teamcode.NewBot.Constants.AllianceColor.BLUE;
+import static org.firstinspires.ftc.teamcode.NewBot.Constants.AllianceColor.RED;
+
 import com.pedropathing.control.FilteredPIDFCoefficients;
-import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.follower.FollowerConstants;
 import com.pedropathing.ftc.FollowerBuilder;
 import com.pedropathing.ftc.drivetrains.MecanumConstants;
 import com.pedropathing.ftc.localization.constants.PinpointConstants;
+import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathConstraints;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-//TODO- Change the robots mass(in kg)
+@SuppressWarnings("SpellCheckingInspection")
 public class Constants {
-    public static FollowerConstants followerConstants = new FollowerConstants()
+
+    public static final double INCREMENT_CHANGE_IN_VELOCITY = 25;
+
+    public static double applyPolynomialToDriveInputs(double input) {
+        double output = input;
+        output = output*Math.abs(output); // square for more control
+        output = output*-0.8; // scalar (negate for pedro pathing driving)
+        return output;
+    }
+    // TUNE LL_PIDF VALUES FOR AUTO-ALIGNMENT
+    public static PIDFCoefficients LimelightAutoAlignmentTurning =
+            new PIDFCoefficients(
+                    0.03, 0.0, 0.0, 0.5
+            );
+    public static final double LIMELIGHT_PIDF_MIN_OUTPUT = -1;
+    public static final double LIMELIGHT_PIDF_MAX_OUTPUT = 1;
+    public static final double LIMELIGHT_PIDF_INTEGRAL_LIMIT = 10;
+
+
+    public static final double TRANSFER_UP_POSITION = 0.5;
+    public static final double TRANSFER_DOWN_POSITION = 0;
+    public static final double SLEEP_BEFORE_INTAKE_START = 1020;
+    public static final double SLEEP_BEFORE_INTAKE_RESET_LAUNCHING = 1600;
+    public static final double RAPID_FIRE_TIME = 1000;
+    public static final double VELOCITY_TOLERANCE = 70;
+    public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1100;// Set target velocity from front launch zone
+    public static double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 980;// Set target velocity from goal
+    public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
+    public static int[] BALL_NUM_INTAKE_NEEDED = {2,3};
+    public static PIDFCoefficients LaunchPIDF = new PIDFCoefficients(
+            225, 0.0021, 0.0001, 10
+    );
+    public enum AllianceColor {
+        BLUE, RED;
+
+        public AllianceColor switchColors() {
+            return this == RED ? BLUE : RED;
+        }
+    }
+    public enum Auto {
+        BLUE_CLOSE(BLUE),
+        BLUE_FAR(BLUE),
+        RED_CLOSE(RED),
+        RED_FAR(RED);
+
+        Auto(AllianceColor allianceColor) {
+
+        }
+        public Auto next() {
+            return values()[(this.ordinal() + 1) % values().length];
+        }
+        public AllianceColor getAllianceColor() {
+            return name().startsWith("BLUE")
+                    ? BLUE
+                    : RED;
+        }
+    }
+    public static Pose RED_GOAL = new Pose(130.37, 127.64, Math.toRadians(45));
+    public static Pose BLUE_GOAL = new Pose(13.63, 127.64, Math.toRadians(135));
+    public static Pose RED_SHOOTING_FRONT = new Pose(123.5, 122.8, Math.toRadians(37));
+    public static Pose RED_SHOOTING_BACK = new Pose(114, 114, Math.toRadians(45));
+    public static Pose BLUE_SHOOTING_FRONT = new Pose(20.5, 122.8, Math.toRadians(143));
+    public static Pose BLUE_SHOOTING_BACK = new Pose(30, 114, Math.toRadians(180));
+    public static Pose RED_PARKING = new Pose((double) 270/7, (double) 234/7);
+    public static Pose BLUE_PARKING = new Pose((double) 738/7, (double) 234/7);
+    // PEDRO PATHING CONSTANTS
+    public static FollowerConstants pedroFollowerConstants = new FollowerConstants()
             .mass(11.4)
-            .forwardZeroPowerAcceleration(-36.816499666421194)
-            .lateralZeroPowerAcceleration(-61.537050148361466)
+            .forwardZeroPowerAcceleration(-41.031359746341444)
+            .lateralZeroPowerAcceleration(-71.62199686407405)
             .translationalPIDFCoefficients(new com.pedropathing.control.PIDFCoefficients(0.067, 0, 0.05, 0.01))
             .headingPIDFCoefficients(new com.pedropathing.control.PIDFCoefficients(0.9, 0, 0.08, 0.02))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.02,0,0.0001,3.5,0.00001))
-            .centripetalScaling(0.00003);
-
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 1);
-
-    public static Follower createFollower(HardwareMap hardwareMap) {
-        return new FollowerBuilder(followerConstants, hardwareMap)
-                .pathConstraints(pathConstraints)
-                .mecanumDrivetrain(driveConstants)
-                .pinpointLocalizer(localizerConstants)
-                .build();
-    }
-
-    // TODO- Change the X and Y pod offsets
-
-    public static PinpointConstants localizerConstants = new PinpointConstants()
+            .centripetalScaling(0.003);
+    public static PathConstraints pedroPathConstraints = new PathConstraints(0.99, 100, 1, 1.2);
+    public static PinpointConstants pedroLocalizerConstants = new PinpointConstants()
             .forwardPodY(-0.3125)
             .strafePodX(-3.5)
             .distanceUnit(DistanceUnit.INCH)
@@ -43,11 +102,8 @@ public class Constants {
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
-
-
-
     public static final double VELOCITY_SCALING_FACTOR = 1;
-    public static MecanumConstants driveConstants = new MecanumConstants()
+    public static MecanumConstants pedroMecanumDriveConstants = new MecanumConstants()
             .maxPower(1)
             .rightFrontMotorName("frontRightMotor")
             .rightRearMotorName("backRightMotor")
@@ -59,19 +115,15 @@ public class Constants {
             .rightFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             // intake is reversed, transfer is reversed
-            .xVelocity(85.22694408987452*VELOCITY_SCALING_FACTOR)
-            .yVelocity(74.93444535863681*VELOCITY_SCALING_FACTOR);
+            .xVelocity(82.28564164769932*VELOCITY_SCALING_FACTOR)
+            .yVelocity(65.39811886764886*VELOCITY_SCALING_FACTOR);
 
+    public static Follower createPedroFollower(HardwareMap hardwareMap) {
+        return new FollowerBuilder(pedroFollowerConstants, hardwareMap)
+                .pathConstraints(pedroPathConstraints)
+                .mecanumDrivetrain(pedroMecanumDriveConstants)
+                .pinpointLocalizer(pedroLocalizerConstants)
+                .build();
+    }
 
-    //  .lateralZeroPowerAcceleration(0.9);
 }
-
-//-48.08076261884704
-
-// TODO - Delete this later. This is copied to check if the names within the quote
-//leftFront = hardwareMap.get(DcMotorEx .class, "frontLeftMotor");
-//leftBack = hardwareMap.get(DcMotorEx.class, "backLeftMotor");
-//rightBack = hardwareMap.get(DcMotorEx.class, "backRightMotor");
-//rightFront = hardwareMap.get(DcMotorEx.class, "frontRightMotor");
-
-

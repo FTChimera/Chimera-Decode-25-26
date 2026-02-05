@@ -67,10 +67,10 @@ public class NewBotTeleOp extends LinearOpMode {
 
         // Declare our motors
         // Make sure your ID's match your configuration
-        DcMotor frontLeftMotor = hardwareMap.dcMotor.get(Constants.driveConstants.leftFrontMotorName);
-        DcMotor backLeftMotor = hardwareMap.dcMotor.get(Constants.driveConstants.leftRearMotorName);
-        DcMotor frontRightMotor = hardwareMap.dcMotor.get(Constants.driveConstants.rightFrontMotorName);
-        DcMotor backRightMotor = hardwareMap.dcMotor.get(Constants.driveConstants.rightRearMotorName);
+        DcMotor frontLeftMotor = hardwareMap.dcMotor.get(Constants.pedroMecanumDriveConstants.leftFrontMotorName);
+        DcMotor backLeftMotor = hardwareMap.dcMotor.get(Constants.pedroMecanumDriveConstants.leftRearMotorName);
+        DcMotor frontRightMotor = hardwareMap.dcMotor.get(Constants.pedroMecanumDriveConstants.rightFrontMotorName);
+        DcMotor backRightMotor = hardwareMap.dcMotor.get(Constants.pedroMecanumDriveConstants.rightRearMotorName);
         // Using DcMotorEx instead of DcMotor to use PID controller
         DcMotorEx OuttakeMotor = hardwareMap.get(DcMotorEx.class,"OuttakeMotor");
         DcMotor intakeMotor = hardwareMap.dcMotor.get("intakeMotor");

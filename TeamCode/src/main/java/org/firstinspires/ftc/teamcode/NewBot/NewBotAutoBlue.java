@@ -15,23 +15,23 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-@Autonomous(name = "NewBotAutoRed", group = "NewBotAuto")
-public class NewBotAutoRed extends OpMode {
+@Autonomous(name = "NewBotAutoBlue", group = "NewBotAuto")
+public class NewBotAutoBlue extends OpMode {
     private Follower follower;
     private Timer pathTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherStage = 0;
 
     // Poses remain unchanged from your original file
-    private final Pose startPose = new Pose(123.9, 122.2, Math.toRadians(38));
-    private final Pose launchPose = new Pose(97.1, 97.2, Math.toRadians(38));
-    private final Pose intakePrep = new Pose(92, 75, Math.toRadians(0));
-    private final Pose red1Intake = new Pose(123, 76.5, Math.toRadians(0));
-    private final Pose intakePrep2 = new Pose(100.38, 52, Math.toRadians(0));
-    private final Pose red2Intake = new Pose(135.02, 52, Math.toRadians(0));
-    private final Pose launchControl = new Pose(118.9, 55.3, Math.toRadians(0));
-    private final Pose intakePrep3 = new Pose(100.27, 37.14, Math.toRadians(0));
-    private final Pose red3intake = new Pose(135, 36.73, Math.toRadians(0));
-    private final Pose finalPose = new Pose(105.2, 75.3, Math.toRadians(0));
+    private final Pose startPose = new Pose(20, 122.2, Math.toRadians(142)); // Start Pose of our robot.
+    private final Pose launchPose = new Pose(48.1, 95.6, Math.toRadians(142));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose intakePrep = new Pose(55,85, Math.toRadians(180));
+    private final Pose blue1Intake = new Pose(25.5, 85, Math.toRadians(180));
+    private final Pose intakePrep2 = new Pose(50,61.35, Math.toRadians(180));
+    private final Pose blue2Intake = new Pose(21, 57.6, Math.toRadians(180));
+    private final Pose launchControl = new Pose(25.5, 54.6, Math.toRadians(180));
+    private final Pose intakePrep3 = new Pose(44.3, 35.3, Math.toRadians(180));
+    private final Pose blue3Intake = new Pose(8, 35.3, Math.toRadians(180));
+    private final Pose finalPose = new Pose(35.1, 79.7, Math.toRadians(180));
 
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 
@@ -82,29 +82,29 @@ public class NewBotAutoRed extends OpMode {
         pathTwo = new Path(new BezierLine(launchPose, intakePrep));
         pathTwo.setLinearHeadingInterpolation(launchPose.getHeading(), intakePrep.getHeading());
 
-        pathThree = new Path(new BezierLine(intakePrep, red1Intake));
-        pathThree.setLinearHeadingInterpolation(intakePrep.getHeading(), red1Intake.getHeading());
+        pathThree = new Path(new BezierLine(intakePrep, blue1Intake));
+        pathThree.setLinearHeadingInterpolation(intakePrep.getHeading(), blue1Intake.getHeading());
 
-        pathFour = new Path(new BezierLine(red1Intake, launchPose));
-        pathFour.setLinearHeadingInterpolation(red1Intake.getHeading(), launchPose.getHeading());
+        pathFour = new Path(new BezierLine(blue1Intake, launchPose));
+        pathFour.setLinearHeadingInterpolation(blue1Intake.getHeading(), launchPose.getHeading());
 
         pathFive = new Path(new BezierLine(launchPose, intakePrep2));
-        pathFive.setLinearHeadingInterpolation(launchPose.getHeading(), red2Intake.getHeading());
+        pathFive.setLinearHeadingInterpolation(launchPose.getHeading(), intakePrep2.getHeading());
 
-        pathSix = new Path(new BezierLine(intakePrep2, red2Intake));
-        pathSix.setLinearHeadingInterpolation(intakePrep2.getHeading(), red2Intake.getHeading());
+        pathSix = new Path(new BezierLine(intakePrep2, blue2Intake));
+        pathSix.setLinearHeadingInterpolation(intakePrep2.getHeading(), blue2Intake.getHeading());
 
-        pathSeven = new Path(new BezierCurve(red2Intake, launchControl, launchPose));
-        pathSeven.setLinearHeadingInterpolation(red2Intake.getHeading(), launchPose.getHeading());
+        pathSeven = new Path(new BezierCurve(blue2Intake, launchControl, launchPose));
+        pathSeven.setLinearHeadingInterpolation(blue2Intake.getHeading(), launchPose.getHeading());
 
         pathEight = new Path(new BezierLine(launchPose, intakePrep3));
         pathEight.setLinearHeadingInterpolation(launchPose.getHeading(), intakePrep3.getHeading());
 
-        pathNine = new Path(new BezierLine(intakePrep3, red3intake));
-        pathNine.setLinearHeadingInterpolation(intakePrep3.getHeading(), red3intake.getHeading());
+        pathNine = new Path(new BezierLine(intakePrep3, blue3Intake));
+        pathNine.setLinearHeadingInterpolation(intakePrep3.getHeading(), blue3Intake.getHeading());
 
-        pathTen = new Path(new BezierLine(red3intake, launchPose));
-        pathTen.setLinearHeadingInterpolation(red3intake.getHeading(), launchPose.getHeading());
+        pathTen = new Path(new BezierLine(blue3Intake, launchPose));
+        pathTen.setLinearHeadingInterpolation(blue3Intake.getHeading(), launchPose.getHeading());
 
         pathEleven = new Path(new BezierLine(launchPose, finalPose));
         pathEleven.setLinearHeadingInterpolation(launchPose.getHeading(), finalPose.getHeading());

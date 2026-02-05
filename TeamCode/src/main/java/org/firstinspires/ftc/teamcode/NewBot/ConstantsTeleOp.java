@@ -17,7 +17,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-
 @SuppressWarnings("SpellCheckingInspection")
 public class ConstantsTeleOp {
 
