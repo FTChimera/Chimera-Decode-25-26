@@ -15,6 +15,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
+import org.opencv.core.Mat;
+
 @Autonomous(name = "NewBotAutoBlue", group = "NewBotAuto")
 public class NewBotAutoBlue extends OpMode {
     private Follower follower;
@@ -23,22 +25,23 @@ public class NewBotAutoBlue extends OpMode {
 
     // Poses remain unchanged from your original file
     private final Pose startPose = new Pose(20, 122.2, Math.toRadians(142)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(48.1, 95.6, Math.toRadians(142));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-    private final Pose intakePrep = new Pose(55,85, Math.toRadians(180));
-    private final Pose blue1Intake = new Pose(25.5, 85, Math.toRadians(180));
-    private final Pose intakePrep2 = new Pose(50,61.35, Math.toRadians(180));
-    private final Pose blue2Intake = new Pose(21, 57.6, Math.toRadians(180));
-    private final Pose launchControl = new Pose(25.5, 54.6, Math.toRadians(180));
-    private final Pose intakePrep3 = new Pose(44.3, 35.3, Math.toRadians(180));
-    private final Pose blue3Intake = new Pose(8, 35.3, Math.toRadians(180));
-    private final Pose finalPose = new Pose(35.1, 79.7, Math.toRadians(180));
+    private final Pose launchPose = new Pose(34.8, 108.5, Math.toRadians(142));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose intakePrep = new Pose(52,87, Math.toRadians(180));
+    private final Pose blue1Intake = new Pose(21.5, 87, Math.toRadians(180));
+    private final Pose intakePrep2 = new Pose(55,59, Math.toRadians(180));
+    private final Pose blue2Intake = new Pose(18, 58.5, Math.toRadians(180));
+    private final Pose launchControl = new Pose(41.9, 33.4, Math.toRadians(180));
+    private final Pose intakePrep3 = new Pose(57, 37, Math.toRadians(180));
+    private final Pose blue3Intake = new Pose(18, 36.5, Math.toRadians(180));
+    private final Pose launchControl1 = new Pose(43.4, 28.3, Math.toRadians(180));
+    private final Pose finalPose = new Pose(51.7, 121.5, Math.toRadians(180));
 
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 
     // Updated Constants based on TeleOp
     // TeleOp "Front Launch" is 1100, Back is 500. Assuming Auto shoots from Front/Close range.
-    final double TARGET_VELOCITY = 1100;
-    final double TARGET_VELOCITY_TOLERANCE = 20;
+    final double TARGET_VELOCITY = 1000;
+    final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0;
 
     // Duration to run the transfer motor to ensure all balls are fired
@@ -103,7 +106,7 @@ public class NewBotAutoBlue extends OpMode {
         pathNine = new Path(new BezierLine(intakePrep3, blue3Intake));
         pathNine.setLinearHeadingInterpolation(intakePrep3.getHeading(), blue3Intake.getHeading());
 
-        pathTen = new Path(new BezierLine(blue3Intake, launchPose));
+        pathTen = new Path(new BezierCurve(blue3Intake,launchControl1, launchPose));
         pathTen.setLinearHeadingInterpolation(blue3Intake.getHeading(), launchPose.getHeading());
 
         pathEleven = new Path(new BezierLine(launchPose, finalPose));
@@ -156,7 +159,6 @@ public class NewBotAutoBlue extends OpMode {
                 if (!follower.isBusy()) {
                     follower.followPath(pathFour);
                     setPathState(CHIMERA_LAUNCH);
-                    IntakeStop();
                 }
                 break;
             case CHIMERA_PATH_FIVE:
@@ -175,6 +177,7 @@ public class NewBotAutoBlue extends OpMode {
             case CHIMERA_PATH_SEVEN:
                 if (!follower.isBusy()) {
                     follower.followPath(pathSeven);
+                    IntakeStop();
                     setPathState(CHIMERA_LAUNCH);
                 }
                 break;

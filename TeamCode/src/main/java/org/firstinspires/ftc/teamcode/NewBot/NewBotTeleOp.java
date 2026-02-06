@@ -176,10 +176,10 @@ public class NewBotTeleOp extends LinearOpMode {
             rx *= Math.abs(rx);
 
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-            double frontLeftPower = 1 *(y + x + rx) / denominator;
-            double backLeftPower = 1 *(y - x + rx) / denominator;
-            double frontRightPower = 1 *(y - x - rx) / denominator;
-            double backRightPower = 1 * (y + x - rx) / denominator;
+            double frontLeftPower = 0.85 *(y + x + rx) / denominator;
+            double backLeftPower = 0.85 *(y - x + rx) / denominator;
+            double frontRightPower = 0.85 *(y - x - rx) / denominator;
+            double backRightPower = 0.85 * (y + x - rx) / denominator;
 
             frontLeftMotor.setPower(frontLeftPower);
             backLeftMotor.setPower(backLeftPower);

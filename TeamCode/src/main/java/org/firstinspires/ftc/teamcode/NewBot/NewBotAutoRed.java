@@ -22,23 +22,24 @@ public class NewBotAutoRed extends OpMode {
     private int pathState, launcherStage = 0;
 
     // Poses remain unchanged from your original file
-    private final Pose startPose = new Pose(123.9, 122.2, Math.toRadians(38));
-    private final Pose launchPose = new Pose(97.1, 97.2, Math.toRadians(38));
-    private final Pose intakePrep = new Pose(92, 75, Math.toRadians(0));
-    private final Pose red1Intake = new Pose(123, 76.5, Math.toRadians(0));
-    private final Pose intakePrep2 = new Pose(100.38, 52, Math.toRadians(0));
-    private final Pose red2Intake = new Pose(135.02, 52, Math.toRadians(0));
-    private final Pose launchControl = new Pose(118.9, 55.3, Math.toRadians(0));
-    private final Pose intakePrep3 = new Pose(100.27, 37.14, Math.toRadians(0));
-    private final Pose red3intake = new Pose(135, 36.73, Math.toRadians(0));
-    private final Pose finalPose = new Pose(105.2, 75.3, Math.toRadians(0));
+    private final Pose startPose = new Pose(123.9, 122.2, Math.toRadians(42));
+    private final Pose launchPose = new Pose(109.2, 108.5, Math.toRadians(42));
+    private final Pose intakePrep = new Pose(96.4, 87, Math.toRadians(0));
+    private final Pose red1Intake = new Pose(127, 87, Math.toRadians(0));
+    private final Pose intakePrep2 = new Pose(101.0, 61, Math.toRadians(0));
+    private final Pose red2Intake = new Pose(138, 61, Math.toRadians(0));
+    private final Pose launchControl = new Pose(108.4, 41.4, Math.toRadians(0));
+    private final Pose intakePrep3 = new Pose(100.4, 37, Math.toRadians(0));
+    private final Pose red3intake = new Pose(136, 37, Math.toRadians(0));
+    private final Pose launchControl1 = new Pose(108.5,36.8, Math.toRadians(0));
+    private final Pose finalPose = new Pose(92.3, 121.5, Math.toRadians(0));
 
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 
     // Updated Constants based on TeleOp
     // TeleOp "Front Launch" is 1100, Back is 500. Assuming Auto shoots from Front/Close range.
-    final double TARGET_VELOCITY = 1100;
-    final double TARGET_VELOCITY_TOLERANCE = 20;
+    final double TARGET_VELOCITY = 1000;
+    final double TARGET_VELOCITY_TOLERANCE = 15;
     final double STOP_VELOCITY = 0;
 
     // Duration to run the transfer motor to ensure all balls are fired
@@ -103,7 +104,7 @@ public class NewBotAutoRed extends OpMode {
         pathNine = new Path(new BezierLine(intakePrep3, red3intake));
         pathNine.setLinearHeadingInterpolation(intakePrep3.getHeading(), red3intake.getHeading());
 
-        pathTen = new Path(new BezierLine(red3intake, launchPose));
+        pathTen = new Path(new BezierCurve(red3intake,launchControl1, launchPose));
         pathTen.setLinearHeadingInterpolation(red3intake.getHeading(), launchPose.getHeading());
 
         pathEleven = new Path(new BezierLine(launchPose, finalPose));
@@ -175,6 +176,7 @@ public class NewBotAutoRed extends OpMode {
             case CHIMERA_PATH_SEVEN:
                 if (!follower.isBusy()) {
                     follower.followPath(pathSeven);
+                    IntakeStop();
                     setPathState(CHIMERA_LAUNCH);
                 }
                 break;
