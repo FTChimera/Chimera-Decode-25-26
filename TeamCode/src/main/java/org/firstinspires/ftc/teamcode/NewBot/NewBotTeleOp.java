@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 @TeleOp(name = "NewBotTeleOp", group = "TeleOp")// Name and Group
 public class NewBotTeleOp extends LinearOpMode {
 
-    boolean TwoGamepads = false;
+    boolean TwoGamepads = true;
     //public LimelightSystem limelight;
 
     // declaring our PIDF tuning values
