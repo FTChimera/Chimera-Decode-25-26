@@ -41,6 +41,7 @@ public class NewBotTeleOp extends LinearOpMode {
             telemetry.addData("Press 'GamePad1 Right Bumper'", "for BLUE");
             telemetry.addData("Press 'GamePad1 Left Bumper'", "for RED");
             telemetry.addLine("Press A for 2 Gamepads, B for 1");
+            telemetry.addLine(TwoGamepads? "2" : "1" + " Gamepad used");
             // This method is called repeatedly during the init phase
             if (gamepad1.a) {
                 TwoGamepads = true;
