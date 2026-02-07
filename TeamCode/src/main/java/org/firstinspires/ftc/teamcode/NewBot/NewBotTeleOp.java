@@ -31,7 +31,7 @@ public class NewBotTeleOp extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         // For now - don't pass in hardware Map because then it won't throw an error.
         // When Limelight is added, pass in hardwareMap
-        limelight = new LimelightSystem(hardwareMap);
+        limelight = new LimelightSystem();
         rgbIndicator = new RGBIndicator(hardwareMap);
         rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
         //while (!isStarted() && !isStopRequested())
