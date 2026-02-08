@@ -32,7 +32,7 @@ public class NewBotAutoRed extends OpMode {
     private final Pose intakePrep3 = new Pose(100.4, 37, Math.toRadians(0));
     private final Pose red3intake = new Pose(136, 37, Math.toRadians(0));
     private final Pose launchControl1 = new Pose(108.5,36.8, Math.toRadians(0));
-    private final Pose finalPose = new Pose(92.3, 121.5, Math.toRadians(0));
+    public static final Pose finalPose = new Pose(92.3, 121.5, Math.toRadians(0));
 
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 

@@ -34,7 +34,7 @@ public class NewBotAutoBlue extends OpMode {
     private final Pose intakePrep3 = new Pose(57, 37, Math.toRadians(180));
     private final Pose blue3Intake = new Pose(18, 36.5, Math.toRadians(180));
     private final Pose launchControl1 = new Pose(43.4, 28.3, Math.toRadians(180));
-    private final Pose finalPose = new Pose(51.7, 121.5, Math.toRadians(180));
+    public static final Pose finalPose = new Pose(51.7, 121.5, Math.toRadians(180));
 
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEleven;
 

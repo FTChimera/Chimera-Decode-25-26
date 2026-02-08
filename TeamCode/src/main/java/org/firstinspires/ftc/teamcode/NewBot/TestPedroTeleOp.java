@@ -125,7 +125,11 @@ public class TestPedroTeleOp extends OpMode {
             robotCentric = !robotCentric;
         }
         // Set starting pose based on alliance color
-        if (allianceColor == RED) {}
+        if (allianceColor == RED) {
+            startingPose = NewBotAutoRed.finalPose;
+        } else {
+            startingPose = NewBotAutoBlue.finalPose;
+        }
 
         panelsTelemetry.addData("Starting Pose", startingPose);
         panelsTelemetry.update(telemetryM);
