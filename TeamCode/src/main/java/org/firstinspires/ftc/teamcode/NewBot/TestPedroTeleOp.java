@@ -3,6 +3,7 @@ import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 
 import static org.firstinspires.ftc.teamcode.NewBot.Constants.AllianceColor.RED;
 import static org.firstinspires.ftc.teamcode.NewBot.Constants.STOP_VELOCITY;
+import static org.firstinspires.ftc.teamcode.NewBot.Constants.TRANSFER_DOWN_POSITION;
 import static org.firstinspires.ftc.teamcode.NewBot.Constants.TRANSFER_UP_POSITION;
 import static org.firstinspires.ftc.teamcode.NewBot.Constants.VELOCITY_TOLERANCE;
 import static org.firstinspires.ftc.teamcode.NewBot.Constants.applyPolynomialToDriveInputs;
@@ -20,7 +21,6 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.PedroCoordinates;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
-import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -74,17 +74,10 @@ public class TestPedroTeleOp extends OpMode {
     private boolean automatedDrive=false, launcherOn=false, robotCentric=true;
     private long lastTimeNs;
     double dt;
-    private enum LaunchingState {
-        IDLE,
-        LAUNCHER_SPINNING_UP,
-        FIRING
-    }
-    private LaunchingState launchingState = LaunchingState.IDLE;
     protected MultipleTelemetry telemetryM;
     private TelemetryManager panelsTelemetry;
     public Pose startingPose;
     DcMotorEx launcher; DcMotor intake, transfer;
-    Timer transfer_timer;
 
     @Override
     public void init() {
@@ -97,7 +90,6 @@ public class TestPedroTeleOp extends OpMode {
         limelight = new LimelightSystem(hardwareMap);
         rgbIndicator = new RGBIndicator(hardwareMap);
         transfer = hardwareMap.get(DcMotor.class, "transferMotor");
-        transfer_timer = new Timer();
         follower = Constants.createPedroFollower(hardwareMap);
         follower.update();
         telemetryM = new MultipleTelemetry(
@@ -269,50 +261,27 @@ public class TestPedroTeleOp extends OpMode {
                 launcherOn = false;
             }
         }
-        // ALL BALL LAUNCHING LOGIC - WITH VELOCITY CHECK
-        if (gamepad1.right_bumper && launchingState==LaunchingState.IDLE) {
-
-            launchingState = LaunchingState.LAUNCHER_SPINNING_UP;
+        // BALL LAUNCHING LOGIC
+        if (gamepad1.right_bumper) {
+           transfer.setPower(TRANSFER_UP_POSITION);
+           intake.setPower(1);
+        } else {
+            transfer.setPower(TRANSFER_DOWN_POSITION);
+            // INTAKE CONTROL - Only manual control when not firing
+            intake.setPower(Math.max(Math.min(
+                    gamepad1.right_trigger - gamepad1.left_trigger * 1.1, 1
+            ), -1)); //Counteract imperfect intake power
         }
 
-        if (launchingState == LaunchingState.LAUNCHER_SPINNING_UP) {
-            // Wait for launcher to reach minimum velocity before starting transfer and intake
-            double velocity = IsBackLaunchZoneCloser() ?
-                    Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE : Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
-            double min_velocity = velocity - VELOCITY_TOLERANCE;
-
-            if (launcher.getVelocity() >= min_velocity) {
-                transfer.setPower(TRANSFER_UP_POSITION);
-                intake.setPower(1);
-                launchingState = LaunchingState.FIRING;
-                transfer_timer.resetTimer();
-            }
-        }
-
-        if (launchingState == LaunchingState.FIRING) {
-            // Wait for RAPID_FIRE_TIME then reset everything
-            if (transfer_timer.getElapsedTimeSeconds() * 1000 >= Constants.RAPID_FIRE_TIME) {
-                transfer.setPower(Constants.TRANSFER_DOWN_POSITION);
-                intake.setPower(0);
-                launchingState = LaunchingState.IDLE;
-            }
-        }
         // INCREASE/DECREASE LAUNCHER VELOCITY
         if (gamepad1.rightStickButtonWasPressed()) {
             launcher.setVelocity(launcher.getVelocity()+Constants.INCREMENT_CHANGE_IN_VELOCITY);
         } else if (gamepad1.leftStickButtonWasPressed()) {
             launcher.setVelocity(launcher.getVelocity()-Constants.INCREMENT_CHANGE_IN_VELOCITY);
         }
-        // INTAKE CONTROL - Only manual control when not firing
-        if (launchingState == LaunchingState.IDLE) {
-            intake.setPower(Math.max(Math.min(
-                    gamepad1.right_trigger - gamepad1.left_trigger * 1.1, 1
-            ), -1)); //Counteract imperfect intake power
-        }
+
         panelsTelemetry.addData("Angle (in degrees)", limelight.tx); // LLScore is negative/positive
         panelsTelemetry.addData("Launcher Velocity", launcher.getVelocity());
-        panelsTelemetry.addData("Launching State", launchingState);
-        if (launchingState != LaunchingState.IDLE) panelsTelemetry.addData("Launch Timer (ms)", transfer_timer.getElapsedTimeSeconds()*1000);
     }
     private Pose getRobotPoseFromCamera() {
         // Thanks to team 20367 RMS Overdrive for this code snippet
