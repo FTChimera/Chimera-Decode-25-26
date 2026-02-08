@@ -262,7 +262,7 @@ public class TestPedroTeleOp extends OpMode {
             }
         }
         // BALL LAUNCHING LOGIC
-        if (gamepad1.right_bumper) {
+        if (gamepad1.right_bumper && launcherOn) {
            transfer.setPower(TRANSFER_UP_POSITION);
            intake.setPower(1);
         } else {
