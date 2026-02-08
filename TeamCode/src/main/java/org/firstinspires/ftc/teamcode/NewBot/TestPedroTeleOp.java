@@ -34,6 +34,7 @@ import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 
 import java.util.List;
+import java.util.Objects;
 
 @SuppressWarnings("SpellCheckingInspection")
 @Configurable
@@ -57,6 +58,7 @@ public class TestPedroTeleOp extends OpMode {
      * X - hold for auto alignment
      * Dpad-Up - reset IMU (do this when you are facing up)
      * Dpad-Down - reset PP Robot Pose to goal start pose
+     * Dpad-Left - hold to stay in one place - resist movement
      * Left Stick - Drive
      * Right Stick - turn
      * Left Stick Button - reduce velocity by 25
@@ -65,6 +67,7 @@ public class TestPedroTeleOp extends OpMode {
      */
 
     // set up bulk reading on sensors
+    private String command = "NULL";
     private List<LynxModule> allHubs;
     private LimelightSystem limelight; private AutoAlignSystem autoAlignSystem;
     private RGBIndicator rgbIndicator;
@@ -179,6 +182,7 @@ public class TestPedroTeleOp extends OpMode {
 
         //Automated Path Following
         if (gamepad1.aWasPressed()) {
+            command = "LAUNCH_ZONE";
             // Find which launch zone is closer
             Pose backLaunchZone = allianceColor == RED ?
                     Constants.RED_SHOOTING_BACK : Constants.BLUE_SHOOTING_BACK;
@@ -198,6 +202,7 @@ public class TestPedroTeleOp extends OpMode {
 
         // Parking Aid
         if (gamepad1.yWasPressed()) {
+            command = "PARK";
             // To be fully inside the parking zone, the heading should only be either 0,90,180,270
             // First, find which heading is closer.
             double heading = Math.toDegrees(follower.getHeading());
@@ -224,9 +229,17 @@ public class TestPedroTeleOp extends OpMode {
         }
 
         //Stop automated following if the follower is done
-        if (gamepad1.bWasPressed() || !follower.isBusy()) {
+        if (gamepad1.bWasPressed() || !follower.isBusy() || Objects.equals(command, "START_TELEOP")) {
+            command = "NULL";
             follower.startTeleopDrive();
             automatedDrive = false;
+        }
+
+        // STAY IN ONE PLACE
+        if ((gamepad1.dpad_left || Objects.equals(command, "STAND_RESIST"))&&!follower.isBusy()) {
+            command = "NULL";
+            follower.followPath(new Path(new BezierLine(follower.getPose(), follower.getPose())));
+            automatedDrive = true;
         }
 
         // Auto Alignment using AutoAlignSystem
@@ -234,35 +247,38 @@ public class TestPedroTeleOp extends OpMode {
         dt = (nowNs - lastTimeNs) / 1e9;
         lastTimeNs = nowNs;
         // Manual-stick override: if driver is giving significant rotation input, disable auto-align
-        if (gamepad1.x && Math.abs(gamepad1.right_stick_x) <= 0.12) {
+        if (gamepad1.xWasPressed() && Math.abs(gamepad1.right_stick_x) <= 0.12) {
             automatedDrive = true; // turning using pedro pathing.
             // Use auto align system with calculated dt
             autoAlignSystem.turnAutoAlign(dt);
-        } else {
+        }
+        if (gamepad1.xWasReleased() || Math.abs(gamepad1.right_stick_x) > 0.12) {
             // Not auto-aiming, ensure normal teleop drive continues
             // No additional action needed as setTeleOpDrive handles this
+            command = "START_TELEOP";
             automatedDrive = false;
-            autoAlignSystem.resetPIDController();
+            autoAlignSystem.reset();
         }
-
+        double velocity = IsBackLaunchZoneCloser() ?
+                Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE : Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+        double min_velocity = velocity - VELOCITY_TOLERANCE;
         // Launcher and Intake
         if (gamepad1.leftBumperWasPressed()) {
             // Run launcher
             if (!launcherOn) {
-                double velocity = IsBackLaunchZoneCloser() ?
-                        Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE : Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
-                double min_velocity = velocity - VELOCITY_TOLERANCE;
+                command = "STAND_RESIST";
                 // Set launcher velocity based on launch zone
                 launcher.setVelocity(min_velocity);
                 launcher.setVelocity(velocity);
                 launcherOn = true;
             } else {
+                command = "START_TELEOP";
                 launcher.setVelocity(STOP_VELOCITY);
                 launcherOn = false;
             }
         }
         // BALL LAUNCHING LOGIC
-        if (gamepad1.right_bumper && launcherOn) {
+        if (gamepad1.right_bumper && launcherOn && launcher.getVelocity() >= min_velocity) {
            transfer.setPower(TRANSFER_UP_POSITION);
            intake.setPower(1);
         } else {

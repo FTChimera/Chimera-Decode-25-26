@@ -34,8 +34,9 @@ public class AutoAlignSystem {
     private DcMotor[] drivingMotors; // for auto alignment turning
 
     boolean areWeUsingPedro;
-    public void resetPIDController() {
+    public void reset() {
         limelightPIDF.reset();
+        follower.startTeleopDrive();
     }
 
     public AutoAlignSystem(Constants.AllianceColor allianceColor) {
