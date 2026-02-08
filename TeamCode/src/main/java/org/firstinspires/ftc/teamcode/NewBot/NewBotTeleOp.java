@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 @TeleOp(name = "NewBotTeleOp", group = "TeleOp")// Name and Group
 public class NewBotTeleOp extends LinearOpMode {
 
-    boolean TwoGamepads = true;
+    boolean TwoGamepads = true, launcherOn= false;
     //public LimelightSystem limelight;
 
     // declaring our PIDF tuning values
@@ -31,7 +31,7 @@ public class NewBotTeleOp extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         // For now - don't pass in hardware Map because then it won't throw an error.
         // When Limelight is added, pass in hardwareMap
-        limelight = new LimelightSystem();
+        limelight = new LimelightSystem(hardwareMap);
         rgbIndicator = new RGBIndicator(hardwareMap);
         rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
         //while (!isStarted() && !isStopRequested())
@@ -147,17 +147,7 @@ public class NewBotTeleOp extends LinearOpMode {
 
             limelight.LLUpdate();
             telemetry.addData("Limelight Score", limelight.getLLScore());
-            if (limelight.getLLScore() == 0) rgbIndicator.setColor(RGBIndicator.Color.BLACK);
-            else if (limelight.getLLScore() < 6) {
-                // GREEN
-                rgbIndicator.setColor(RGBIndicator.Color.GREEN);
-            } else if (limelight.getLLScore() < 10) {
-                // ORANGE
-                rgbIndicator.setColor(RGBIndicator.Color.GOLD);
-            } else {
-                // OFF
-                rgbIndicator.setColor(RGBIndicator.Color.BLACK);
-            }
+            rgbIndicator.updateUsingLL(limelight);
 
 
             if (limelight.isDisconnected) rgbIndicator.setColor(RGBIndicator.Color.RED);telemetry.addData("Disconnected",""); // DISCONNECTED
@@ -189,6 +179,7 @@ public class NewBotTeleOp extends LinearOpMode {
 
 
             if (gamepad1.y) {
+                launcherOn = true;
                 setMinVelocity = ConstantsTeleOp.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - ConstantsTeleOp.VELOCITY_TOLERANCE;
                 setTargetVelocity = ConstantsTeleOp.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
                 OuttakeMotor.setVelocity(setMinVelocity);
@@ -198,6 +189,7 @@ public class NewBotTeleOp extends LinearOpMode {
 
             if (gamepad1.a)
             {
+                launcherOn = true;
                 setMinVelocity = ConstantsTeleOp.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - ConstantsTeleOp.VELOCITY_TOLERANCE;
                 setTargetVelocity = ConstantsTeleOp.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
                 OuttakeMotor.setVelocity(setMinVelocity);
@@ -205,7 +197,7 @@ public class NewBotTeleOp extends LinearOpMode {
 
             }
 
-            if (gamepad1.x) {
+            if (gamepad1.x && launcherOn) {
                 intakeMotor.setPower(1);
                 transferMotor.setPower(ConstantsTeleOp.TRANSFER_UP_POSITION);
             } else {
@@ -216,6 +208,7 @@ public class NewBotTeleOp extends LinearOpMode {
                 intakeMotor.setPower(intakePower);
             }
             if (gamepad1.b) {
+                launcherOn = false;
                 OuttakeMotor.setVelocity(ConstantsTeleOp.STOP_VELOCITY);
                 transferMotor.setPower(ConstantsTeleOp.TRANSFER_DOWN_POSITION);
                 setTargetVelocity = 0;

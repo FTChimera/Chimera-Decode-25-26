@@ -30,6 +30,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.teamcode.SimpleTeleOpDrive;
 import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 
@@ -70,6 +71,7 @@ public class TestPedroTeleOp extends OpMode {
     private String command = "NULL";
     private List<LynxModule> allHubs;
     private LimelightSystem limelight; private AutoAlignSystem autoAlignSystem;
+    private SimpleTeleOpDrive teleOpDrive;
     private RGBIndicator rgbIndicator;
     private Follower follower;
     private Constants.AllianceColor allianceColor = RED;
@@ -92,6 +94,7 @@ public class TestPedroTeleOp extends OpMode {
 
         limelight = new LimelightSystem(hardwareMap);
         rgbIndicator = new RGBIndicator(hardwareMap);
+        teleOpDrive = new SimpleTeleOpDrive(hardwareMap);
         transfer = hardwareMap.get(DcMotor.class, "transferMotor");
         follower = Constants.createPedroFollower(hardwareMap);
         follower.update();
@@ -105,6 +108,7 @@ public class TestPedroTeleOp extends OpMode {
         intake = hardwareMap.dcMotor.get("intakeMotor");
 
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        transfer.setDirection(DcMotorSimple.Direction.REVERSE);
         launcher.setZeroPowerBehavior(FLOAT);
         launcher.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Constants.LaunchPIDF);
         transfer.setPower(Constants.TRANSFER_DOWN_POSITION);
@@ -141,40 +145,48 @@ public class TestPedroTeleOp extends OpMode {
         //The parameter controls whether the Follower should use break mode on the motors (using it is recommended).
         //In order to use float mode, add .useBrakeModeInTeleOp(true); to your Drivetrain Constants in Constants.java (for Mecanum)
         //If you don't pass anything in, it uses the default (false)
-        follower.startTeleopDrive();
+        //follower.startTeleopDrive();
     }
 
     @Override
     public void loop() {
-        //Call this once per loop
-        follower.update();
-        limelight.LLUpdate();
-        rgbIndicator.updateUsingLL(limelight);
-        panelsTelemetry.update(telemetryM); // update all telemetry
-
         // Clear cached data from control hubs for fresh readings
         for (LynxModule hub : allHubs) {
             hub.clearBulkCache();
         }
 
+        //Call this once per loop
+        if (automatedDrive) {
+            follower.update();
+        }
+        limelight.LLUpdate();
+        rgbIndicator.updateUsingLL(limelight);
+        panelsTelemetry.update(telemetryM); // update all telemetry
+
+
         if (!automatedDrive) {
             //Make the last parameter false for field-centric, true for robot centric
             //This is the normal version to use in the TeleOp
-            follower.setTeleOpDrive(
-                    applyPolynomialToDriveInputs(gamepad1.left_stick_y),
-                    applyPolynomialToDriveInputs(gamepad1.left_stick_x),
-                    applyPolynomialToDriveInputs(gamepad1.right_stick_x),
-                    robotCentric // robot centric/field centric
-            );
+            // use TeleOpDrive for now (pp is broken)
+//            follower.setTeleOpDrive(
+//                    applyPolynomialToDriveInputs(gamepad1.left_stick_y),
+//                    applyPolynomialToDriveInputs(gamepad1.left_stick_x),
+//                    applyPolynomialToDriveInputs(gamepad1.right_stick_x),
+//                    robotCentric // robot centric/field centric
+//            );
+            teleOpDrive.drive(gamepad1, robotCentric);
         }
 
         // Update pedro pose if april tag detected via limelight
         Pose camPose = getRobotPoseFromCamera();
-        if (camPose != null) follower.setPose(camPose);
+        if (automatedDrive && camPose != null) {
+            follower.setPose(camPose);
+        }
 
         // IMU Reset
         if (gamepad1.dpadUpWasPressed()) {
             follower.setPose(follower.getPose().setHeading(90)); // Facing Up
+            teleOpDrive.resetHeading();
         }
         if (gamepad1.dpadDownWasPressed()) {
             follower.setPose(allianceColor == RED ? Constants.RED_SHOOTING_FRONT : Constants.BLUE_SHOOTING_FRONT); // Reset to front launching pose
@@ -229,18 +241,18 @@ public class TestPedroTeleOp extends OpMode {
         }
 
         //Stop automated following if the follower is done
-        if (gamepad1.bWasPressed() || !follower.isBusy() || Objects.equals(command, "START_TELEOP")) {
+        if (automatedDrive&&(gamepad1.bWasPressed() || !follower.isBusy() || Objects.equals(command, "START_TELEOP"))) {
             command = "NULL";
             follower.startTeleopDrive();
             automatedDrive = false;
         }
 
         // STAY IN ONE PLACE
-        if ((gamepad1.dpad_left || Objects.equals(command, "STAND_RESIST"))&&!follower.isBusy()) {
-            command = "NULL";
-            follower.followPath(new Path(new BezierLine(follower.getPose(), follower.getPose())));
-            automatedDrive = true;
-        }
+//        if ((gamepad1.dpad_left || Objects.equals(command, "STAND_RESIST"))&&!follower.isBusy()) {
+//            command = "NULL";
+//            follower.followPath(new Path(new BezierLine(follower.getPose(), follower.getPose())));
+//            automatedDrive = true;
+//        }
 
         // Auto Alignment using AutoAlignSystem
         long nowNs = System.nanoTime();
@@ -257,7 +269,7 @@ public class TestPedroTeleOp extends OpMode {
             // No additional action needed as setTeleOpDrive handles this
             command = "START_TELEOP";
             automatedDrive = false;
-            autoAlignSystem.reset();
+            //autoAlignSystem.reset();
         }
         double velocity = IsBackLaunchZoneCloser() ?
                 Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE : Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
@@ -278,7 +290,8 @@ public class TestPedroTeleOp extends OpMode {
             }
         }
         // BALL LAUNCHING LOGIC
-        if (gamepad1.right_bumper && launcherOn && launcher.getVelocity() >= min_velocity) {
+        // bumper is broken so use dpad right
+        if (gamepad1.dpad_right && launcherOn && launcher.getVelocity() >= min_velocity) {
            transfer.setPower(TRANSFER_UP_POSITION);
            intake.setPower(1);
         } else {
