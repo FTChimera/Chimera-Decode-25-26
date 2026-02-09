@@ -150,7 +150,6 @@ public class NewBotTeleOp extends LinearOpMode {
             rgbIndicator.updateUsingLL(limelight);
 
 
-            if (limelight.isDisconnected) rgbIndicator.setColor(RGBIndicator.Color.RED);telemetry.addData("Disconnected",""); // DISCONNECTED
             double y, x, rx;
             if (TwoGamepads) {
                 y = -gamepad2.left_stick_y; // Remember, Y stick value is reversed
