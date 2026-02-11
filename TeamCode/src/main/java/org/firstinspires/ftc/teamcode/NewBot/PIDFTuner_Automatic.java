@@ -19,10 +19,10 @@ public class PIDFTuner_Automatic extends LinearOpMode {
     double kF = 10;
 
     static final double VELOCITY_TOLERANCE = 35;
-    static final int SAMPLE_TIME_MS = 1000;
+    static final int SAMPLE_TIME_MS = 2000;
 
     static final double[] TARGET_VELOCITIES = {
-            600, 1000, 1200, 1400
+            600, 900, 1100, 1200
     };
 
     @Override
