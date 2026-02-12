@@ -359,6 +359,6 @@ public class NewBotCornerRedTest2 extends OpMode {
     }
     public void IntakeSafe() {
         intakeMotor.setPower(1);
-        transferMotor.setPower(-0.25); // to avoid feeding balls to launcher
+        transferMotor.setPower(-0.7); // to avoid feeding balls to launcher
     }
 }

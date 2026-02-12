@@ -243,6 +243,7 @@ public class TestPedroTeleOp extends OpMode {
         //Stop automated following if the follower is done
         if (automatedDrive&&(gamepad1.bWasPressed() || !follower.isBusy() || Objects.equals(command, "START_TELEOP"))) {
             command = "NULL";
+            follower.breakFollowing();
             follower.startTeleopDrive();
             automatedDrive = false;
         }

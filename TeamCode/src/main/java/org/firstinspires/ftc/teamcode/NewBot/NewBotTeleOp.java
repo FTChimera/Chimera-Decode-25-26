@@ -205,6 +205,13 @@ public class NewBotTeleOp extends LinearOpMode {
                 double intakePower = gamepad1.right_trigger - gamepad1.left_trigger;
                 intakePower = intakePower * 1.5;
                 intakeMotor.setPower(intakePower);
+                if (!(launcherOn)) {
+                    if (Math.abs(intakePower) >= 0.3) {
+                        transferMotor.setPower(-0.5*Math.abs(intakePower));
+                    } else {
+                        transferMotor.setPower(0);
+                    }
+                }
             }
             if (gamepad1.b) {
                 launcherOn = false;

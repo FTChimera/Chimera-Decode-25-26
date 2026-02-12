@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Systems;
 
+import com.pedropathing.util.Timer;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -40,20 +41,17 @@ public class LimelightSystem {
     private static double calculateDistanceCurve(double x) {
         return 0;
     }
-
-    private static boolean isDisconnected(LLResult newR) {
-        return !newR.isValid() || newR==null;
-    }
-
     public double tx=0,ty=0,ta=0,tid=0, dist=0;
     public boolean isDisconnected;
     public Limelight3A limelight1;
+    private Timer disconnectedTimer;
     public Pose3D botpose;
     public LLResult result;
     public void start(int pipeline) {startLLWithPipeline(pipeline);}
     private void startLLWithPipeline(int pipeline){
         if (!isBeingUsed) return;
         limelight1.start();limelight1.pipelineSwitch(pipeline);
+        disconnectedTimer = new Timer();
     }
     //public int pipelineChange(Constants.AllianceColor allianceColor){int newPipe = changePipeline(limelight1.getLatestResult().getPipelineIndex(), allianceColor== Constants.AllianceColor.RED);limelight1.pipelineSwitch(newPipe);return newPipe;}
     public void LLUpdate() {
@@ -67,7 +65,10 @@ public class LimelightSystem {
             for (LLResultTypes.FiducialResult fiduciary : fiducials ) {tid = fiduciary.getFiducialId();}
             dist = calculateDistanceCurve(ta);
             botpose = result.getBotpose_MT2();
-            isDisconnected = isDisconnected(result);
+            isDisconnected = false;
+            disconnectedTimer.resetTimer();
+        } else {
+            if (disconnectedTimer.getElapsedTimeSeconds() > 0.5) {isDisconnected= true;}
         }
     }
     public double getLLScore() {
