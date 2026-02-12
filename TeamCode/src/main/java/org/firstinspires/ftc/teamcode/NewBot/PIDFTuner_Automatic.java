@@ -110,7 +110,7 @@ public class PIDFTuner_Automatic extends LinearOpMode {
             telemetry.addData("Oscillation", maxOscillation);
             telemetry.update();
 
-            if (maxOscillation > 100) {
+            if (maxOscillation > 40) {
                 kP *= 0.75;
                 break;
             }

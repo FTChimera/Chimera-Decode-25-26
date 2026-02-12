@@ -2,6 +2,9 @@ package org.firstinspires.ftc.teamcode.NewBot;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 
+import static org.firstinspires.ftc.teamcode.NewBot.Constants.TRANSFER_DOWN_POSITION;
+import static org.firstinspires.ftc.teamcode.NewBot.Constants.TRANSFER_UP_POSITION;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
@@ -13,7 +16,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+
+import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
+import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 
 @Autonomous(name = "NewBotAutoRed2", group = "NewBotAuto", preselectTeleOp = "NewBotTeleOp")
 public class NewBotCornerRedTest2 extends OpMode {
@@ -26,12 +31,12 @@ public class NewBotCornerRedTest2 extends OpMode {
     private final Pose launchPose = new Pose(96, 135.5, Math.toRadians(0));
     private final Pose intakePrep = new Pose(96.4, 87, Math.toRadians(0));
     private final Pose red1Intake = new Pose(127, 87, Math.toRadians(0));
-    private final Pose intakePrep2 = new Pose(101.0, 61, Math.toRadians(0));
+    private final Pose intakePrep2 = new Pose(98, 61, Math.toRadians(0));
     private final Pose red2Intake = new Pose(139, 59, Math.toRadians(0));
-    private final Pose emptyGate = new Pose(134, 72, Math.toRadians(350));
-    private final Pose emptyGateControlPoint = new Pose(110, 58);
-    private final Pose intakePrep3 = new Pose(100.4, 36, Math.toRadians(0));
-    private final Pose red3intake = new Pose(133, 36, Math.toRadians(0));
+    private final Pose emptyGate = new Pose(131.5, 76, Math.toRadians(350));
+    private final Pose emptyGateControlPoint = new Pose(107, 57);
+    private final Pose intakePrep3 = new Pose(98, 36, Math.toRadians(0));
+    private final Pose red3intake = new Pose(124, 36, Math.toRadians(0));
 
     private Path pathOne, pathTwo, pathThree, pathFour, pathFive, pathSix, pathSeven, pathEight, pathNine, pathTen, pathEmptyGate;
 
@@ -43,7 +48,7 @@ public class NewBotCornerRedTest2 extends OpMode {
 
     // Duration to run the transfer motor to ensure all balls are fired
     final double FEED_DURATION_SECONDS = 1.8;
-    final double MAX_RPM_WAIT_TIME_SECONDS = 1.7; // Fail-safe if RPM isn't reached
+    final double MAX_RPM_WAIT_TIME_SECONDS = 1.4; // Fail-safe to PID if RPM isn't reached
 
     // Path State Constants
     final int CHIMERA_LAUNCH = 1;
@@ -75,7 +80,8 @@ public class NewBotCornerRedTest2 extends OpMode {
     DcMotorEx OuttakeMotor;
     DcMotor intakeMotor;
     DcMotor transferMotor; // Replaces pushServo
-
+    LimelightSystem limelightSystem;
+    RGBIndicator rgbIndicator;
     public void buildPaths() {
         pathOne = new Path(new BezierLine(startPose, launchPose));
         pathOne.setLinearHeadingInterpolation(startPose.getHeading(), launchPose.getHeading());
@@ -158,7 +164,7 @@ public class NewBotCornerRedTest2 extends OpMode {
                 if (!follower.isBusy()) {
                     follower.followPath(pathFour);
                     setPathState(CHIMERA_LAUNCH);
-                    IntakeStop();
+                    IntakeSafe();
                 }
                 break;
             case CHIMERA_PATH_FIVE:
@@ -171,6 +177,7 @@ public class NewBotCornerRedTest2 extends OpMode {
             case CHIMERA_PATH_SIX:
                 if (!follower.isBusy()) {
                     follower.followPath(pathSix);
+                    IntakeSafe();
                     setPathState(CHIMERA_EMPTY_GATE);
                 }
                 break;
@@ -183,7 +190,7 @@ public class NewBotCornerRedTest2 extends OpMode {
             case CHIMERA_PATH_SEVEN:
                 if (!follower.isBusy()) {
                     follower.followPath(pathSeven);
-                    IntakeStop();
+                    IntakeSafe();
                     setPathState(CHIMERA_LAUNCH);
                 }
                 break;
@@ -223,6 +230,8 @@ public class NewBotCornerRedTest2 extends OpMode {
 
     @Override
     public void loop() {
+        limelightSystem.LLUpdate();
+        rgbIndicator.updateUsingLL(limelightSystem);
         follower.update();
         autonomousPathUpdate();
 
@@ -235,6 +244,8 @@ public class NewBotCornerRedTest2 extends OpMode {
 
     @Override
     public void init() {
+        limelightSystem = new LimelightSystem(hardwareMap);
+        rgbIndicator = new RGBIndicator(hardwareMap);
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         launcherTimer = new Timer();
@@ -275,6 +286,7 @@ public class NewBotCornerRedTest2 extends OpMode {
     public void start() {
         opmodeTimer.resetTimer();
         setPathState(0);
+        limelightSystem.start(0);
     }
 
     @Override
@@ -318,8 +330,7 @@ public class NewBotCornerRedTest2 extends OpMode {
 
             case 1: // FEEDING (RUN TRANSFER)
                 // TeleOp logic: Intake runs at 1, Transfer at 0.5
-                intakeMotor.setPower(1);
-                transferMotor.setPower(0.5);
+                Intake(); transferMotor.setPower(TRANSFER_UP_POSITION);
 
                 // Run for defined duration to empty hopper
                 if (launcherTimer.getElapsedTimeSeconds() >= FEED_DURATION_SECONDS) {
@@ -329,8 +340,8 @@ public class NewBotCornerRedTest2 extends OpMode {
 
             case 2: // STOP & FINISH
                 OuttakeMotor.setVelocity(STOP_VELOCITY);
-                intakeMotor.setPower(0);
-                transferMotor.setPower(0);
+                IntakeStop();
+                transferMotor.setPower(TRANSFER_DOWN_POSITION);
 
                 isLauncherRunning = false;
                 return true; // Sequence Complete
@@ -345,5 +356,9 @@ public class NewBotCornerRedTest2 extends OpMode {
 
     public void IntakeStop() {
         intakeMotor.setPower(0);
+    }
+    public void IntakeSafe() {
+        intakeMotor.setPower(1);
+        transferMotor.setPower(-0.25); // to avoid feeding balls to launcher
     }
 }
