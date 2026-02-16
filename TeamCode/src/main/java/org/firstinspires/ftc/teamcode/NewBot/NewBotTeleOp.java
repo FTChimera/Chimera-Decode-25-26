@@ -11,10 +11,11 @@ import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 
 
+@SuppressWarnings("SpellCheckingInspection")
 @TeleOp(name = "NewBotTeleOp", group = "TeleOp")// Name and Group
 public class NewBotTeleOp extends LinearOpMode {
 
-    boolean TwoGamepads = true, launcherOn= false;
+    boolean Gamepad2Driving = false, launcherOn= false;
     //public LimelightSystem limelight;
 
     // declaring our PIDF tuning values
@@ -22,8 +23,9 @@ public class NewBotTeleOp extends LinearOpMode {
     double setMinVelocity = 0;
     // private Follower follower;
     public static Pose startingPose;
-    ConstantsTeleOp.AllianceColor allianceColor;
+    Constants.AllianceColor allianceColor;
     LimelightSystem limelight;
+    AutoAlignSystem autoAlignSystem;
 
     RGBIndicator rgbIndicator;
 
@@ -35,31 +37,31 @@ public class NewBotTeleOp extends LinearOpMode {
         rgbIndicator = new RGBIndicator(hardwareMap);
         rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
         //while (!isStarted() && !isStopRequested())
-        allianceColor = ConstantsTeleOp.AllianceColor.RED;
+        allianceColor = Constants.AllianceColor.RED;
         while (opModeInInit())
         {
             telemetry.addData("Press 'GamePad1 Right Bumper'", "for BLUE");
             telemetry.addData("Press 'GamePad1 Left Bumper'", "for RED");
-            telemetry.addLine("Press A for 2 Gamepads, B for 1");
-            telemetry.addLine(TwoGamepads? "2" : "1" + " Gamepad used");
+            telemetry.addLine("Press A for Start A Driver, B for Start B Driver");
+            telemetry.addLine(Gamepad2Driving ? "Gamepad B" : "Gamepad A" + " Driving");
             // This method is called repeatedly during the init phase
             if (gamepad1.a) {
-                TwoGamepads = true;
+                Gamepad2Driving = false;
             }
             if (gamepad1.b) {
-                TwoGamepads = false;
+                Gamepad2Driving = true;
             }
             if (gamepad1.right_bumper)
             {
-                allianceColor = ConstantsTeleOp.AllianceColor.BLUE;
+                allianceColor = Constants.AllianceColor.BLUE;
                 // Display the current selection on the Driver Station
                 telemetry.addData("Alliance", "Selected: ", "BLUE");
             } else if (gamepad1.left_bumper) {
-                allianceColor = ConstantsTeleOp.AllianceColor.RED;
+                allianceColor = Constants.AllianceColor.RED;
                 // Display the current selection on the Driver Station
                 telemetry.addData("Alliance", "Selected: ", "RED");
             } else {
-                allianceColor = ConstantsTeleOp.AllianceColor.RED;
+                allianceColor = Constants.AllianceColor.RED;
                 // Display the current selection on the Driver Station
                 telemetry.addData("Alliance", "Selected: ", "RED");
             }
@@ -95,10 +97,11 @@ public class NewBotTeleOp extends LinearOpMode {
         OuttakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         transferMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        OuttakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, ConstantsTeleOp.LaunchPIDF);
+        OuttakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Constants.LaunchPIDF);
 
-        if (allianceColor == ConstantsTeleOp.AllianceColor.RED)
+        if (allianceColor == Constants.AllianceColor.RED)
         {
+            autoAlignSystem = new AutoAlignSystem(Constants.AllianceColor.RED);
             // Starting position Red Goal
             startingPose = new Pose();
             //follower.setStartingPose(startingPose);
@@ -106,14 +109,16 @@ public class NewBotTeleOp extends LinearOpMode {
             telemetry.addData("Alliance Color", "Red");
             //telemetry.addData("Starting Pose", follower.getPose());
         }
-        else if(allianceColor == ConstantsTeleOp.AllianceColor.BLUE)
+        else if(allianceColor == Constants.AllianceColor.BLUE)
         {
+            autoAlignSystem = new AutoAlignSystem(Constants.AllianceColor.BLUE);
             startingPose = new Pose();
             //follower.setStartingPose(startingPose);
             //follower.update();
             telemetry.addData("Alliance Color", "Blue");
             //telemetry.addData("Starting Pose", follower.getPose());
         } else {
+            autoAlignSystem = new AutoAlignSystem(Constants.AllianceColor.RED);
             // Starting position Red Goal
             startingPose = new Pose();
             //follower.setStartingPose(startingPose);
@@ -122,6 +127,8 @@ public class NewBotTeleOp extends LinearOpMode {
             // telemetry.addData("Starting Pose", follower.getPose());
             telemetry.addData("Alliance Color Variable", allianceColor);
         }
+
+        autoAlignSystem.LimelightSetUp(limelight, new DcMotor[]{frontLeftMotor,backLeftMotor, frontRightMotor, backRightMotor});
 
         //telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         /*
@@ -143,15 +150,21 @@ public class NewBotTeleOp extends LinearOpMode {
         boolean lastDpadDown = false;
         // ----------------------------------------
 
+        // calculate dt for turning with limelight
+        long lastTime = System.nanoTime();
+        long currentTime;
+        double deltaTime;
+
         while (opModeIsActive()) {
 
             limelight.LLUpdate();
             telemetry.addData("Limelight Score", limelight.getLLScore());
+            telemetry.addData("Limelight TagID", limelight.tid); // debug: show which tag limelight reports
             rgbIndicator.updateUsingLL(limelight);
 
 
             double y, x, rx;
-            if (TwoGamepads) {
+            if (Gamepad2Driving) {
                 y = -gamepad2.left_stick_y; // Remember, Y stick value is reversed
                 x = gamepad2.left_stick_x * 1.1; // Counteract imperfect strafing
                 rx = gamepad2.right_stick_x;
@@ -161,15 +174,25 @@ public class NewBotTeleOp extends LinearOpMode {
                 rx = gamepad1.right_stick_x;
             }
 
-            y *= Math.abs(y);
-            x *= Math.abs(x);
-            rx *= Math.abs(rx);
+            y *= y*y;
+            x *= x*x;
+            rx *= rx*rx / 2;
 
+            // Calculate dt
+            currentTime = System.nanoTime();
+            deltaTime = (currentTime - lastTime) / 1e9; // convert to seconds
+            lastTime = currentTime; // Update lastTime each loop so dt is meaningful
+
+
+            if (gamepad1.back || gamepad2.back) {
+                rx = autoAlignSystem.getTurningPowerLimelight(deltaTime);
+                telemetry.addData("rx", rx);
+            }
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-            double frontLeftPower = 0.85 *(y + x + rx) / denominator;
-            double backLeftPower = 0.85 *(y - x + rx) / denominator;
-            double frontRightPower = 0.85 *(y - x - rx) / denominator;
-            double backRightPower = 0.85 * (y + x - rx) / denominator;
+            double frontLeftPower = 0.9 *(y + x + rx) / denominator;
+            double backLeftPower = 0.9 *(y - x + rx) / denominator;
+            double frontRightPower = 0.9 *(y - x - rx) / denominator;
+            double backRightPower = 0.9 * (y + x - rx) / denominator;
 
             frontLeftMotor.setPower(frontLeftPower);
             backLeftMotor.setPower(backLeftPower);
@@ -177,32 +200,33 @@ public class NewBotTeleOp extends LinearOpMode {
             backRightMotor.setPower(backRightPower);
 
 
-            if (gamepad1.y) {
+            if (gamepad1.y || gamepad2.y) {
                 launcherOn = true;
-                setMinVelocity = ConstantsTeleOp.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - ConstantsTeleOp.VELOCITY_TOLERANCE;
-                setTargetVelocity = ConstantsTeleOp.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+                setMinVelocity = Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - Constants.VELOCITY_TOLERANCE;
+                setTargetVelocity = Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
                 OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
 
             }
 
-            if (gamepad1.a)
+            if (gamepad1.a || gamepad2.a)
             {
                 launcherOn = true;
-                setMinVelocity = ConstantsTeleOp.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - ConstantsTeleOp.VELOCITY_TOLERANCE;
-                setTargetVelocity = ConstantsTeleOp.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
+                setMinVelocity = Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - Constants.VELOCITY_TOLERANCE;
+                setTargetVelocity = Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
                 OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
 
             }
 
-            if (gamepad1.x && launcherOn) {
+            if ((gamepad1.x || gamepad2.x) && launcherOn) {
                 intakeMotor.setPower(1);
-                transferMotor.setPower(ConstantsTeleOp.TRANSFER_UP_POSITION);
+                transferMotor.setPower(Constants.TRANSFER_UP_POSITION);
             } else {
 
                 // In-take
                 double intakePower = gamepad1.right_trigger - gamepad1.left_trigger;
+                intakePower += gamepad2.right_trigger - gamepad2.left_trigger;
                 intakePower = intakePower * 1.5;
                 intakeMotor.setPower(intakePower);
                 if (!(launcherOn)) {
@@ -213,16 +237,16 @@ public class NewBotTeleOp extends LinearOpMode {
                     }
                 }
             }
-            if (gamepad1.b) {
+            if (gamepad1.b || gamepad2.b) {
                 launcherOn = false;
-                OuttakeMotor.setVelocity(ConstantsTeleOp.STOP_VELOCITY);
-                transferMotor.setPower(ConstantsTeleOp.TRANSFER_DOWN_POSITION);
+                OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);
+                transferMotor.setPower(Constants.TRANSFER_DOWN_POSITION);
                 setTargetVelocity = 0;
                 setMinVelocity = 0;
             }
 
             // Check for Dpad Up (Increase Velocity)
-            boolean currentDpadUp = gamepad1.dpad_up;
+            boolean currentDpadUp = gamepad1.dpad_up || gamepad2.dpad_up;
             if (currentDpadUp && !lastDpadUp) {
                 setTargetVelocity += 25;
                 OuttakeMotor.setVelocity(setTargetVelocity);
@@ -230,7 +254,7 @@ public class NewBotTeleOp extends LinearOpMode {
             lastDpadUp = currentDpadUp;
 
             // Check for Dpad Down (Decrease Velocity)
-            boolean currentDpadDown = gamepad1.dpad_down;
+            boolean currentDpadDown = gamepad1.dpad_down || gamepad2.dpad_down;
             if (currentDpadDown && !lastDpadDown) {
                 if (setTargetVelocity > 25) {
                     setTargetVelocity -= 25;

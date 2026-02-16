@@ -28,10 +28,9 @@ public class Constants {
         output = output*-0.8; // scalar (negate for pedro pathing driving)
         return output;
     }
-    // TUNE LL_PIDF VALUES FOR AUTO-ALIGNMENT
     public static PIDFCoefficients LimelightAutoAlignmentTurning =
             new PIDFCoefficients(
-                    0.03, 0.0, 0.0, 0.5
+                    0.04, 0, 0.00005, 0
             );
     public static final double LIMELIGHT_PIDF_MIN_OUTPUT = -1;
     public static final double LIMELIGHT_PIDF_MAX_OUTPUT = 1;
@@ -44,8 +43,8 @@ public class Constants {
     public static final double SLEEP_BEFORE_INTAKE_RESET_LAUNCHING = 1600;
     public static final double RAPID_FIRE_TIME = 1000;
     public static final double VELOCITY_TOLERANCE = 70;
-    public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1100;// Set target velocity from front launch zone
-    public static double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 980;// Set target velocity from goal
+    public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1050;// Set target velocity from front launch zone
+    public static double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 950;// Set target velocity from goal
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     public static int[] BALL_NUM_INTAKE_NEEDED = {2,3};
     public static PIDFCoefficients LaunchPIDF = new PIDFCoefficients(

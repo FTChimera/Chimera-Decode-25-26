@@ -47,6 +47,7 @@ public class LimelightSystem {
     private Timer disconnectedTimer;
     public Pose3D botpose;
     public LLResult result;
+    private List<LLResultTypes.FiducialResult> fiducials;
     public void start(int pipeline) {startLLWithPipeline(pipeline);}
     private void startLLWithPipeline(int pipeline){
         if (!isBeingUsed) return;
@@ -54,6 +55,31 @@ public class LimelightSystem {
         disconnectedTimer = new Timer();
     }
     //public int pipelineChange(Constants.AllianceColor allianceColor){int newPipe = changePipeline(limelight1.getLatestResult().getPipelineIndex(), allianceColor== Constants.AllianceColor.RED);limelight1.pipelineSwitch(newPipe);return newPipe;}
+
+   public LLResultTypes.FiducialResult getResultForTag(int tagID) {
+         if (!isBeingUsed) return null;
+         for (LLResultTypes.FiducialResult fiduciary : fiducials ) {
+             if (fiduciary.getFiducialId() == tagID) {
+                 return fiduciary;
+             }
+         }
+         return null;
+   }
+
+   public boolean isTagInFiducialResults(int tagID) {
+       if (!isBeingUsed) return false;
+       if (fiducials == null) return false;
+       for (LLResultTypes.FiducialResult fiduciary : fiducials ) {
+           if (fiduciary.getFiducialId() == tagID) {
+               return true;
+           }
+       }
+       return false;
+   }
+   public List<LLResultTypes.FiducialResult> getFiducials() {
+       if (!isBeingUsed) return null;
+       return fiducials;
+   }
     public void LLUpdate() {
         if (!isBeingUsed) return;
         result = limelight1.getLatestResult();

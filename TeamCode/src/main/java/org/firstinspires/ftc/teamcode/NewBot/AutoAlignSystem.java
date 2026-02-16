@@ -100,7 +100,7 @@ public class AutoAlignSystem {
         follower.turnTo(angle);
     }
 
-    private void turnAutoAlignLimelight(double dt) {
+    public void turnAutoAlignLimelight(double dt) {
         // Use the tx value from the already updated limelight system
         tx = limelight.tx;
         tid = limelight.tid;
@@ -133,7 +133,7 @@ public class AutoAlignSystem {
 
         // Apply offset and calculate rotation command using PID with dt from TeleOp
         double error = tx + TxOffset;
-        double rotationCmd = limelightPIDF.update(error, dt);
+        double rotationCmd = limelightPIDF.updatePIDF(error, dt);
 
         // Apply rotation command
         if (areWeUsingPedro) {
@@ -154,5 +154,65 @@ public class AutoAlignSystem {
                 drivingMotors[3].setPower(rightBackPower);
             }
         }
+    }
+    public double getTurningPowerLimelight(double dt) {
+        // Use the tx value from the already updated limelight system
+
+        // Early exit on disconnected
+        // now gone because tx will turn to see the goal
+//        if (limelight == null || limelight.isDisconnected) {
+//            return 0;
+//        }
+
+        // Verify tag ID matches alliance color for DECODE season (24 for red goal, 20 for blue goal)
+        boolean correctTag = false;
+
+        // Prefer checking reported tid first (simple and fast), then fallback to fiducial results
+        if (currentGoal == Constants.AllianceColor.RED) {
+            if (limelight.tid == 24) {
+                correctTag = true;
+                tid = 24;
+                // prefer the detailed result if available
+                if (limelight.isTagInFiducialResults(24)) {
+                    tx = limelight.getResultForTag(24).getTargetXDegrees();
+                } else {
+                    tx = limelight.tx; // fallback
+                }
+            } else if (limelight.isTagInFiducialResults(24)) {
+                correctTag = true;
+                tid = 24;
+                tx = limelight.getResultForTag(24).getTargetXDegrees();
+            }
+        } else if (currentGoal == Constants.AllianceColor.BLUE) {
+            if (limelight.tid == 20) {
+                correctTag = true;
+                tid = 20;
+                if (limelight.isTagInFiducialResults(20)) {
+                    tx = limelight.getResultForTag(20).getTargetXDegrees();
+                } else {
+                    tx = limelight.tx;
+                }
+            } else if (limelight.isTagInFiducialResults(20)) {
+                correctTag = true;
+                tid = 20;
+                tx = limelight.getResultForTag(20).getTargetXDegrees();
+            }
+        }
+
+        if (!correctTag) {
+            return 0; // Wrong target, don't align
+        }
+
+        // Guard against PID controller not initialized
+        if (limelightPIDF == null) {
+            return 0;
+        }
+
+        // Apply offset and calculate rotation command using PID with dt from TeleOp
+        double error = tx + TxOffset;
+        double rotationCmd = limelightPIDF.updatePIDF(error, dt);
+
+        // return rotation command for use in TeleOp
+        return rotationCmd;
     }
 }

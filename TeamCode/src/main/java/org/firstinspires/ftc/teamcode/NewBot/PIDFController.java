@@ -16,7 +16,7 @@ public class PIDFController {
     private double lastError = 0.0;
     private boolean firstUpdate = true;
 
-    private double tolerance = 0.0;
+    private double tolerance = 0.5;
     private double lastOutput = 0.0;
 
     /**
@@ -51,8 +51,8 @@ public class PIDFController {
      * @param dtSeconds time step in seconds
      * @return controller output (clamped)
      */
-    public double update(double error, double dtSeconds) {
-        return update(error, dtSeconds, 0.0);
+    public double updatePIDF(double error, double dtSeconds) {
+        return updatePIDF(error, dtSeconds, 0.0);
     }
 
     /**
@@ -63,8 +63,8 @@ public class PIDFController {
      * @param setpointVelocity velocity (units/sec) used for feedforward term
      * @return controller output (clamped)
      */
-    public double update(double error, double dtSeconds, double setpointVelocity) {
-        if (dtSeconds <= 0) return 0.0;
+    public double updatePIDF(double error, double dtSeconds, double setpointVelocity) {
+        //if (dtSeconds <= 0) return 0.0;
         if (firstUpdate) {
             lastError = error;
             firstUpdate = false;
