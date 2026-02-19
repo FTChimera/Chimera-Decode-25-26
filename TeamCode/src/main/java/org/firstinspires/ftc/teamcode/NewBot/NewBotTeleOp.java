@@ -176,7 +176,7 @@ public class NewBotTeleOp extends LinearOpMode {
 
             y *= y*y;
             x *= x*x;
-            rx *= rx*rx / 2;
+            rx *= rx*rx * 0.75;
 
             // Calculate dt
             currentTime = System.nanoTime();
@@ -202,22 +202,23 @@ public class NewBotTeleOp extends LinearOpMode {
 
             if (gamepad1.y || gamepad2.y) {
                 launcherOn = true;
-                setMinVelocity = Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - Constants.VELOCITY_TOLERANCE;
-                setTargetVelocity = Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+                //setTargetVelocity = Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE;
+                setTargetVelocity = VelocityCalculator.NEWBOT.calculateVelocity(limelight.dist); // use new velocity calculator
+                setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
                 OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
 
             }
 
-            if (gamepad1.a || gamepad2.a)
-            {
-                launcherOn = true;
-                setMinVelocity = Constants.TARGET_VELOCITY_FRONT_LAUNCH_ZONE - Constants.VELOCITY_TOLERANCE;
-                setTargetVelocity = Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
-                OuttakeMotor.setVelocity(setMinVelocity);
-                OuttakeMotor.setVelocity(setTargetVelocity);
-
-            }
+//            if (gamepad1.a || gamepad2.a)
+//            {
+//                launcherOn = true;
+//                setTargetVelocity = Constants.TARGET_VELOCITY_BACK_LAUNCH_ZONE;
+//                setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
+//                OuttakeMotor.setVelocity(setMinVelocity);
+//                OuttakeMotor.setVelocity(setTargetVelocity);
+//
+//            }
 
             if ((gamepad1.x || gamepad2.x) && launcherOn) {
                 intakeMotor.setPower(1);
@@ -249,6 +250,7 @@ public class NewBotTeleOp extends LinearOpMode {
             boolean currentDpadUp = gamepad1.dpad_up || gamepad2.dpad_up;
             if (currentDpadUp && !lastDpadUp) {
                 setTargetVelocity += 25;
+                setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
                 OuttakeMotor.setVelocity(setTargetVelocity);
             }
             lastDpadUp = currentDpadUp;
@@ -258,6 +260,7 @@ public class NewBotTeleOp extends LinearOpMode {
             if (currentDpadDown && !lastDpadDown) {
                 if (setTargetVelocity > 25) {
                     setTargetVelocity -= 25;
+                    setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
                     OuttakeMotor.setVelocity(setTargetVelocity);
                 }
             }
@@ -270,6 +273,7 @@ public class NewBotTeleOp extends LinearOpMode {
             telemetry.addData("Outake Motor Velocity:", OuttakeMotor.getVelocity());
             telemetry.addData("Target Velocity", setTargetVelocity);
             telemetry.addData("Min Velocity", setMinVelocity);
+            telemetry.addData("Dist (1/ta)", limelight.dist);
             telemetry.update();
         }
     }

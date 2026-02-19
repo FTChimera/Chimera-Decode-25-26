@@ -39,7 +39,7 @@ public class LimelightSystem {
 //    }
 
     private static double calculateDistanceCurve(double x) {
-        return 0;
+        return 1/x;
     }
     public double tx=0,ty=0,ta=0,tid=0, dist=0;
     public boolean isDisconnected;
@@ -81,6 +81,7 @@ public class LimelightSystem {
        return fiducials;
    }
     public void LLUpdate() {
+        // Must be called every loop for disconnected timer
         if (!isBeingUsed) return;
         result = limelight1.getLatestResult();
         if (result!=null && result.isValid()) {
@@ -94,7 +95,7 @@ public class LimelightSystem {
             isDisconnected = false;
             disconnectedTimer.resetTimer();
         } else {
-            if (disconnectedTimer.getElapsedTimeSeconds() > 0.5) {isDisconnected= true;}
+            if (disconnectedTimer.getElapsedTimeSeconds() > 0.6) {isDisconnected= true;}
         }
     }
     public double getLLScore() {
