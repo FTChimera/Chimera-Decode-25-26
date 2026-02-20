@@ -30,7 +30,7 @@ public class Constants {
     }
     public static PIDFCoefficients LimelightAutoAlignmentTurning =
             new PIDFCoefficients(
-                    0.04, 0, 0.00005, 0
+                    0.03, 0, 0, 0
             );
     public static final double LIMELIGHT_PIDF_MIN_OUTPUT = -1;
     public static final double LIMELIGHT_PIDF_MAX_OUTPUT = 1;

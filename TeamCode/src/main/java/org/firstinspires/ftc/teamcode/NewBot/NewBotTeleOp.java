@@ -21,8 +21,7 @@ public class NewBotTeleOp extends LinearOpMode {
     // declaring our PIDF tuning values
     double setTargetVelocity = 0;
     double setMinVelocity = 0;
-    // private Follower follower;
-    public static Pose startingPose;
+    private PedroDrive follower;
     Constants.AllianceColor allianceColor;
     LimelightSystem limelight;
     AutoAlignSystem autoAlignSystem;
@@ -79,7 +78,7 @@ public class NewBotTeleOp extends LinearOpMode {
         DcMotor intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         DcMotor transferMotor = hardwareMap.dcMotor.get("transferMotor");
 
-        //follower = Constants.createPedroFollower(hardwareMap);
+        follower = new PedroDrive(hardwareMap, new Pose().setHeading(allianceColor == Constants.AllianceColor.RED? 0 : 180));
 
         telemetry.addLine("Setting the motors now");
 
@@ -99,34 +98,7 @@ public class NewBotTeleOp extends LinearOpMode {
 
         OuttakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Constants.LaunchPIDF);
 
-        if (allianceColor == Constants.AllianceColor.RED)
-        {
-            autoAlignSystem = new AutoAlignSystem(Constants.AllianceColor.RED);
-            // Starting position Red Goal
-            startingPose = new Pose();
-            //follower.setStartingPose(startingPose);
-            //follower.update();
-            telemetry.addData("Alliance Color", "Red");
-            //telemetry.addData("Starting Pose", follower.getPose());
-        }
-        else if(allianceColor == Constants.AllianceColor.BLUE)
-        {
-            autoAlignSystem = new AutoAlignSystem(Constants.AllianceColor.BLUE);
-            startingPose = new Pose();
-            //follower.setStartingPose(startingPose);
-            //follower.update();
-            telemetry.addData("Alliance Color", "Blue");
-            //telemetry.addData("Starting Pose", follower.getPose());
-        } else {
-            autoAlignSystem = new AutoAlignSystem(Constants.AllianceColor.RED);
-            // Starting position Red Goal
-            startingPose = new Pose();
-            //follower.setStartingPose(startingPose);
-            // follower.update();
-            telemetry.addData("Alliance Color", "Red");
-            // telemetry.addData("Starting Pose", follower.getPose());
-            telemetry.addData("Alliance Color Variable", allianceColor);
-        }
+       autoAlignSystem = new AutoAlignSystem(allianceColor);
 
         autoAlignSystem.LimelightSetUp(limelight, new DcMotor[]{frontLeftMotor,backLeftMotor, frontRightMotor, backRightMotor});
 
@@ -156,7 +128,7 @@ public class NewBotTeleOp extends LinearOpMode {
         double deltaTime;
 
         while (opModeIsActive()) {
-
+            follower.manualUpdate();
             limelight.LLUpdate();
             telemetry.addData("Limelight Score", limelight.getLLScore());
             telemetry.addData("Limelight TagID", limelight.tid); // debug: show which tag limelight reports
@@ -185,7 +157,12 @@ public class NewBotTeleOp extends LinearOpMode {
 
 
             if (gamepad1.back || gamepad2.back) {
-                rx = autoAlignSystem.getTurningPowerLimelight(deltaTime);
+                if (autoAlignSystem.LLCanSeeGoal()) {
+                    rx = autoAlignSystem.getTurningPowerLimelight(deltaTime);
+                    follower.resetHeading(PedroDrive.getPedroHeadingFromLL(limelight, allianceColor));
+                } else {
+                    rx = autoAlignSystem.getTurningPowerLimelightWithSuppliedTX(deltaTime, follower.getLLHeadingFromPedro(allianceColor));
+                }
                 telemetry.addData("rx", rx);
             }
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
@@ -258,16 +235,14 @@ public class NewBotTeleOp extends LinearOpMode {
             // Check for Dpad Down (Decrease Velocity)
             boolean currentDpadDown = gamepad1.dpad_down || gamepad2.dpad_down;
             if (currentDpadDown && !lastDpadDown) {
-                if (setTargetVelocity > 25) {
-                    setTargetVelocity -= 25;
-                    setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
-                    OuttakeMotor.setVelocity(setTargetVelocity);
-                }
+                setTargetVelocity -= 25;
+                setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
+                OuttakeMotor.setVelocity(setTargetVelocity);
             }
             lastDpadDown = currentDpadDown;
 
             // ------------------------------------
-
+            telemetry.addData("POSE", follower.getPose());
             telemetry.addData("Intake Motor power", intakeMotor.getPower());
             telemetry.addData("Transfer Motor power", transferMotor.getPower());
             telemetry.addData("Outake Motor Velocity:", OuttakeMotor.getVelocity());

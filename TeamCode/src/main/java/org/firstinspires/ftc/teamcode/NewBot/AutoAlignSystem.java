@@ -215,4 +215,52 @@ public class AutoAlignSystem {
         // return rotation command for use in TeleOp
         return rotationCmd;
     }
+
+    public boolean LLCanSeeGoal() {
+        // Verify tag ID matches alliance color for DECODE season (24 for red goal, 20 for blue goal)
+        boolean correctTag = false;
+
+        // Prefer checking reported tid first (simple and fast), then fallback to fiducial results
+        if (currentGoal == Constants.AllianceColor.RED) {
+            if (limelight.tid == 24) {
+                correctTag = true;
+                tid = 24;
+                // prefer the detailed result if available
+                if (limelight.isTagInFiducialResults(24)) {
+                    tx = limelight.getResultForTag(24).getTargetXDegrees();
+                } else {
+                    tx = limelight.tx; // fallback
+                }
+            } else if (limelight.isTagInFiducialResults(24)) {
+                correctTag = true;
+                tid = 24;
+                tx = limelight.getResultForTag(24).getTargetXDegrees();
+            }
+        } else if (currentGoal == Constants.AllianceColor.BLUE) {
+            if (limelight.tid == 20) {
+                correctTag = true;
+                tid = 20;
+                if (limelight.isTagInFiducialResults(20)) {
+                    tx = limelight.getResultForTag(20).getTargetXDegrees();
+                } else {
+                    tx = limelight.tx;
+                }
+            } else if (limelight.isTagInFiducialResults(20)) {
+                correctTag = true;
+                tid = 20;
+                tx = limelight.getResultForTag(20).getTargetXDegrees();
+            }
+        }
+
+        return correctTag;
+    }
+
+    public double getTurningPowerLimelightWithSuppliedTX(double deltaTime, double targetX) {
+        // Apply offset and calculate rotation command using PID with dt from TeleOp
+        double error = targetX + TxOffset;
+        double rotationCmd = limelightPIDF.updatePIDF(error, deltaTime);
+
+        // return rotation command for use in TeleOp
+        return rotationCmd;
+    }
 }

@@ -44,8 +44,8 @@ public class NewBotAutoRed extends OpMode {
     // TeleOp "Front Launch" is 1100, Back is 500. Assuming Auto shoots from Front/Close range.
     double TARGET_VELOCITY = 1000;
     // Duration to run the transfer motor to ensure all balls are fired
-    final double FEED_DURATION_SECONDS = 1.8;
-    final double MAX_RPM_WAIT_TIME_SECONDS = 1.4; // Fail-safe if RPM isn't reached
+    final double FEED_DURATION_SECONDS = 2;
+    final double MAX_RPM_WAIT_TIME_SECONDS = 1.2; // Fail-safe if RPM isn't reached
 
     // Path State Constants
     final int CHIMERA_LAUNCH = 1;
@@ -139,6 +139,7 @@ public class NewBotAutoRed extends OpMode {
                     setPathState(CHIMERA_PATH_EIGHT);
                     third_iteration = true;
                 } else {
+                    follower.followPath(pathEleven);
                     setPathState(CHIMERA_STOP);
                 }
                 break;
@@ -202,14 +203,12 @@ public class NewBotAutoRed extends OpMode {
                 }
                 break;
             case CHIMERA_STOP:
+                IntakeStop();
                 if (!follower.isBusy()) {
-                    IntakeStop();
-                    follower.followPath(pathEleven);
-                    break;
+                    setPathState(STOP_AUTO);
                 }
-                setPathState(STOP_AUTO);
                 break;
-            case 13:
+            case STOP_AUTO:
                 telemetry.addLine("Autonomous Complete");
                 requestOpModeStop();
                 break;
@@ -311,6 +310,8 @@ public class NewBotAutoRed extends OpMode {
         // 2. State Machine
         switch (launcherStage) {
             case 0: // WAIT FOR RPM
+                // FEED BALL WHILE WAITING
+                if (first_iteration) IntakeSafe(); // dont intake for first iteration
                 double currentVel = OuttakeMotor.getVelocity();
                 double targetThreshold = TARGET_VELOCITY - Constants.VELOCITY_TOLERANCE;
 
@@ -327,7 +328,7 @@ public class NewBotAutoRed extends OpMode {
             case 1: // FEEDING (RUN TRANSFER)
                 // TeleOp logic: Intake runs at 1, Transfer at 0.5
                 intakeMotor.setPower(1);
-                transferMotor.setPower(0.5);
+                transferMotor.setPower(Constants.TRANSFER_UP_POSITION);
 
                 // Run for defined duration to empty hopper
                 if (launcherTimer.getElapsedTimeSeconds() >= FEED_DURATION_SECONDS) {
@@ -338,7 +339,7 @@ public class NewBotAutoRed extends OpMode {
             case 2: // STOP & FINISH
                 OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);
                 intakeMotor.setPower(0);
-                transferMotor.setPower(0);
+                transferMotor.setPower(Constants.TRANSFER_DOWN_POSITION);
 
                 isLauncherRunning = false;
                 return true; // Sequence Complete
@@ -356,6 +357,6 @@ public class NewBotAutoRed extends OpMode {
     }
     public void IntakeSafe() {
         intakeMotor.setPower(1);
-        transferMotor.setPower(-0.7); // to avoid feeding balls to launcher
+        transferMotor.setPower(-0.5); // to avoid feeding balls to launcher
     }
 }

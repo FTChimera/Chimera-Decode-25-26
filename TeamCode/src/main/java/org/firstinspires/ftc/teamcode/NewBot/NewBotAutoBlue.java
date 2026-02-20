@@ -15,13 +15,17 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.opencv.core.Mat;
+import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
+import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 
 @Autonomous(name = "NewBotAutoBlue", group = "NewBotAuto")
 public class NewBotAutoBlue extends OpMode {
     private Follower follower;
     private Timer pathTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherStage = 0;
+
+    private LimelightSystem limelight;
+    private RGBIndicator rgbIndicator;
 
     // Poses remain unchanged from your original file
     private final Pose startPose = new Pose(20, 122.2, Math.toRadians(142)); // Start Pose of our robot.
@@ -40,13 +44,10 @@ public class NewBotAutoBlue extends OpMode {
 
     // Updated Constants based on TeleOp
     // TeleOp "Front Launch" is 1100, Back is 500. Assuming Auto shoots from Front/Close range.
-    final double TARGET_VELOCITY = 1000;
-    final double TARGET_VELOCITY_TOLERANCE = 15;
-    final double STOP_VELOCITY = 0;
-
+    double TARGET_VELOCITY = 1000;
     // Duration to run the transfer motor to ensure all balls are fired
-    final double FEED_DURATION_SECONDS = 1.5;
-    final double MAX_RPM_WAIT_TIME_SECONDS = 2.0; // Fail-safe if RPM isn't reached
+    final double FEED_DURATION_SECONDS = 2;
+    final double MAX_RPM_WAIT_TIME_SECONDS = 1.2; // Fail-safe if RPM isn't reached
 
     // Path State Constants
     final int CHIMERA_LAUNCH = 1;
@@ -61,6 +62,7 @@ public class NewBotAutoBlue extends OpMode {
     final int CHIMERA_PATH_NINE = 10;
     final int CHIMERA_PATH_TEN = 11;
     final int CHIMERA_STOP = 12;
+    final int STOP_AUTO = 13;
 
     boolean first_iteration = false;
     boolean second_iteration = false;
@@ -139,6 +141,7 @@ public class NewBotAutoBlue extends OpMode {
                     setPathState(CHIMERA_PATH_EIGHT);
                     third_iteration = true;
                 } else {
+                    follower.followPath(pathEleven);
                     setPathState(CHIMERA_STOP);
                 }
                 break;
@@ -159,6 +162,7 @@ public class NewBotAutoBlue extends OpMode {
                 if (!follower.isBusy()) {
                     follower.followPath(pathFour);
                     setPathState(CHIMERA_LAUNCH);
+                    IntakeSafe();
                 }
                 break;
             case CHIMERA_PATH_FIVE:
@@ -171,6 +175,7 @@ public class NewBotAutoBlue extends OpMode {
             case CHIMERA_PATH_SIX:
                 if (!follower.isBusy()) {
                     follower.followPath(pathSix);
+                    IntakeSafe();
                     setPathState(CHIMERA_PATH_SEVEN);
                 }
                 break;
@@ -201,11 +206,15 @@ public class NewBotAutoBlue extends OpMode {
                 }
                 break;
             case CHIMERA_STOP:
-                if (!follower.isBusy()) {
-                    follower.followPath(pathEleven);
-                }
-                telemetry.addLine("Autonomous Complete");
                 IntakeStop();
+                if (!follower.isBusy()) {
+                    setPathState(STOP_AUTO);
+                }
+                break;
+            case STOP_AUTO:
+                telemetry.addLine("Autonomous Complete");
+                requestOpModeStop();
+                break;
             default:
                 break;
         }
@@ -218,6 +227,9 @@ public class NewBotAutoBlue extends OpMode {
 
     @Override
     public void loop() {
+        limelight.LLUpdate();
+        rgbIndicator.updateUsingLL(limelight);
+
         follower.update();
         autonomousPathUpdate();
 
@@ -230,6 +242,9 @@ public class NewBotAutoBlue extends OpMode {
 
     @Override
     public void init() {
+        limelight = new LimelightSystem(hardwareMap);
+        rgbIndicator = new RGBIndicator(hardwareMap);
+
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         launcherTimer = new Timer();
@@ -269,6 +284,7 @@ public class NewBotAutoBlue extends OpMode {
     @Override
     public void start() {
         opmodeTimer.resetTimer();
+        limelight.start(0);
         setPathState(0);
     }
 
@@ -285,6 +301,7 @@ public class NewBotAutoBlue extends OpMode {
     public boolean runLauncherSequence() {
         // 1. Initialization: Start Flywheel
         if (!isLauncherRunning) {
+            //TARGET_VELOCITY = VelocityCalculator.NEWBOT.calculateVelocity(limelight.dist);
             OuttakeMotor.setVelocity(TARGET_VELOCITY);
             isLauncherRunning = true;
             launcherStage = 0;
@@ -298,13 +315,13 @@ public class NewBotAutoBlue extends OpMode {
         // 2. State Machine
         switch (launcherStage) {
             case 0: // WAIT FOR RPM
+                if (first_iteration) IntakeSafe(); // dont intake for first iteration
                 double currentVel = OuttakeMotor.getVelocity();
-                double targetThreshold = TARGET_VELOCITY - TARGET_VELOCITY_TOLERANCE;
+                double targetThreshold = TARGET_VELOCITY - Constants.VELOCITY_TOLERANCE;
 
                 boolean isSpeedReached = (currentVel >= targetThreshold);
                 boolean isTimedOut = (launcherTimer.getElapsedTimeSeconds() > MAX_RPM_WAIT_TIME_SECONDS);
 
-                // If speed reached OR timed out, start feeding
                 if (isSpeedReached || isTimedOut) {
                     launcherStage = 1;
                     launcherTimer.resetTimer();
@@ -312,20 +329,18 @@ public class NewBotAutoBlue extends OpMode {
                 break;
 
             case 1: // FEEDING (RUN TRANSFER)
-                // TeleOp logic: Intake runs at 1, Transfer at 0.5
                 intakeMotor.setPower(1);
-                transferMotor.setPower(0.5);
+                transferMotor.setPower(Constants.TRANSFER_UP_POSITION);
 
-                // Run for defined duration to empty hopper
                 if (launcherTimer.getElapsedTimeSeconds() >= FEED_DURATION_SECONDS) {
                     launcherStage = 2;
                 }
                 break;
 
             case 2: // STOP & FINISH
-                OuttakeMotor.setVelocity(STOP_VELOCITY);
+                OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);
                 intakeMotor.setPower(0);
-                transferMotor.setPower(0);
+                transferMotor.setPower(Constants.TRANSFER_DOWN_POSITION);
 
                 isLauncherRunning = false;
                 return true; // Sequence Complete
@@ -340,5 +355,10 @@ public class NewBotAutoBlue extends OpMode {
 
     public void IntakeStop() {
         intakeMotor.setPower(0);
+    }
+
+    public void IntakeSafe() {
+        intakeMotor.setPower(1);
+        transferMotor.setPower(-0.5); // to avoid feeding balls to launcher
     }
 }

@@ -12,7 +12,7 @@ public class VelocityCalculator {
             {0.22, 950},
             {0.34, 1050},
             {0.4, 1100},
-            {0.76, 1280}
+            {0.76, 1260}
     };
     public static VelocityCalculator NEWBOT = new VelocityCalculator(shotTableNewBot, minVelocityNewBot, maxVelocityNewBot);
 
