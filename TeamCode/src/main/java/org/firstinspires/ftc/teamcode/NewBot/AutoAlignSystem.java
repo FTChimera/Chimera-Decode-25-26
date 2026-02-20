@@ -10,11 +10,6 @@ import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class AutoAlignSystem {
-
-    // Test class of how this works
-    // todo FINISH THIS CLASS FOR LIMELIGHT
-
-
     // PEDRO STUFF
     private Pose currentPose, newPose;
     double Posex, Posey, diffX, diffY;
@@ -30,9 +25,11 @@ public class AutoAlignSystem {
     private PIDFController limelightPIDF;
 
     private final double TxOffset = 0;
-    double tx, tid;
+    double tx;
+    int tid;
     private DcMotor[] drivingMotors; // for auto alignment turning
 
+    boolean drivingMotorsUsed;
     boolean areWeUsingPedro;
     public void reset() {
         limelightPIDF.reset();
@@ -67,6 +64,11 @@ public class AutoAlignSystem {
                 Constants.LIMELIGHT_PIDF_INTEGRAL_LIMIT
         );
         areWeUsingPedro = false;
+        drivingMotorsUsed = true;
+    }
+    public void LimelightSetUp(LimelightSystem limelightSystem) {
+        this.LimelightSetUp(limelightSystem, null);
+        drivingMotorsUsed = false;
     }
 
     // main function to auto align to goal
@@ -101,105 +103,48 @@ public class AutoAlignSystem {
     }
 
     public void turnAutoAlignLimelight(double dt) {
+        if (!drivingMotorsUsed) return;
+        tid = currentGoal == Constants.AllianceColor.RED? 24 : 20;
+        if (!LLCanSeeGoal() && !(limelight.isTagInFiducialResults(tid))) return;
         // Use the tx value from the already updated limelight system
-        tx = limelight.tx;
-        tid = limelight.tid;
+        tx = limelight.getResultForTag(tid).getTargetXDegrees();
 
         // Check if we have a valid target
         if (limelight.isDisconnected || tx == 0) {
             // No valid target, stop rotation
-            if (areWeUsingPedro) {
-                follower.setTeleOpDrive(0, 0, 0, true);
-            } else {
-                // Stop all drive motors
-                for (DcMotor motor : drivingMotors) {
-                    motor.setPower(0);
-                }
+            // Stop all drive motors
+            for (DcMotor motor : drivingMotors) {
+                motor.setPower(0);
             }
             return;
         }
 
         // Verify tag ID matches alliance color for DECODE season (24 for red goal, 20 for blue goal)
-        boolean correctTag = false;
-        if (currentGoal == Constants.AllianceColor.RED && tid == 24) {
-            correctTag = true;
-        } else if (currentGoal == Constants.AllianceColor.BLUE && tid == 20) {
-            correctTag = true;
-        }
 
-        if (!correctTag) {
-            return; // Wrong target, don't align
-        }
-
-        // Apply offset and calculate rotation command using PID with dt from TeleOp
-        double error = tx + TxOffset;
-        double rotationCmd = limelightPIDF.updatePIDF(error, dt);
-
+        double rotationCmd = getTurningPowerLimelightWithSuppliedTX(dt, tx);
         // Apply rotation command
-        if (areWeUsingPedro) {
-            follower.setTeleOpDrive(0, 0, rotationCmd, true);
-        } else {
-            // Manual motor control for mecanum drive
-            // Assuming standard mecanum wheel configuration
-            double leftFrontPower = rotationCmd;
-            double leftBackPower = rotationCmd;
-            double rightFrontPower = -rotationCmd;
-            double rightBackPower = -rotationCmd;
 
-            // Apply power to motors (assuming standard order: lf, lb, rf, rb)
-            if (drivingMotors.length >= 4) {
-                drivingMotors[0].setPower(leftFrontPower);
-                drivingMotors[1].setPower(leftBackPower);
-                drivingMotors[2].setPower(rightFrontPower);
-                drivingMotors[3].setPower(rightBackPower);
-            }
+        // Manual motor control for mecanum drive
+        // Assuming standard mecanum wheel configuration
+        double leftFrontPower = rotationCmd;
+        double leftBackPower = rotationCmd;
+        double rightFrontPower = -rotationCmd;
+        double rightBackPower = -rotationCmd;
+
+        // Apply power to motors (assuming standard order: lf, lb, rf, rb)
+        if (drivingMotors.length == 4) {
+            drivingMotors[0].setPower(leftFrontPower);
+            drivingMotors[1].setPower(leftBackPower);
+            drivingMotors[2].setPower(rightFrontPower);
+            drivingMotors[3].setPower(rightBackPower);
         }
+
     }
     public double getTurningPowerLimelight(double dt) {
         // Use the tx value from the already updated limelight system
-
-        // Early exit on disconnected
-        // now gone because tx will turn to see the goal
-//        if (limelight == null || limelight.isDisconnected) {
-//            return 0;
-//        }
-
         // Verify tag ID matches alliance color for DECODE season (24 for red goal, 20 for blue goal)
-        boolean correctTag = false;
 
-        // Prefer checking reported tid first (simple and fast), then fallback to fiducial results
-        if (currentGoal == Constants.AllianceColor.RED) {
-            if (limelight.tid == 24) {
-                correctTag = true;
-                tid = 24;
-                // prefer the detailed result if available
-                if (limelight.isTagInFiducialResults(24)) {
-                    tx = limelight.getResultForTag(24).getTargetXDegrees();
-                } else {
-                    tx = limelight.tx; // fallback
-                }
-            } else if (limelight.isTagInFiducialResults(24)) {
-                correctTag = true;
-                tid = 24;
-                tx = limelight.getResultForTag(24).getTargetXDegrees();
-            }
-        } else if (currentGoal == Constants.AllianceColor.BLUE) {
-            if (limelight.tid == 20) {
-                correctTag = true;
-                tid = 20;
-                if (limelight.isTagInFiducialResults(20)) {
-                    tx = limelight.getResultForTag(20).getTargetXDegrees();
-                } else {
-                    tx = limelight.tx;
-                }
-            } else if (limelight.isTagInFiducialResults(20)) {
-                correctTag = true;
-                tid = 20;
-                tx = limelight.getResultForTag(20).getTargetXDegrees();
-            }
-        }
-
-        if (!correctTag) {
+        if (!LLCanSeeGoal()) {
             return 0; // Wrong target, don't align
         }
 

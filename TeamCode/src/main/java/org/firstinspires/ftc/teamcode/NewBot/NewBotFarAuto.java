@@ -214,6 +214,7 @@ public class NewBotFarAuto extends OpMode {
                     if (runLauncherSequence()) {
                         follower.followPath(humanIntakeChain);
                         intakeMotor.setPower(1);
+                        transferMotor.setPower(-0.5); // safe intake
                         autoStage = 1;
                     }
                 }
@@ -250,11 +251,9 @@ public class NewBotFarAuto extends OpMode {
         telemetry.update();
     }
 
-    @Override
-    public void stop() {}
 
     // ------------------------------------------------
-    // Launcher Logic (copied + adapted)
+    // Launcher Logic
     // ------------------------------------------------
 
     public boolean runLauncherSequence() {
