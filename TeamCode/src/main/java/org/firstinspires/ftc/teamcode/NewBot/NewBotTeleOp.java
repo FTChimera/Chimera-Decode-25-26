@@ -227,6 +227,7 @@ public class NewBotTeleOp extends LinearOpMode {
 
             // ------------------------------------
             telemetry.addData("POSE", follower.getPose());
+            telemetry.addData("Alliance Color", allianceColor);
             telemetry.addData("Intake Motor power", intakeMotor.getPower());
             telemetry.addData("Transfer Motor power", transferMotor.getPower());
             telemetry.addData("Outake Motor Velocity:", OuttakeMotor.getVelocity());

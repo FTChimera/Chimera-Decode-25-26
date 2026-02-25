@@ -38,8 +38,14 @@ public class LimelightSystem {
 //        }
 //    }
 
-    private static double calculateDistanceCurve(double x) {
+    private static double calculateDistanceFromArea(double x) {
         return 1/x;
+    }
+    public static double calculateDistanceFromRelativePose(LLResultTypes.FiducialResult fiducial) {
+        Pose3D pose = fiducial.getRobotPoseTargetSpace();
+        double x = pose.getPosition().x;
+        double y = pose.getPosition().y;
+        return Math.sqrt(x*x + y*y);
     }
     public double tx=0,ty=0,ta=0,tid=0, dist=0;
     public boolean isDisconnected;
@@ -89,8 +95,10 @@ public class LimelightSystem {
             ty= result.getTy();
             ta=result.getTa();
             List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
-            for (LLResultTypes.FiducialResult fiduciary : fiducials ) {tid = fiduciary.getFiducialId();}
-            dist = calculateDistanceCurve(ta);
+            for (LLResultTypes.FiducialResult fiduciary : fiducials ) {
+                tid = fiduciary.getFiducialId();
+                dist = calculateDistanceFromRelativePose(fiduciary);
+            }
             botpose = result.getBotpose_MT2();
             isDisconnected = false;
             disconnectedTimer.resetTimer();

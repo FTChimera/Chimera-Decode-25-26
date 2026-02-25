@@ -41,11 +41,11 @@ public class AutoAlignSystem {
         if (currentGoal == Constants.AllianceColor.RED) {
             GoalCoordinates = new Pose(
                     0,144
-            ); // RED GOAL COORDINATES
+            ); // BLUE GOAL COORDINATES
         } else {
             GoalCoordinates = new Pose(
                     144, 144
-            ); // BLUE GOAL COORDINATES
+            ); // RED GOAL COORDINATES
         }
     }
 
