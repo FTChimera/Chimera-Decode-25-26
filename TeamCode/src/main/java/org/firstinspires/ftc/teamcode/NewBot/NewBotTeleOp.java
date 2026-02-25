@@ -171,11 +171,10 @@ public class NewBotTeleOp extends LinearOpMode {
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
 
-
+            LLResultTypes.FiducialResult fiducialResult = limelight.getResultForTag(allianceColor == Constants.AllianceColor.RED? 24 : 20);
+            double distance = LimelightSystem.calculateDistanceFromRelativePose(fiducialResult);
             if (gamepad1.y || gamepad2.y) {
                 launcherOn = true;
-                LLResultTypes.FiducialResult fiducialResult = limelight.getResultForTag(allianceColor == Constants.AllianceColor.RED? 24 : 20);
-                double distance = LimelightSystem.calculateDistanceFromRelativePose(fiducialResult);
                 setTargetVelocity = VelocityCalculator.NEWBOT.calculateVelocity(distance); // use new velocity calculator
                 setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
                 OuttakeMotor.setVelocity(setMinVelocity);
@@ -236,7 +235,8 @@ public class NewBotTeleOp extends LinearOpMode {
             telemetry.addData("Outake Motor Velocity:", OuttakeMotor.getVelocity());
             telemetry.addData("Target Velocity", setTargetVelocity);
             telemetry.addData("Min Velocity", setMinVelocity);
-            telemetry.addData("Dist (1/ta)", limelight.dist);
+            telemetry.addData("Distance", limelight.dist);
+            telemetry.addData("Distance to goal", distance);
             telemetry.update();
         }
     }
