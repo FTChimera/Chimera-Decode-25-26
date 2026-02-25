@@ -37,15 +37,7 @@ public class PedroDrive {
         return lastPose;
     }
 
-    public void periodic() {
-        // Update last known pose
-        lastPose = getCurrentPose();
-
-        // Update follower (handles odometry and motor control)
-        follower.update();
-    }
-
-    public void manualUpdate() {
+    public void update() {
         // Update last known pose
         lastPose = getCurrentPose();
 

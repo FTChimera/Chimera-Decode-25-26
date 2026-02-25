@@ -16,9 +16,7 @@ import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 @TeleOp(name = "NewBotTeleOp", group = "TeleOp")// Name and Group
 public class NewBotTeleOp extends LinearOpMode {
 
-    boolean Gamepad2Driving = false, launcherOn= false;
-    //public LimelightSystem limelight;
-
+    boolean Gamepad2Driving = false, launcherOn= false, testingStartPose = false;
     // declaring our PIDF tuning values
     double setTargetVelocity = 0;
     double setMinVelocity = 0;
@@ -26,36 +24,30 @@ public class NewBotTeleOp extends LinearOpMode {
     Constants.AllianceColor allianceColor;
     LimelightSystem limelight;
     AutoAlignSystem autoAlignSystem;
-
     RGBIndicator rgbIndicator;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        // For now - don't pass in hardware Map because then it won't throw an error.
-        // When Limelight is added, pass in hardwareMap
         limelight = new LimelightSystem(hardwareMap);
         rgbIndicator = new RGBIndicator(hardwareMap);
         rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
-        //while (!isStarted() && !isStopRequested())
         allianceColor = Constants.AllianceColor.RED;
         while (opModeInInit())
         {
+            telemetry.addLine("Press X to switch alliance, A to switch drivers, B to switch between testing start pose and normal start pose");
             telemetry.addLine("Press X for Red Alliance, Y for Blue Alliance");
             telemetry.addLine("Press A for Start A Driver, B for Start B Driver");
-            telemetry.addLine(Gamepad2Driving ? "Gamepad B" : "Gamepad A" + " Driving");
+            telemetry.addLine((Gamepad2Driving ? "Gamepad B" : "Gamepad A" )+ " Driving");
             telemetry.addData("Alliance selected: ", allianceColor);
             // This method is called repeatedly during the init phase
-            if (gamepad1.a) {
-                Gamepad2Driving = false;
+            if (gamepad1.aWasPressed()) {
+                Gamepad2Driving = !Gamepad2Driving;
             }
-            if (gamepad1.b) {
-                Gamepad2Driving = true;
+            if (gamepad1.bWasPressed()) {
+                testingStartPose = !testingStartPose;
             }
-            if (gamepad1.x) {
-                allianceColor = Constants.AllianceColor.RED;
-            }
-            if (gamepad1.y) {
-                allianceColor = Constants.AllianceColor.BLUE;
+            if (gamepad1.xWasReleased()) {
+                allianceColor = allianceColor.switchColors();
             }
 
 
@@ -73,19 +65,28 @@ public class NewBotTeleOp extends LinearOpMode {
         DcMotor intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         DcMotor transferMotor = hardwareMap.dcMotor.get("transferMotor");
 
-        follower = new PedroDrive(hardwareMap, new Pose().setHeading(allianceColor == Constants.AllianceColor.RED? 0 : 180));
-
-        telemetry.addLine("Setting the motors now");
+        follower = new PedroDrive(hardwareMap,
+                // calculate pose
+                testingStartPose ? new Pose(120, 36, 180) : ( // Testing Pose (near our table)
+                        // X: line between second to last and last field tile
+                        // Y: Middle of second to last field tile
+                        allianceColor == Constants.AllianceColor.RED ?
+                                NewBotAutoRed.finalPose :
+                                NewBotAutoBlue.finalPose
+                        )
+                );
 
         frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        OuttakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         transferMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         OuttakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        transferMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        transferMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         OuttakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -97,16 +98,8 @@ public class NewBotTeleOp extends LinearOpMode {
 
         autoAlignSystem.LimelightSetUp(limelight);
 
-        //telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
-        /*
-         * Tell the driver that initialization is complete.
-         */
-
         telemetry.addData("Status", "Initialized");telemetry.update();
-        // limelight.setDevice(hardwareMap.get(Limelight3A.class, "limelight"));
         waitForStart();
-        // limelight.startLLWithPipeline(0);
-        // follower.startTeleopDrive();
 
         if (isStopRequested()) return;
         limelight.start(0);
@@ -123,10 +116,8 @@ public class NewBotTeleOp extends LinearOpMode {
         double deltaTime;
 
         while (opModeIsActive()) {
-            follower.manualUpdate();
+            follower.update();
             limelight.LLUpdate();
-            telemetry.addData("Limelight Score", limelight.getLLScore());
-            telemetry.addData("Limelight TagID", limelight.tid); // debug: show which tag limelight reports
             rgbIndicator.updateUsingLL(limelight);
 
 
@@ -141,9 +132,9 @@ public class NewBotTeleOp extends LinearOpMode {
                 rx = gamepad1.right_stick_x;
             }
 
-            y *= y*y;
-            x *= x*x;
-            rx *= rx*rx * 0.75;
+            y *= Math.abs(y);
+            x *= Math.abs(x);
+            rx *= Math.abs(rx * 0.75);
 
             // Calculate dt
             currentTime = System.nanoTime();
@@ -235,6 +226,7 @@ public class NewBotTeleOp extends LinearOpMode {
             telemetry.addData("Outake Motor Velocity:", OuttakeMotor.getVelocity());
             telemetry.addData("Target Velocity", setTargetVelocity);
             telemetry.addData("Min Velocity", setMinVelocity);
+            telemetry.addData("Tag ID", limelight.tid);
             telemetry.addData("Distance", limelight.dist);
             telemetry.addData("Distance to goal", distance);
             telemetry.update();
