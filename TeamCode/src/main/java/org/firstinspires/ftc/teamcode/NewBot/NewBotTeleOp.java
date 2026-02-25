@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.NewBot;
 
 import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -173,7 +174,9 @@ public class NewBotTeleOp extends LinearOpMode {
 
             if (gamepad1.y || gamepad2.y) {
                 launcherOn = true;
-                setTargetVelocity = VelocityCalculator.NEWBOT.calculateVelocity(limelight.dist); // use new velocity calculator
+                LLResultTypes.FiducialResult fiducialResult = limelight.getResultForTag(allianceColor == Constants.AllianceColor.RED? 24 : 20);
+                double distance = LimelightSystem.calculateDistanceFromRelativePose(fiducialResult);
+                setTargetVelocity = VelocityCalculator.NEWBOT.calculateVelocity(distance); // use new velocity calculator
                 setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
                 OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
