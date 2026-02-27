@@ -44,8 +44,8 @@ public class LimelightSystem {
     public static double calculateDistanceFromRelativePose(LLResultTypes.FiducialResult fiducial) {
         Pose3D pose = fiducial.getRobotPoseTargetSpace();
         double x = pose.getPosition().x;
-        double y = pose.getPosition().y;
-        return Math.sqrt(x*x + y*y);
+        double z = pose.getPosition().z;
+        return Math.sqrt(x*x + z*z);
     }
     public double tx=0,ty=0,ta=0,tid=0, dist=0;
     public boolean isDisconnected;
@@ -94,7 +94,7 @@ public class LimelightSystem {
             tx=result.getTx();
             ty= result.getTy();
             ta=result.getTa();
-            List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+            fiducials = result.getFiducialResults();
             for (LLResultTypes.FiducialResult fiduciary : fiducials ) {
                 tid = fiduciary.getFiducialId();
                 dist = calculateDistanceFromRelativePose(fiduciary);
