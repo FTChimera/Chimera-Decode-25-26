@@ -3,8 +3,12 @@ package org.firstinspires.ftc.teamcode.NewBot;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.math.Vector;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 
 @SuppressWarnings("SpellCheckingInspection")
@@ -15,6 +19,20 @@ public class PedroDrive {
         follower = Constants.createPedroFollower(hwMap);
         follower.setStartingPose(initialPose);
         lastPose = initialPose;
+    }
+
+    public static Pose getPedroPoseFromLL(LimelightSystem limelight, Constants.AllianceColor allianceColor) {
+        int tagID = allianceColor == Constants.AllianceColor.RED ? 24 : 20;
+        Pose AllianceGoalPose = allianceColor == Constants.AllianceColor.RED ? Constants.RED_GOAL : Constants.BLUE_GOAL;
+        LLResultTypes.FiducialResult fiducial = limelight.getResultForTag(tagID);
+        if (fiducial == null) {
+            return null; // No valid fiducial result, cannot determine pose
+        }
+        Pose3D Pose3d = fiducial.getRobotPoseTargetSpace();
+        double x = Pose3d.getPosition().x + AllianceGoalPose.getX();
+        double y = Pose3d.getPosition().z + AllianceGoalPose.getY(); // LL's z is our y
+        double heading = Pose3d.getOrientation().getYaw() + AllianceGoalPose.getHeading();
+        return new Pose(x, y, Math.toRadians(heading));
     }
 
     public static double getPedroHeadingFromLL(LimelightSystem limelight, Constants.AllianceColor allianceColor) {

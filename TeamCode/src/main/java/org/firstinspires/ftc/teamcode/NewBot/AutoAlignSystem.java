@@ -39,13 +39,9 @@ public class AutoAlignSystem {
     public AutoAlignSystem(Constants.AllianceColor allianceColor) {
         currentGoal = allianceColor;
         if (currentGoal == Constants.AllianceColor.RED) {
-            GoalCoordinates = new Pose(
-                    0,144
-            ); // BLUE GOAL COORDINATES
+            GoalCoordinates = Constants.RED_GOAL;
         } else {
-            GoalCoordinates = new Pose(
-                    144, 144
-            ); // RED GOAL COORDINATES
+           GoalCoordinates = Constants.BLUE_GOAL;
         }
     }
 
@@ -158,6 +154,27 @@ public class AutoAlignSystem {
         double rotationCmd = limelightPIDF.updatePIDF(error, dt);
 
         // return rotation command for use in TeleOp
+        return rotationCmd;
+    }
+
+    public double getTurningPowerPedro(Pose currentPose, double dt) {
+        // Use the tx value from the already updated limelight system
+        // Verify tag ID matches alliance color for DECODE season (24 for red goal, 20 for blue goal)
+
+        if (!LLCanSeeGoal()) {
+            return 0; // Wrong target, don't align
+        }
+
+        // Guard against PID controller not initialized
+        if (limelightPIDF == null) {
+            return 0;
+        }
+        double correctHeading = Math.atan2(
+                GoalCoordinates.getY() - currentPose.getY(),
+                GoalCoordinates.getX() - currentPose.getX());
+
+        double headingError = correctHeading - currentPose.getHeading();
+        double rotationCmd = limelightPIDF.updatePIDF(headingError, dt);
         return rotationCmd;
     }
 

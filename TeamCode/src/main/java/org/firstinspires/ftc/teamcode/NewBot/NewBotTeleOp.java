@@ -144,12 +144,9 @@ public class NewBotTeleOp extends LinearOpMode {
 
             if (gamepad1.back || gamepad2.back) {
                 if (autoAlignSystem.LLCanSeeGoal()) {
-                    rx = autoAlignSystem.getTurningPowerLimelight(deltaTime);
-                    follower.resetHeading(PedroDrive.getPedroHeadingFromLL(limelight, allianceColor));
-                } else {
-                    rx = autoAlignSystem.getTurningPowerLimelightWithSuppliedTX(deltaTime, follower.getLLHeadingFromPedro(allianceColor));
+                    follower.correctPose(PedroDrive.getPedroPoseFromLL(limelight, allianceColor));
                 }
-                telemetry.addData("rx", rx);
+                rx = autoAlignSystem.getTurningPowerPedro(follower.getPose(), deltaTime);
             }
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
             double frontLeftPower = 0.9 *(y + x + rx) / denominator;
@@ -184,21 +181,22 @@ public class NewBotTeleOp extends LinearOpMode {
                 intakePower += gamepad2.right_trigger - gamepad2.left_trigger;
                 intakePower = intakePower * 1.5;
                 intakeMotor.setPower(intakePower);
-                if (!(launcherOn)) {
-                    if (Math.abs(intakePower) >= 0.3) {
-                        transferMotor.setPower(-0.5*Math.abs(intakePower));
-                    } else {
-                        transferMotor.setPower(0);
-                    }
+                if (Math.abs(intakePower) >= 0.3) {
+                    transferMotor.setPower(-0.5*Math.abs(intakePower));
+                } else {
+                    transferMotor.setPower(0);
                 }
             }
             if (gamepad1.b || gamepad2.b) {
+                // new- safe braking (like regenerative braking?)
+                if (launcherOn) {OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);setTargetVelocity=0;setMinVelocity=0;}
+                else if (setTargetVelocity == 0) {OuttakeMotor.setVelocity(Constants.BREAK_STOP_VEL);setTargetVelocity=Constants.BREAK_STOP_VEL;setMinVelocity=0;}
+                else if (setTargetVelocity == Constants.BREAK_STOP_VEL) {OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);setTargetVelocity=0;setMinVelocity=0;}
                 launcherOn = false;
-                OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);
                 transferMotor.setPower(Constants.TRANSFER_DOWN_POSITION);
-                setTargetVelocity = 0;
-                setMinVelocity = 0;
             }
+            // check for B button release to stop the launcher and reset velocity variables (incase stuck at break-stop-vel)
+            if (gamepad1.bWasReleased() || gamepad2.bWasReleased()) {OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);setTargetVelocity=0;setMinVelocity=0;}
 
             // Check for Dpad Up (Increase Velocity)
             boolean currentDpadUp = gamepad1.dpad_up || gamepad2.dpad_up;
@@ -229,6 +227,7 @@ public class NewBotTeleOp extends LinearOpMode {
             telemetry.addData("Tag ID", limelight.tid);
             telemetry.addData("Distance", limelight.dist);
             telemetry.addData("Distance to goal", distance);
+            telemetry.addData("Turning Power (RX)", rx);
             telemetry.update();
         }
     }

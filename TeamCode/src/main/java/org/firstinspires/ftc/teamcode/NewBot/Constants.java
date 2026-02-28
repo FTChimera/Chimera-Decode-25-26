@@ -45,6 +45,7 @@ public class Constants {
     public static final double VELOCITY_TOLERANCE = 70;
     public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1050;// Set target velocity from front launch zone
     public static double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 950;// Set target velocity from goal
+    public static double BREAK_STOP_VEL = 50;
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     public static int[] BALL_NUM_INTAKE_NEEDED = {2,3};
     public static PIDFCoefficients LaunchPIDF = new PIDFCoefficients(
@@ -75,8 +76,10 @@ public class Constants {
                     : RED;
         }
     }
-    public static Pose RED_GOAL = new Pose(130.37, 127.64, Math.toRadians(45));
-    public static Pose BLUE_GOAL = new Pose(13.63, 127.64, Math.toRadians(135));
+//    public static Pose RED_GOAL = new Pose(130.37, 127.64, 36);
+//    public static Pose BLUE_GOAL = new Pose(13.63, 127.64, 144);
+    public static Pose BLUE_GOAL = new Pose(16.3, 130.4, Math.toRadians(144));
+    public static Pose RED_GOAL = new Pose(127.7, 130.4, Math.toRadians(36));
     public static Pose RED_SHOOTING_FRONT = new Pose(123.5, 122.8, Math.toRadians(37));
     public static Pose RED_SHOOTING_BACK = new Pose(114, 114, Math.toRadians(45));
     public static Pose BLUE_SHOOTING_FRONT = new Pose(20.5, 122.8, Math.toRadians(143));
