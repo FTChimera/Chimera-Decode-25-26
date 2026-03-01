@@ -21,6 +21,7 @@ public class NewBotTeleOp extends LinearOpMode {
     double setTargetVelocity = 0;
     double setMinVelocity = 0;
     private PedroDrive follower;
+    private KalmanAutoCorrectPedroLimelight kalmanPoseCorrector;
     Constants.AllianceColor allianceColor;
     LimelightSystem limelight;
     AutoAlignSystem autoAlignSystem;
@@ -28,6 +29,7 @@ public class NewBotTeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        kalmanPoseCorrector = new KalmanAutoCorrectPedroLimelight();
         limelight = new LimelightSystem(hardwareMap);
         rgbIndicator = new RGBIndicator(hardwareMap);
         rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
@@ -64,17 +66,17 @@ public class NewBotTeleOp extends LinearOpMode {
         DcMotorEx OuttakeMotor = hardwareMap.get(DcMotorEx.class,"OuttakeMotor");
         DcMotor intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         DcMotor transferMotor = hardwareMap.dcMotor.get("transferMotor");
-
+        Pose startPose = testingStartPose ? new Pose(120, 36, 180) : ( // Testing Pose (near our table)
+                // X: line between second to last and last field tile
+                // Y: Middle of second to last field tile
+                allianceColor == Constants.AllianceColor.RED ?
+                        NewBotAutoRed.finalPose :
+                        NewBotAutoBlue.finalPose
+        );
         follower = new PedroDrive(hardwareMap,
-                // calculate pose
-                testingStartPose ? new Pose(120, 36, 180) : ( // Testing Pose (near our table)
-                        // X: line between second to last and last field tile
-                        // Y: Middle of second to last field tile
-                        allianceColor == Constants.AllianceColor.RED ?
-                                NewBotAutoRed.finalPose :
-                                NewBotAutoBlue.finalPose
-                        )
+                    startPose
                 );
+        kalmanPoseCorrector.resetToPose(startPose);
 
         frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -119,7 +121,12 @@ public class NewBotTeleOp extends LinearOpMode {
             follower.update();
             limelight.LLUpdate();
             rgbIndicator.updateUsingLL(limelight);
+            kalmanPoseCorrector.updateFromLimelight(limelight, allianceColor, follower);
 
+            // Pose Corrector
+            if (autoAlignSystem.LLCanSeeGoal()) {
+                follower.correctPose(kalmanPoseCorrector.getEstimatedPose());
+            }
 
             double y, x, rx;
             if (Gamepad2Driving) {
@@ -141,11 +148,7 @@ public class NewBotTeleOp extends LinearOpMode {
             deltaTime = (currentTime - lastTime) / 1e9; // convert to seconds
             lastTime = currentTime; // Update lastTime each loop so dt is meaningful
 
-
             if (gamepad1.back || gamepad2.back) {
-                if (autoAlignSystem.LLCanSeeGoal()) {
-                    follower.correctPose(PedroDrive.getPedroPoseFromLL(limelight, allianceColor));
-                }
                 rx = autoAlignSystem.getTurningPowerPedro(follower.getPose(), deltaTime);
             }
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
@@ -229,6 +232,7 @@ public class NewBotTeleOp extends LinearOpMode {
             telemetry.addData("Distance", limelight.dist);
             telemetry.addData("Distance to goal", distance);
             telemetry.addData("Turning Power (RX)", rx);
+            telemetry.addData("Kalman Analysis\n", kalmanPoseCorrector.output());
             telemetry.update();
         }
     }
