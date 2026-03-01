@@ -6,6 +6,8 @@ import static org.firstinspires.ftc.teamcode2.Systems.Constants.TRANSFER_UP_POSI
 import static org.firstinspires.ftc.teamcode2.Systems.Constants.VELOCITY_TOLERANCE;
 import static org.firstinspires.ftc.teamcode2.Systems.Constants.applyPolynomialToDriveInputs;
 
+import android.annotation.SuppressLint;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -37,6 +39,7 @@ import org.firstinspires.ftc.teamcode2.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode2.Systems.RGBIndicator;
 
 import java.util.List;
+import java.util.Locale;
 
 @SuppressWarnings("SpellCheckingInspection")
 @Configurable
@@ -85,6 +88,8 @@ public class Pedro_TeleOp extends OpMode {
     private LaunchingState launchingState = LaunchingState.IDLE;
     protected MultipleTelemetry telemetryM;
     private TelemetryManager panelsTelemetry;
+    // Debug flag to see whether we actually call setTeleOpDrive each loop
+    private boolean lastSetTeleopCall = false;
     public Pose startingPose;
     DcMotorEx launcher; DcMotor intake, transfer;
     Timer transfer_timer;
@@ -151,12 +156,22 @@ public class Pedro_TeleOp extends OpMode {
         limelight.start(0);
         // Follower stuff
         follower.setStartingPose(startingPose);
+        // Ensure PID/drive are activated like tuning examples do so teleop inputs take effect
+        try {
+            follower.activateAllPIDFs();
+            follower.activateDrive();
+        } catch (Exception ignore) {
+            // Some follower builds may not require explicit activation; ignore if not present
+        }
         //The parameter controls whether the Follower should use break mode on the motors (using it is recommended).
         //In order to use float mode, add .useBrakeModeInTeleOp(true); to your Drivetrain Constants in Constants.java (for Mecanum)
         //If you don't pass anything in, it uses the default (false)
         follower.startTeleopDrive();
+        // Initialize timing to avoid a large dt on the first loop
+        lastTimeNs =  System.nanoTime();
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
         //Call this once per loop
@@ -171,15 +186,26 @@ public class Pedro_TeleOp extends OpMode {
         }
 
         if (!automatedDrive) {
-            //Make the last parameter false for field-centric, true for robot centric
-            //This is the normal version to use in the TeleOp
-            follower.setTeleOpDrive(
-                    applyPolynomialToDriveInputs(gamepad1.left_stick_y),
-                    applyPolynomialToDriveInputs(gamepad1.left_stick_x),
-                    applyPolynomialToDriveInputs(gamepad1.right_stick_x),
-                    robotCentric // robot centric/field centric
-            );
-        }
+            panelsTelemetry.addData("Raw Sticks", String.format(Locale.US, "LY=%.3f LX=%.3f RX=%.3f", gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x));
+            panelsTelemetry.addData("Calling setTeleOpDrive", true);
+            lastSetTeleopCall = true;
+             //Make the last parameter false for field-centric, true for robot centric
+             //This is the normal version to use in the TeleOp
+             follower.setTeleOpDrive(
+                     applyPolynomialToDriveInputs(gamepad1.left_stick_y),
+                     applyPolynomialToDriveInputs(gamepad1.left_stick_x),
+                     applyPolynomialToDriveInputs(gamepad1.right_stick_x),
+                     robotCentric // robot centric/field centric
+             );
+         } else {
+            lastSetTeleopCall = false;
+            panelsTelemetry.addData("Calling setTeleOpDrive", false);
+         }
+
+        // Extra telemetry showing the decision state so we can debug when teleop drive is suppressed
+        panelsTelemetry.addData("Raw Sticks", String.format("LY=%.3f LX=%.3f RX=%.3f", gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x));
+        panelsTelemetry.addData("Last setTeleOpDrive call", lastSetTeleopCall);
+        panelsTelemetry.addData("robotCentric", robotCentric);
 
         // Update pedro pose if april tag detected via limelight
         Pose camPose = getRobotPoseFromCamera();
@@ -210,6 +236,8 @@ public class Pedro_TeleOp extends OpMode {
                     (shootFromBack ? backLaunchZone.getHeading() : frontLaunchZone.getHeading())
             );
             automatedDrive = true;
+            // Tell the follower to actually follow the generated path
+            follower.followPath(pathToLaunchZone);
         }
 
         // Parking Aid
@@ -234,9 +262,11 @@ public class Pedro_TeleOp extends OpMode {
             );
             pathToParking.setLinearHeadingInterpolation(
                     follower.getHeading(),
-                    heading
+                    Math.toRadians(heading)
             );
             automatedDrive = true;
+            // Start following the parking path
+            follower.followPath(pathToParking);
         }
 
         //Stop automated following if the follower is done
@@ -245,20 +275,29 @@ public class Pedro_TeleOp extends OpMode {
             automatedDrive = false;
         }
 
+        // Debug telemetry for pathing
+        panelsTelemetry.addData("Follower Pose", follower.getPose());
+        panelsTelemetry.addData("Follower Busy", follower.isBusy());
+        // Velocity helps determine whether teleop inputs reach drivetrain
+        try { panelsTelemetry.addData("Follower Velocity", follower.getVelocity()); } catch (Exception ignored) {}
+        panelsTelemetry.addData("automatedDrive", automatedDrive);
+
         // Auto Alignment using AutoAlignSystem
         long nowNs = System.nanoTime();
         dt = (nowNs - lastTimeNs) / 1e9;
         lastTimeNs = nowNs;
         // Manual-stick override: if driver is giving significant rotation input, disable auto-align
-        if (gamepad1.x && Math.abs(gamepad1.right_stick_x) <= 0.12) {
-            automatedDrive = true; // turning using pedro pathing.
-            // Use auto align system with calculated dt
+        boolean wantsAutoAlign = gamepad1.x && Math.abs(gamepad1.right_stick_x) <= 0.12;
+        if (wantsAutoAlign) {
+            // Enter auto-align mode; this counts as an automated drive action
+            automatedDrive = true;
             autoAlignSystem.turnAutoAlign(dt);
         } else {
-            // Not auto-aiming, ensure normal teleop drive continues
-            // No additional action needed as setTeleOpDrive handles this
-            automatedDrive = false;
+            // Not auto-aiming: reset auto-align controller
             autoAlignSystem.resetPIDController();
+            // Only clear automatedDrive if the follower is not currently busy following a path.
+            // This prevents auto-align's absence from interrupting active path following.
+            if (!follower.isBusy()) automatedDrive = false;
         }
 
         // Launcher and Intake
@@ -384,7 +423,7 @@ public class Pedro_TeleOp extends OpMode {
             // Create Pose in FTC coordinate system
             Pose ftcPose = new Pose(
                     x,      // X position in inches
-                    y,      // Y position in inches
+                    y,      // Y Position in inches
                     heading, // Heading in radians
                     FTCCoordinates.INSTANCE
             );
@@ -435,3 +474,4 @@ public class Pedro_TeleOp extends OpMode {
 
     public double getDistanceFromTwoPosesPP(@NonNull Pose pose1, @NonNull Pose pose2) {return Math.hypot(pose2.getX() - pose1.getX(), pose2.getY() - pose1.getY());}
 }
+

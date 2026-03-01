@@ -18,7 +18,8 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 
-@Autonomous(name = "NewBotAutoBlue", group = "NewBotAuto")
+@SuppressWarnings("SpellCheckingInspection")
+@Autonomous(name = "NewBotAutoBlue", group = "NewBotAuto", preselectTeleOp = "NewBotTeleOp")
 public class NewBotAutoBlue extends OpMode {
     private Follower follower;
     private Timer pathTimer, opmodeTimer, launcherTimer;
@@ -359,6 +360,6 @@ public class NewBotAutoBlue extends OpMode {
 
     public void IntakeSafe() {
         intakeMotor.setPower(1);
-        transferMotor.setPower(-0.5); // to avoid feeding balls to launcher
+        transferMotor.setPower(-0.7); // to avoid feeding balls to launcher
     }
 }

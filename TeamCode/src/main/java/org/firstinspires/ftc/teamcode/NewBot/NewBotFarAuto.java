@@ -17,7 +17,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 
-@Autonomous(name = "NewBotAutoFar", group = "NewBotAuto")
+@SuppressWarnings("SpellCheckingInspection")
+@Autonomous(name = "NewBotAutoFar", group = "NewBotAuto", preselectTeleOp = "NewBotTeleOp")
 public class NewBotFarAuto extends OpMode {
 
     private Follower follower;
@@ -214,7 +215,7 @@ public class NewBotFarAuto extends OpMode {
                     if (runLauncherSequence()) {
                         follower.followPath(humanIntakeChain);
                         intakeMotor.setPower(1);
-                        transferMotor.setPower(-0.5); // safe intake
+                        transferMotor.setPower(-0.7); // safe intake
                         autoStage = 1;
                     }
                 }
@@ -230,7 +231,6 @@ public class NewBotFarAuto extends OpMode {
             case 2: // Second launch
                 if (!follower.isBusy()) {
                     if (runLauncherSequence()) {
-                        intakeMotor.setPower(0);
                         follower.followPath(toPark);
                         autoStage = 3;
                     }

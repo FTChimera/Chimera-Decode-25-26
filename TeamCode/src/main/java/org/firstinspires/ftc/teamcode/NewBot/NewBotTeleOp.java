@@ -180,15 +180,16 @@ public class NewBotTeleOp extends LinearOpMode {
                 double intakePower = gamepad1.right_trigger - gamepad1.left_trigger;
                 intakePower += gamepad2.right_trigger - gamepad2.left_trigger;
                 intakePower = intakePower * 1.5;
+                intakePower = Math.max(-1, Math.min(1, intakePower)); // Clip to [-1, 1]
                 intakeMotor.setPower(intakePower);
                 if (Math.abs(intakePower) >= 0.3) {
-                    transferMotor.setPower(-0.5*Math.abs(intakePower));
+                    transferMotor.setPower(-Constants.TRANSFER_UP_POSITION*Math.abs(intakePower));
                 } else {
                     transferMotor.setPower(0);
                 }
             }
             if (gamepad1.b || gamepad2.b) {
-                // new- safe braking (like regenerative braking?)
+                // new- safe braking (like Car braking?)
                 if (launcherOn) {OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);setTargetVelocity=0;setMinVelocity=0;}
                 else if (setTargetVelocity == 0) {OuttakeMotor.setVelocity(Constants.BREAK_STOP_VEL);setTargetVelocity=Constants.BREAK_STOP_VEL;setMinVelocity=0;}
                 else if (setTargetVelocity == Constants.BREAK_STOP_VEL) {OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);setTargetVelocity=0;setMinVelocity=0;}
