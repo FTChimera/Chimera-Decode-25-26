@@ -167,8 +167,7 @@ public class NewBotTeleOp extends LinearOpMode {
             LLResultTypes.FiducialResult fiducialResult = limelight.getResultForTag(allianceColor == Constants.AllianceColor.RED? 24 : 20);
             telemetry.addData("FIDUCIAL NULL", fiducialResult==null);
             double distance = LimelightSystem.calculateDistanceFromRelativePose(fiducialResult);
-            assert fiducialResult != null;
-            telemetry.addData("POSE: ",fiducialResult.getRobotPoseTargetSpace().getPosition());
+            if (!(fiducialResult==null)) telemetry.addData("FIDUCIAL POSE: ",fiducialResult.getRobotPoseTargetSpace().getPosition());
             if (gamepad1.y || gamepad2.y) {
                 launcherOn = true;
                 setTargetVelocity = 1000; //VelocityCalculator.NEWBOT.calculateVelocity(distance); // use new velocity calculator
