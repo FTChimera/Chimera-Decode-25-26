@@ -35,7 +35,7 @@ public class NewBotFarAuto extends OpMode {
     private boolean isLauncherRunning = false;
     private int launcherStage = 0;
 
-    double TARGET_VELOCITY = 1200;
+    double TARGET_VELOCITY = 1400;
     final double FEED_DURATION_SECONDS = 2;
     final double MAX_RPM_WAIT_TIME_SECONDS = 1.2;
 

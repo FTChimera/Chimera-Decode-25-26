@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.NewBot;
+package org.firstinspires.ftc.teamcode2.NewBot;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.ZeroPowerBehavior.FLOAT;
 
@@ -15,8 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
-import org.firstinspires.ftc.teamcode.Systems.Consts;
-import org.firstinspires.ftc.teamcode.pedroAuto.Constants;
+import org.firstinspires.ftc.teamcode2.Systems.Constants;
 
 @Autonomous(name = "NewBotAutoRed", group = "NewBotAuto")
 public class NewBotAutoRed extends OpMode {
@@ -258,7 +257,7 @@ public class NewBotAutoRed extends OpMode {
         // PID Tuning (Values from TeleOp)
         OuttakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(Kp, Ki, Kd, Kf));
 
-        follower = Constants.createFollower(hardwareMap);
+        follower = Constants.createPedroFollower(hardwareMap);
         buildPaths();
         follower.setStartingPose(startPose);
     }

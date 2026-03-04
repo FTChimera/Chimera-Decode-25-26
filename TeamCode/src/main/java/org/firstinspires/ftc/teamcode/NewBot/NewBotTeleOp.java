@@ -104,7 +104,7 @@ public class NewBotTeleOp extends LinearOpMode {
         waitForStart();
 
         //if (isStopRequested()) return;
-        limelight.start(0);
+        limelight.start();
         telemetry.addData("Status", "Running");
 
         // --- NEW VARIABLES FOR BUTTON TOGGLES ---
@@ -116,6 +116,9 @@ public class NewBotTeleOp extends LinearOpMode {
         long lastTime = System.nanoTime();
         long currentTime;
         double deltaTime;
+        // ---------------------------------------
+
+        double distance = 0;
 
         while (opModeIsActive()) {
             follower.update();
@@ -125,10 +128,8 @@ public class NewBotTeleOp extends LinearOpMode {
 
             // Pose Corrector
             if (autoAlignSystem.LLCanSeeGoal()) {
-                telemetry.addData("LL CAN SEE GOAL", "YES");
                 follower.correctPose(kalmanPoseCorrector.getEstimatedPose());
             }
-            else telemetry.addData("LL CAN SEE GOAL", "NO");
 
             double y, x, rx;
             if (Gamepad2Driving) {
@@ -149,7 +150,6 @@ public class NewBotTeleOp extends LinearOpMode {
             currentTime = System.nanoTime();
             deltaTime = (currentTime - lastTime) / 1e9; // convert to seconds
             lastTime = currentTime; // Update lastTime each loop so dt is meaningful
-            telemetry.addData("DT", deltaTime);
             if (gamepad1.back || gamepad2.back) {
                 rx = autoAlignSystem.getTurningPowerLimelight(deltaTime);
             }
@@ -164,19 +164,25 @@ public class NewBotTeleOp extends LinearOpMode {
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
 
-            LLResultTypes.FiducialResult fiducialResult = limelight.getResultForTag(allianceColor == Constants.AllianceColor.RED? 24 : 20);
+            LLResultTypes.FiducialResult fiducialResult = limelight.getResultForTag(allianceColor.getTagID());
             telemetry.addData("FIDUCIAL NULL", fiducialResult==null);
-            double distance = LimelightSystem.calculateDistanceFromRelativePose(fiducialResult);
-            if (!(fiducialResult==null)) telemetry.addData("FIDUCIAL POSE: ",fiducialResult.getRobotPoseTargetSpace().getPosition());
+            if (!(fiducialResult==null)) {
+                distance = limelight.calculateDistance(fiducialResult);
+                if (distance == 0) {
+                    distance = limelight.dist; // SAFETY CHECK
+                }
+            }
             if (gamepad1.y || gamepad2.y) {
                 launcherOn = true;
-                setTargetVelocity = 1000; //VelocityCalculator.NEWBOT.calculateVelocity(distance); // use new velocity calculator
+            }
+            if (launcherOn) {
+                // Dynamically update velocity
+                if (!(limelight.isDisconnected)) setTargetVelocity = VelocityCalculator.NEWBOT.calculateVelocity(distance); // use new velocity calculator
+                else setTargetVelocity = 1000;
                 setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
                 OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
-
             }
-
 
             if ((gamepad1.x || gamepad2.x) && launcherOn) {
                 intakeMotor.setPower(1);
@@ -226,6 +232,7 @@ public class NewBotTeleOp extends LinearOpMode {
 
             // ------------------------------------
             telemetry.addData("POSE", follower.getPose());
+            telemetry.addData("LL Can see goal", autoAlignSystem.LLCanSeeGoal());
             telemetry.addData("Alliance Color", allianceColor);
             telemetry.addData("Intake Motor power", intakeMotor.getPower());
             telemetry.addData("Transfer Motor power", transferMotor.getPower());
@@ -233,11 +240,8 @@ public class NewBotTeleOp extends LinearOpMode {
             telemetry.addData("Target Velocity", setTargetVelocity);
             telemetry.addData("Min Velocity", setMinVelocity);
             telemetry.addData("Tag ID", limelight.tid);
-            telemetry.addData("Distance", limelight.dist);
-            telemetry.addData("Distance to goal", distance);
+            telemetry.addData("Distance", distance);
             telemetry.addData("Turning Power (RX)", rx);
-            telemetry.addData("Kalman Analysis\n", kalmanPoseCorrector.output());
-            telemetry.addData("FIDUCIALS NULL", limelight.getFiducials() == null);
             telemetry.update();
         }
     }

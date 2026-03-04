@@ -32,6 +32,9 @@ public class LogitechSystem {
                 .setCameraResolution(new android.util.Size(640,480))
                 .build();
     }
+
+    void setExposureTime(long time) {exposureTime = time;}
+
     public void update() {
         AprilTagDetection tag = tagProcessor.getDetections().get(0);
         AprilTagPose = tag.ftcPose;

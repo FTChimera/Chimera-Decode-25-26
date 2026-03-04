@@ -100,7 +100,7 @@ public class AutoAlignSystem {
 
     public void turnAutoAlignLimelight(double dt) {
         if (!drivingMotorsUsed) return;
-        tid = currentGoal == Constants.AllianceColor.RED? 24 : 20;
+        tid = currentGoal.getTagID();
         if (!LLCanSeeGoal() && !(limelight.isTagInFiducialResults(tid))) return;
         // Use the tx value from the already updated limelight system
         tx = limelight.getResultForTag(tid).getTargetXDegrees();

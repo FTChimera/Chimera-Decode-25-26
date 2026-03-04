@@ -7,11 +7,22 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.teamcode.NewBot.Constants;
 
 import java.util.List;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class LimelightSystem {
+    public enum Pipeline {
+        APRIL_TAG(0);
+        private final int pipelineIndex;
+        Pipeline(int index) { this.pipelineIndex = index; }
+
+        public int getIndex() { return pipelineIndex; }
+    }
+    public enum DISTANCE_METHOD {
+        AREA, RELATIVE_POSE, TRIG
+    }
     private final boolean isBeingUsed;
     public LimelightSystem(HardwareMap hwMap) {
         limelight1 = hwMap.get(Limelight3A.class, "limelight");
@@ -38,7 +49,7 @@ public class LimelightSystem {
 //        }
 //    }
 
-    private static double calculateDistanceFromArea(double x) {
+    public static double calculateDistanceFromArea(double x) {
         return 1/x;
     }
     public static double calculateDistanceFromRelativePose(LLResultTypes.FiducialResult fiducial) {
@@ -54,8 +65,13 @@ public class LimelightSystem {
     private Timer disconnectedTimer;
     public Pose3D botpose;
     public LLResult result;
+    public final DISTANCE_METHOD distanceMethod = DISTANCE_METHOD.TRIG;
     private List<LLResultTypes.FiducialResult> fiducials;
     public void start(int pipeline) {startLLWithPipeline(pipeline);}
+    public void start() {start(0);}
+    public void start(Pipeline pipeline) {
+        start(pipeline.getIndex());
+    }
     private void startLLWithPipeline(int pipeline){
         if (!isBeingUsed) return;
         limelight1.start();limelight1.pipelineSwitch(pipeline);
@@ -72,6 +88,27 @@ public class LimelightSystem {
              }
          }
          return null;
+   }
+   public static double calculateDistanceFromTrig(LLResultTypes.FiducialResult result) {
+        double ty = result.getTargetYDegrees();
+
+        double angleToGoalRadians = Math.toRadians(Constants.LIMELIGHT_MOUNT_ANGLE_DEGREES + ty);
+        return (Constants.GOAL_HEIGHT_INCHES - Constants.LIMELIGHT_LENS_HEIGHT_INCHES) / Math.tan(angleToGoalRadians);
+    }
+   public double calculateDistance(LLResultTypes.FiducialResult result) {
+         if (distanceMethod == DISTANCE_METHOD.AREA) {
+              return calculateDistanceFromArea(result.getTargetArea());
+         } else if (distanceMethod == DISTANCE_METHOD.RELATIVE_POSE){
+              return calculateDistanceFromRelativePose(result);
+         } else {
+             return calculateDistanceFromTrig(result);
+         }
+   }
+   public double findDistanceFromTag(int tagId) {
+       if (!isBeingUsed) return Double.NaN;
+       LLResultTypes.FiducialResult fiduciary = getResultForTag(tagId);
+       if (fiduciary == null) return Double.NaN;
+       return calculateDistance(fiduciary);
    }
 
    public boolean isTagInFiducialResults(int tagID) {
@@ -99,7 +136,7 @@ public class LimelightSystem {
             fiducials = result.getFiducialResults();
             for (LLResultTypes.FiducialResult fiduciary : fiducials ) {
                 tid = fiduciary.getFiducialId();
-                dist = calculateDistanceFromRelativePose(fiduciary);
+                dist = calculateDistance(fiduciary);
             }
             botpose = result.getBotpose_MT2();
             isDisconnected = false;
