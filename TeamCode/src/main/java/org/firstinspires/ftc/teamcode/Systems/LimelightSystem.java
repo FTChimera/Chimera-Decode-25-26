@@ -42,6 +42,7 @@ public class LimelightSystem {
         return 1/x;
     }
     public static double calculateDistanceFromRelativePose(LLResultTypes.FiducialResult fiducial) {
+        if (fiducial==null) return Double.NaN;
         Pose3D pose = fiducial.getRobotPoseTargetSpace();
         double x = pose.getPosition().x;
         double z = pose.getPosition().z;
@@ -64,6 +65,7 @@ public class LimelightSystem {
 
    public LLResultTypes.FiducialResult getResultForTag(int tagID) {
          if (!isBeingUsed) return null;
+         if (fiducials == null) return null;
          for (LLResultTypes.FiducialResult fiduciary : fiducials ) {
              if (fiduciary.getFiducialId() == tagID) {
                  return fiduciary;

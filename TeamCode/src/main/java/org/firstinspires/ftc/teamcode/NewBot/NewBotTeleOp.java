@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 
 @SuppressWarnings("SpellCheckingInspection")
 @TeleOp(name = "NewBotTeleOp", group = "TeleOp")// Name and Group
+@TeleOp(name = "NewBotTeleOp", group = "0:TeleOp")// Name and Group - 0 to put at top
 public class NewBotTeleOp extends LinearOpMode {
 
     boolean Gamepad2Driving = false, launcherOn= false, testingStartPose = false;
@@ -103,7 +104,7 @@ public class NewBotTeleOp extends LinearOpMode {
         telemetry.addData("Status", "Initialized");telemetry.update();
         waitForStart();
 
-        if (isStopRequested()) return;
+        //if (isStopRequested()) return;
         limelight.start(0);
         telemetry.addData("Status", "Running");
 
@@ -125,8 +126,10 @@ public class NewBotTeleOp extends LinearOpMode {
 
             // Pose Corrector
             if (autoAlignSystem.LLCanSeeGoal()) {
+                telemetry.addData("LL CAN SEE GOAL", "YES");
                 follower.correctPose(kalmanPoseCorrector.getEstimatedPose());
             }
+            else telemetry.addData("LL CAN SEE GOAL", "NO");
 
             double y, x, rx;
             if (Gamepad2Driving) {
@@ -147,9 +150,9 @@ public class NewBotTeleOp extends LinearOpMode {
             currentTime = System.nanoTime();
             deltaTime = (currentTime - lastTime) / 1e9; // convert to seconds
             lastTime = currentTime; // Update lastTime each loop so dt is meaningful
-
+            telemetry.addData("DT", deltaTime);
             if (gamepad1.back || gamepad2.back) {
-                rx = autoAlignSystem.getTurningPowerPedro(follower.getPose(), deltaTime);
+                rx = autoAlignSystem.getTurningPowerLimelight(deltaTime);
             }
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
             double frontLeftPower = 0.9 *(y + x + rx) / denominator;
@@ -163,10 +166,13 @@ public class NewBotTeleOp extends LinearOpMode {
             backRightMotor.setPower(backRightPower);
 
             LLResultTypes.FiducialResult fiducialResult = limelight.getResultForTag(allianceColor == Constants.AllianceColor.RED? 24 : 20);
+            telemetry.addData("FIDUCIAL NULL", fiducialResult==null);
             double distance = LimelightSystem.calculateDistanceFromRelativePose(fiducialResult);
+            assert fiducialResult != null;
+            telemetry.addData("POSE: ",fiducialResult.getRobotPoseTargetSpace().getPosition());
             if (gamepad1.y || gamepad2.y) {
                 launcherOn = true;
-                setTargetVelocity = VelocityCalculator.NEWBOT.calculateVelocity(distance); // use new velocity calculator
+                setTargetVelocity = 1000; //VelocityCalculator.NEWBOT.calculateVelocity(distance); // use new velocity calculator
                 setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
                 OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
@@ -233,6 +239,7 @@ public class NewBotTeleOp extends LinearOpMode {
             telemetry.addData("Distance to goal", distance);
             telemetry.addData("Turning Power (RX)", rx);
             telemetry.addData("Kalman Analysis\n", kalmanPoseCorrector.output());
+            telemetry.addData("FIDUCIALS NULL", limelight.getFiducials() == null);
             telemetry.update();
         }
     }
