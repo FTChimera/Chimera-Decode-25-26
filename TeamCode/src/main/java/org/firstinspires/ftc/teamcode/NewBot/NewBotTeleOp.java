@@ -13,7 +13,6 @@ import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 
 
 @SuppressWarnings("SpellCheckingInspection")
-@TeleOp(name = "NewBotTeleOp", group = "TeleOp")// Name and Group
 @TeleOp(name = "NewBotTeleOp", group = "0:TeleOp")// Name and Group - 0 to put at top
 public class NewBotTeleOp extends LinearOpMode {
 
