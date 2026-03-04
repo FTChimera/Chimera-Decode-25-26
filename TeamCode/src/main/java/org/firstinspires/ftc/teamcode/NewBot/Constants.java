@@ -36,8 +36,8 @@ public class Constants {
     public static final double LIMELIGHT_PIDF_MAX_OUTPUT = 1;
     public static final double LIMELIGHT_PIDF_INTEGRAL_LIMIT = 10;
     public static final double GOAL_HEIGHT_INCHES = 54;
-    public static final double LIMELIGHT_LENS_HEIGHT_INCHES = 10; // measure
-    public static final double LIMELIGHT_MOUNT_ANGLE_DEGREES = 30; // measure
+    public static final double LIMELIGHT_LENS_HEIGHT_INCHES = 12.5; // measure
+    public static final double LIMELIGHT_MOUNT_ANGLE_DEGREES = 12; // measure
 
     public static final double TRANSFER_UP_POSITION = 0.5;
     public static final double TRANSFER_DOWN_POSITION = 0;

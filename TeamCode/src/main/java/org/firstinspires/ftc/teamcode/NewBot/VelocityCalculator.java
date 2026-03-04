@@ -5,14 +5,21 @@ package org.firstinspires.ftc.teamcode.NewBot;
 public class VelocityCalculator {
     // Shot table
 
-    public static final double minVelocityNewBot = 900, maxVelocityNewBot = 1320;
+    public static final double minVelocityNewBot = 970, maxVelocityNewBot = 1500;
     public static final double[][] shotTableNewBot = {
             // { distance (1/ta), velocity }
             // fill in with tuned values- TODO - fix these based on mew launch angle + distance instead of target area
-            {0.22, 950},
-            {0.34, 1050},
-            {0.4, 1100},
-            {0.76, 1260}
+            {98, 1010},
+            {138, 1060},
+            {190, 1120},
+            {230, 1140},
+            {260, 1157},
+            {310, 1220},
+            {365, 1240},
+            {425, 1330},
+            {474, 1350},
+            {535, 1400},
+            {650, 1475}
     };
     public static VelocityCalculator NEWBOT = new VelocityCalculator(shotTableNewBot, minVelocityNewBot, maxVelocityNewBot);
 

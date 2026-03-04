@@ -84,8 +84,8 @@ public class NewBotTeleOp extends LinearOpMode {
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         OuttakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         transferMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         OuttakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         transferMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -174,7 +174,12 @@ public class NewBotTeleOp extends LinearOpMode {
             }
             if (gamepad1.y || gamepad2.y) {
                 launcherOn = true;
+                setTargetVelocity = VelocityCalculator.NEWBOT.calculateVelocity(distance);
+                setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
+                OuttakeMotor.setVelocity(setMinVelocity);
+                OuttakeMotor.setVelocity(setTargetVelocity);
             }
+            /*
             if (launcherOn) {
                 // Dynamically update velocity
                 if (!(limelight.isDisconnected)) setTargetVelocity = VelocityCalculator.NEWBOT.calculateVelocity(distance); // use new velocity calculator
@@ -183,6 +188,8 @@ public class NewBotTeleOp extends LinearOpMode {
                 OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
             }
+            */
+
 
             if ((gamepad1.x || gamepad2.x) && launcherOn) {
                 intakeMotor.setPower(1);
@@ -196,16 +203,13 @@ public class NewBotTeleOp extends LinearOpMode {
                 intakePower = Math.max(-1, Math.min(1, intakePower)); // Clip to [-1, 1]
                 intakeMotor.setPower(intakePower);
                 if (Math.abs(intakePower) >= 0.3) {
-                    transferMotor.setPower(-Constants.TRANSFER_UP_POSITION*Math.abs(intakePower));
+                    transferMotor.setPower(-0.5*Math.abs(intakePower));
                 } else {
                     transferMotor.setPower(0);
                 }
             }
             if (gamepad1.b || gamepad2.b) {
-                // new- safe braking (like Car braking?)
-                if (launcherOn) {OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);setTargetVelocity=0;setMinVelocity=0;}
-                else if (setTargetVelocity == 0) {OuttakeMotor.setVelocity(Constants.BREAK_STOP_VEL);setTargetVelocity=Constants.BREAK_STOP_VEL;setMinVelocity=0;}
-                else if (setTargetVelocity == Constants.BREAK_STOP_VEL) {OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);setTargetVelocity=0;setMinVelocity=0;}
+                OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);
                 launcherOn = false;
                 transferMotor.setPower(Constants.TRANSFER_DOWN_POSITION);
             }

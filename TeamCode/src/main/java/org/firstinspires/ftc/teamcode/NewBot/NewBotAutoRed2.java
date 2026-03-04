@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 
 @SuppressWarnings("SpellCheckingInspection")
-@Autonomous(name = "NewBotAutoRed", group = "NewBotAuto", preselectTeleOp = "NewBotTeleOp")
+@Autonomous(name = "NewBotAutoRed2", group = "NewBotAuto", preselectTeleOp = "NewBotTeleOp")
 public class NewBotAutoRed2 extends OpMode {
     private Follower follower;
     private Timer pathTimer, opmodeTimer, launcherTimer;
