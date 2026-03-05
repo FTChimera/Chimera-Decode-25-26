@@ -153,6 +153,9 @@ public class AutoAlignSystem {
         double error = tx + TxOffset;
         double rotationCmd = limelightPIDF.updatePIDF(error, dt);
 
+        if (Math.abs(rotationCmd) < 0.13) {
+            rotationCmd = Math.copySign(0.13, rotationCmd);
+        }
         // return rotation command for use in TeleOp
         return rotationCmd;
     }

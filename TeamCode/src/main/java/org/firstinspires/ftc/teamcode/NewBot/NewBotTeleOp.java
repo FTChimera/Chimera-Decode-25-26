@@ -150,8 +150,11 @@ public class NewBotTeleOp extends LinearOpMode {
             currentTime = System.nanoTime();
             deltaTime = (currentTime - lastTime) / 1e9; // convert to seconds
             lastTime = currentTime; // Update lastTime each loop so dt is meaningful
-            if (gamepad1.back || gamepad2.back) {
-                rx = autoAlignSystem.getTurningPowerLimelight(deltaTime);
+            if ((gamepad1.back || gamepad2.back)) {
+                rx = 0;
+                if (!(rgbIndicator.getPWM() == RGBIndicator.GREEN_PWM)) {
+                    rx = autoAlignSystem.getTurningPowerLimelight(deltaTime);
+                }
             }
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
             double frontLeftPower = 0.9 *(y + x + rx) / denominator;

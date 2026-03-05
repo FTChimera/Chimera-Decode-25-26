@@ -28,7 +28,7 @@ public class NewBotAutoRed extends OpMode {
 
     // Poses remain unchanged from your original file
     private final Pose startPose = new Pose(123.9, 122.2, Math.toRadians(42));
-    private final Pose launchPose = new Pose(109.2, 108.5, Math.toRadians(42));
+    private final Pose launchPose = new Pose(99, 99, Math.toRadians(42));
     private final Pose intakePrep = new Pose(96.4, 87, Math.toRadians(0));
     private final Pose red1Intake = new Pose(127, 87, Math.toRadians(0));
     private final Pose intakePrep2 = new Pose(101.0, 61, Math.toRadians(0));
@@ -43,7 +43,7 @@ public class NewBotAutoRed extends OpMode {
 
     // Updated Constants based on TeleOp
     // TeleOp "Front Launch" is 1100, Back is 500. Assuming Auto shoots from Front/Close range.
-    double TARGET_VELOCITY = 1000;
+    double TARGET_VELOCITY = 1050;
     // Duration to run the transfer motor to ensure all balls are fired
     final double FEED_DURATION_SECONDS = 2;
     final double MAX_RPM_WAIT_TIME_SECONDS = 1.2; // Fail-safe if RPM isn't reached

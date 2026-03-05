@@ -30,7 +30,7 @@ public class NewBotAutoBlue extends OpMode {
 
     // Poses remain unchanged from your original file
     private final Pose startPose = new Pose(20, 122.2, Math.toRadians(142)); // Start Pose of our robot.
-    private final Pose launchPose = new Pose(34.8, 108.5, Math.toRadians(142));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose launchPose = new Pose(45, 99, Math.toRadians(142));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose intakePrep = new Pose(52,87, Math.toRadians(180));
     private final Pose blue1Intake = new Pose(21.5, 87, Math.toRadians(180));
     private final Pose intakePrep2 = new Pose(55,59, Math.toRadians(180));
@@ -45,7 +45,7 @@ public class NewBotAutoBlue extends OpMode {
 
     // Updated Constants based on TeleOp
     // TeleOp "Front Launch" is 1100, Back is 500. Assuming Auto shoots from Front/Close range.
-    double TARGET_VELOCITY = 1000;
+    double TARGET_VELOCITY = 1050;
     // Duration to run the transfer motor to ensure all balls are fired
     final double FEED_DURATION_SECONDS = 2;
     final double MAX_RPM_WAIT_TIME_SECONDS = 1.2; // Fail-safe if RPM isn't reached

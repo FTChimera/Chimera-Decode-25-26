@@ -61,6 +61,11 @@ public class RGBIndicator {
         if (!isBeingUsed) return;
         rgb.setPosition(val);
     }
+
+    public double getPWM() {
+        return rgb.getPosition();
+    }
+
     public void setColor(Color col) {
         if (!isBeingUsed) return;
         if (col==Color.BLACK) rgb.setPosition(BLACK_PWM);

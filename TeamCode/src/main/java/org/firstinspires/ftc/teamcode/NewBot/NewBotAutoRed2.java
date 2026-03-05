@@ -50,7 +50,7 @@ public class NewBotAutoRed2 extends OpMode {
 
     // Updated Constants based on TeleOp
     // TeleOp "Front Launch" is 1100, Back is 500. Assuming Auto shoots from Front/Close range.
-    double TARGET_VELOCITY = 1000;
+    double TARGET_VELOCITY = 1050;
     // Duration to run the transfer motor to ensure all balls are fired
     final double GATE_WAITING_TIME = 1000; // 1 second for intaking from gate
     final double FEED_DURATION_SECONDS = 2;
