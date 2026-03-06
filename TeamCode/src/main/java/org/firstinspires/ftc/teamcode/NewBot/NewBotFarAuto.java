@@ -36,38 +36,38 @@ public class NewBotFarAuto extends OpMode {
     private int launcherStage = 0;
     private int intake_iterations = 2;
     private boolean first_iteration = false;
-
-    double TARGET_VELOCITY = 1400;
-    final double FEED_DURATION_SECONDS = 2.25;
-    final double MAX_RPM_WAIT_TIME_SECONDS = 1.75;
-    final double INTAKE_WAIT_TIME_SECONDS = 0.7;
-    final double WAIT_TIME_BETWEEN_ITERATION_SECONDS = 1.1;
+    double PREWARM_VELOCITY = 1000;
+    double TARGET_VELOCITY = 1375;
+    final double FEED_DURATION_SECONDS = 3;
+    final double MAX_RPM_WAIT_TIME_SECONDS = 3;
+    final double INTAKE_WAIT_TIME_SECONDS = 1;
+    final double WAIT_TIME_BETWEEN_ITERATION_SECONDS = 0.5;
 
     // ---------------- RED FAR POSES ----------------
     private final Pose redStart = new Pose(86.591, 9.184, Math.toRadians(90));
-    private final Pose redLaunch = new Pose(84.000, 12.000, Math.toRadians(65.5560452));
+    private final Pose redLaunch = new Pose(91.000, 12.000, Math.toRadians(70.000));
     private final Pose redPark = new Pose(104.000, 18.000, Math.toRadians(90));
 
     // ---------------- BLUE FAR POSES ----------------
     private final Pose blueStart = new Pose(57.409, 9.184, Math.toRadians(90));
-    private final Pose blueLaunch = new Pose(60.000, 12.000, Math.toRadians(114.4439548));
+    private final Pose blueLaunch = new Pose(56.000, 12.000, Math.toRadians(110.000));
     private final Pose bluePark = new Pose(40.000, 18.000, Math.toRadians(90));
 
     // ---------------- RED HUMAN INTAKE ----------------
-    private final Pose redHuman = new Pose(134.360, 8.900, Math.toRadians(0));
-    private final Pose redIntakePrepPrep = new Pose(116.444, 13.000, Math.toRadians(0));
-    private final Pose redIntakePrep = new Pose(131.893, 10.000, Math.toRadians(350));
-    private final Pose redHuman2 = new Pose(134.360, 28.500, Math.toRadians(0));
-    private final Pose redIntakePrepPrep2 = new Pose(116.444, 17.500, Math.toRadians(0));
-    private final Pose redIntakePrep2 = new Pose(131.893, 25.000, Math.toRadians(350));
+    private final Pose redHuman = new Pose(136, 14.000, Math.toRadians(0));
+    private final Pose redIntakePrepPrep = new Pose(116.444, 10.500, Math.toRadians(0));
+    private final Pose redIntakePrep = new Pose(131.893, 12.000, Math.toRadians(350));
+    private final Pose redHuman2 = new Pose(135.360, 16.550, Math.toRadians(0));
+    private final Pose redIntakePrepPrep2 = new Pose(116.444, 12.000, Math.toRadians(0));
+    private final Pose redIntakePrep2 = new Pose(131.893, 14.500, Math.toRadians(350));
 
     // ---------------- BLUE HUMAN INTAKE ----------------
-    private final Pose blueHuman = new Pose(9.640, 8.900, Math.toRadians(180));
-    private final Pose blueIntakePrepPrep = new Pose(27.556, 13.000, Math.toRadians(180));
-    private final Pose blueIntakePrep = new Pose(12.107, 10.000, Math.toRadians(190));
-    private final Pose blueHuman2 = new Pose(9.640, 28.500, Math.toRadians(180));
-    private final Pose blueIntakePrepPrep2 = new Pose(27.556, 17.500, Math.toRadians(180));
-    private final Pose blueIntakePrep2 = new Pose(12.107, 25.000, Math.toRadians(190));
+    private final Pose blueHuman = new Pose(8.100, 13.000, Math.toRadians(180));
+    private final Pose blueIntakePrepPrep = new Pose(27.556, 10.500, Math.toRadians(180));
+    private final Pose blueIntakePrep = new Pose(12.107, 12.000, Math.toRadians(200));
+    private final Pose blueHuman2 = new Pose(9.640, 16.550, Math.toRadians(180));
+    private final Pose blueIntakePrepPrep2 = new Pose(27.556, 12.000, Math.toRadians(180));
+    private final Pose blueIntakePrep2 = new Pose(12.107, 14.500, Math.toRadians(210));
 
     private Path toLaunch;
     private Path toPark;
@@ -292,6 +292,7 @@ public class NewBotFarAuto extends OpMode {
 
         follower.setStartingPose(startPose);
         follower.followPath(toLaunch);
+        OuttakeMotor.setVelocity(PREWARM_VELOCITY);
     }
 
     @Override
@@ -320,7 +321,7 @@ public class NewBotFarAuto extends OpMode {
                 if (waitTimer.getElapsedTimeSeconds() >= WAIT_TIME_BETWEEN_ITERATION_SECONDS || !first_iteration) {
                     follower.followPath(!first_iteration ? humanIntakeChain : humanIntakeChain2);
                     intakeMotor.setPower(1);
-                    transferMotor.setPower(-0.7); // safe intake
+                    transferMotor.setPower(-0.8); // safe intake
                     waitTimer = null;
                     autoStage = 2;
                 }

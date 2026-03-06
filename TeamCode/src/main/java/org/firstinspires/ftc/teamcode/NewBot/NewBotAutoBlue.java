@@ -32,12 +32,12 @@ public class NewBotAutoBlue extends OpMode {
     private final Pose startPose = new Pose(20, 122.2, Math.toRadians(142)); // Start Pose of our robot.
     private final Pose launchPose = new Pose(45, 99, Math.toRadians(142));// Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
     private final Pose intakePrep = new Pose(52,87, Math.toRadians(180));
-    private final Pose blue1Intake = new Pose(21.5, 87, Math.toRadians(180));
-    private final Pose intakePrep2 = new Pose(55,59, Math.toRadians(180));
-    private final Pose blue2Intake = new Pose(18, 58.5, Math.toRadians(180));
+    private final Pose blue1Intake = new Pose(20, 87, Math.toRadians(180));
+    private final Pose intakePrep2 = new Pose(55,61, Math.toRadians(180));
+    private final Pose blue2Intake = new Pose(15, 61, Math.toRadians(180));
     private final Pose launchControl = new Pose(41.9, 33.4, Math.toRadians(180));
     private final Pose intakePrep3 = new Pose(57, 37, Math.toRadians(180));
-    private final Pose blue3Intake = new Pose(18, 36.5, Math.toRadians(180));
+    private final Pose blue3Intake = new Pose(16, 36.5, Math.toRadians(180));
     private final Pose launchControl1 = new Pose(43.4, 28.3, Math.toRadians(180));
     public static final Pose finalPose = new Pose(51.7, 121.5, Math.toRadians(180));
 
@@ -45,10 +45,10 @@ public class NewBotAutoBlue extends OpMode {
 
     // Updated Constants based on TeleOp
     // TeleOp "Front Launch" is 1100, Back is 500. Assuming Auto shoots from Front/Close range.
-    double TARGET_VELOCITY = 1050;
+    double TARGET_VELOCITY = 1025;
     // Duration to run the transfer motor to ensure all balls are fired
-    final double FEED_DURATION_SECONDS = 2;
-    final double MAX_RPM_WAIT_TIME_SECONDS = 1.2; // Fail-safe if RPM isn't reached
+    final double FEED_DURATION_SECONDS = 2.1;
+    final double MAX_RPM_WAIT_TIME_SECONDS = 1.4; // Fail-safe if RPM isn't reached
 
     // Path State Constants
     final int CHIMERA_LAUNCH = 1;
