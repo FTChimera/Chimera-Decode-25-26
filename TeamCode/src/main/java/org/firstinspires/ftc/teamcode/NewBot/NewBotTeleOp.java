@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 @TeleOp(name = "NewBotTeleOp", group = "0:TeleOp")// Name and Group - 0 to put at top
 public class NewBotTeleOp extends LinearOpMode {
 
-    boolean Gamepad2Driving = false, launcherOn= false, testingStartPose = false;
+    boolean Gamepad2Driving = false, launcherOn= false, testingMode = false;
     // declaring our PIDF tuning values
     double setTargetVelocity = 0;
     double setMinVelocity = 0;
@@ -36,7 +36,7 @@ public class NewBotTeleOp extends LinearOpMode {
         allianceColor = Constants.AllianceColor.RED;
         while (opModeInInit())
         {
-            telemetry.addLine("Press X to switch alliance, A to switch drivers, B to switch between testing start pose and normal start pose");
+            telemetry.addLine("Press X to switch alliance, A to switch drivers, B to switch between testing mode and comp mode");
             telemetry.addLine((Gamepad2Driving ? "Gamepad B" : "Gamepad A" )+ " Driving");
             telemetry.addData("Alliance selected: ", allianceColor);
             // This method is called repeatedly during the init phase
@@ -44,7 +44,7 @@ public class NewBotTeleOp extends LinearOpMode {
                 Gamepad2Driving = !Gamepad2Driving;
             }
             if (gamepad1.bWasPressed()) {
-                testingStartPose = !testingStartPose;
+                testingMode = !testingMode;
             }
             if (gamepad1.xWasReleased()) {
                 allianceColor = allianceColor.switchColors();
@@ -53,6 +53,8 @@ public class NewBotTeleOp extends LinearOpMode {
 
             telemetry.update();
         }
+
+
 
         // Declare our motors
         // Make sure your ID's match your configuration
@@ -64,17 +66,20 @@ public class NewBotTeleOp extends LinearOpMode {
         DcMotorEx OuttakeMotor = hardwareMap.get(DcMotorEx.class,"OuttakeMotor");
         DcMotor intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         DcMotor transferMotor = hardwareMap.dcMotor.get("transferMotor");
-        Pose startPose = testingStartPose ? new Pose(120, 36, 180) : ( // Testing Pose (near our table)
-                // X: line between second to last and last field tile
-                // Y: Middle of second to last field tile
-                allianceColor == Constants.AllianceColor.RED ?
-                        NewBotAutoRed.finalPose :
-                        NewBotAutoBlue.finalPose
-        );
-        follower = new PedroDrive(hardwareMap,
-                    startPose
-                );
-        kalmanPoseCorrector.resetToPose(startPose);
+
+        // set up
+        if (!testingMode) {
+            allianceColor = MatchState.getAllianceColor();
+            Pose startPose = MatchState.getStartingPose();
+            follower = new PedroDrive(hardwareMap, startPose);
+            kalmanPoseCorrector.resetToPose(startPose);
+        } else {
+            Pose startPose =  new Pose(120, 36, 180); // our testing pose
+            // X: line between second to last and last field tile
+            // Y: Middle of second to last field tile
+            follower = new PedroDrive(hardwareMap, startPose);
+            kalmanPoseCorrector.resetToPose(startPose);
+        }
 
         frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);

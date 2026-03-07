@@ -272,6 +272,11 @@ public class NewBotFarAuto extends OpMode {
                 .build();
     }
 
+    @Override
+    public void stop() {
+        MatchState.setEndPose(follower.getPose());
+        MatchState.setAutoTypeInfo(allianceColor, true);
+    }
 
     @Override
     public void start() {

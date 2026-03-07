@@ -136,7 +136,7 @@ public class AutoAlignSystem {
         }
 
     }
-    public double getTurningPowerLimelight(double dt, double distance) {
+    public double getTurningPowerLimelight(double dt) {
         // Use the tx value from the already updated limelight system
         // Verify tag ID matches alliance color for DECODE season (24 for red goal, 20 for blue goal)
 

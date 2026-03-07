@@ -13,7 +13,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
@@ -290,7 +289,10 @@ public class NewBotAutoBlue extends OpMode {
     }
 
     @Override
-    public void stop() {}
+    public void stop() {
+        MatchState.setEndPose(follower.getPose());
+        MatchState.setAutoTypeInfo(Constants.AllianceColor.BLUE, false);
+    }
 
     /**
      * Executes the launch sequence for the NEW mechanism:

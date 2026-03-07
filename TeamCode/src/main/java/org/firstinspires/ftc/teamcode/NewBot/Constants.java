@@ -37,7 +37,6 @@ public class Constants {
     public static final double GOAL_HEIGHT_INCHES = 54;
     public static final double LIMELIGHT_LENS_HEIGHT_INCHES = 12.5; // measure
     public static final double LIMELIGHT_MOUNT_ANGLE_DEGREES = 12; // measure
-
     public static final double TRANSFER_UP_POSITION = 0.7;
     public static final double TRANSFER_DOWN_POSITION = 0;
     public static final double VELOCITY_TOLERANCE = 60;

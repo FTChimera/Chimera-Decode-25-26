@@ -285,7 +285,10 @@ public class NewBotAutoRed extends OpMode {
     }
 
     @Override
-    public void stop() {}
+    public void stop() {
+        MatchState.setEndPose(follower.getPose());
+        MatchState.setAutoTypeInfo(Constants.AllianceColor.RED, false);
+    }
 
     /**
      * Executes the launch sequence for the NEW mechanism:
