@@ -6,7 +6,7 @@ public class MatchState {
     // keep static values to keep values in memory
     // for transfer from auto to teleop
 
-    public static Pose PEDRO_END_POSE = new Pose();
+    public static Pose PEDRO_END_POSE;
     public static boolean wasFarAuto;
     public static Constants.AllianceColor allianceColor;
 

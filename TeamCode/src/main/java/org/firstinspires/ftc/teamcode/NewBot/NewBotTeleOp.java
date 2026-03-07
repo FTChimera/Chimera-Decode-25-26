@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
 @TeleOp(name = "NewBotTeleOp", group = "0:TeleOp")// Name and Group - 0 to put at top
 public class NewBotTeleOp extends LinearOpMode {
 
-    boolean Gamepad2Driving = false, launcherOn= false, testingMode = false;
+    boolean launcherOn= false, testingMode = false;
     // declaring our PIDF tuning values
     double setTargetVelocity = 0;
     double setMinVelocity = 0;
@@ -36,13 +36,9 @@ public class NewBotTeleOp extends LinearOpMode {
         allianceColor = Constants.AllianceColor.RED;
         while (opModeInInit())
         {
-            telemetry.addLine("Press X to switch alliance, A to switch drivers, B to switch between testing mode and comp mode");
-            telemetry.addLine((Gamepad2Driving ? "Gamepad B" : "Gamepad A" )+ " Driving");
-            telemetry.addData("Alliance selected: ", allianceColor);
             // This method is called repeatedly during the init phase
-            if (gamepad1.aWasPressed()) {
-                Gamepad2Driving = !Gamepad2Driving;
-            }
+            telemetry.addLine("Press X to switch alliance, B to switch between testing mode and comp mode");
+            telemetry.addData("Alliance selected: ", allianceColor);
             if (gamepad1.bWasPressed()) {
                 testingMode = !testingMode;
             }
@@ -69,8 +65,8 @@ public class NewBotTeleOp extends LinearOpMode {
 
         // set up
         if (!testingMode) {
-            allianceColor = MatchState.getAllianceColor();
-            Pose startPose = MatchState.getStartingPose();
+            allianceColor = MatchState.getAllianceColor() == null ? allianceColor : MatchState.getAllianceColor();
+            Pose startPose = MatchState.getStartingPose() == null ? new Pose(120, 36, 180) : MatchState.getStartingPose();
             follower = new PedroDrive(hardwareMap, startPose);
             kalmanPoseCorrector.resetToPose(startPose);
         } else {
@@ -144,19 +140,14 @@ public class NewBotTeleOp extends LinearOpMode {
             }
 
             double y, x, rx;
-            if (Gamepad2Driving) {
-                y = -gamepad2.left_stick_y * 1.01; // Remember, Y stick value is reversed
-                x = gamepad2.left_stick_x * 1.1; // Counteract imperfect strafing
-                rx = gamepad2.right_stick_x * 1.01;
-            } else {
-                y = -gamepad1.left_stick_y * 1.01; // Remember, Y stick value is reversed
-                x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
-                rx = gamepad1.right_stick_x * 1.01;
-            }
+
+            y = -gamepad1.left_stick_y * 1.01; // Remember, Y stick value is reversed
+            x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+            rx = gamepad1.right_stick_x * 1.01;
 
             y *= Math.abs(y);
             x *= Math.abs(x);
-            rx *= Math.abs(rx * 0.7);
+            rx *= Math.abs(rx * 0.65);
 
             // Calculate dt
             currentTime = System.nanoTime();
@@ -169,10 +160,10 @@ public class NewBotTeleOp extends LinearOpMode {
                 }
             }
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
-            double frontLeftPower = 0.85 *(y + x + rx) / denominator;
-            double backLeftPower = 0.85 *(y - x + rx) / denominator;
-            double frontRightPower = 0.85 *(y - x - rx) / denominator;
-            double backRightPower = 0.85 * (y + x - rx) / denominator;
+            double frontLeftPower = 0.9 *(y + x + rx) / denominator;
+            double backLeftPower = 0.9 *(y - x + rx) / denominator;
+            double frontRightPower = 0.9 *(y - x - rx) / denominator;
+            double backRightPower = 0.9 * (y + x - rx) / denominator;
 
             frontLeftMotor.setPower(frontLeftPower);
             backLeftMotor.setPower(backLeftPower);
@@ -186,16 +177,15 @@ public class NewBotTeleOp extends LinearOpMode {
                 OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
             }
-            /*
+
             if (launcherOn) {
                 // Dynamically update velocity
-                if (!(limelight.isDisconnected)) setTargetVelocity = VelocityCalculator.NEWBOT.calculateVelocity(distance); // use new velocity calculator
-                else setTargetVelocity = 1000;
+                setTargetVelocity = VelocityCalculator.NEWBOT.calculateVelocity(distance);
                 setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
                 OuttakeMotor.setVelocity(setMinVelocity);
                 OuttakeMotor.setVelocity(setTargetVelocity);
             }
-            */
+
 
 
             if ((gamepad1.x || gamepad2.x) && launcherOn && OuttakeMotor.getVelocity() >= setMinVelocity) {
