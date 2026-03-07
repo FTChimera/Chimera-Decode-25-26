@@ -20,7 +20,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 @SuppressWarnings("SpellCheckingInspection")
 public class Constants {
 
-    public static final double INCREMENT_CHANGE_IN_VELOCITY = 25;
 
     public static double applyPolynomialToDriveInputs(double input) {
         double output = input;
@@ -39,17 +38,10 @@ public class Constants {
     public static final double LIMELIGHT_LENS_HEIGHT_INCHES = 12.5; // measure
     public static final double LIMELIGHT_MOUNT_ANGLE_DEGREES = 12; // measure
 
-    public static final double TRANSFER_UP_POSITION = 0.5;
+    public static final double TRANSFER_UP_POSITION = 0.7;
     public static final double TRANSFER_DOWN_POSITION = 0;
-    public static final double SLEEP_BEFORE_INTAKE_START = 1020;
-    public static final double SLEEP_BEFORE_INTAKE_RESET_LAUNCHING = 1600;
-    public static final double RAPID_FIRE_TIME = 1000;
-    public static final double VELOCITY_TOLERANCE = 70;
-    public static double TARGET_VELOCITY_BACK_LAUNCH_ZONE = 1050;// Set target velocity from front launch zone
-    public static double TARGET_VELOCITY_FRONT_LAUNCH_ZONE = 950;// Set target velocity from goal
-    public static double BREAK_STOP_VEL = 50;
+    public static final double VELOCITY_TOLERANCE = 60;
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
-    public static int[] BALL_NUM_INTAKE_NEEDED = {2,3};
     public static PIDFCoefficients LaunchPIDF = new PIDFCoefficients(
             300.0025, 0, 0.0002, 10
     );
@@ -62,24 +54,6 @@ public class Constants {
 
         public int getTagID() {
             return this == RED ? 24 : 20;
-        }
-    }
-    public enum Auto {
-        BLUE_CLOSE(BLUE),
-        BLUE_FAR(BLUE),
-        RED_CLOSE(RED),
-        RED_FAR(RED);
-
-        Auto(AllianceColor allianceColor) {
-
-        }
-        public Auto next() {
-            return values()[(this.ordinal() + 1) % values().length];
-        }
-        public AllianceColor getAllianceColor() {
-            return name().startsWith("BLUE")
-                    ? BLUE
-                    : RED;
         }
     }
 //    public static Pose RED_GOAL = new Pose(130.37, 127.64, 36);

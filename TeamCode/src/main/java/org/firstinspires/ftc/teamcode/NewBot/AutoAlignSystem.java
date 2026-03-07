@@ -24,7 +24,7 @@ public class AutoAlignSystem {
     private LimelightSystem limelight;
     private PIDFController limelightPIDF;
 
-    private final double TxOffset = 0;
+    private double TxOffset = 0;
     double tx;
     int tid;
     private DcMotor[] drivingMotors; // for auto alignment turning
@@ -136,7 +136,7 @@ public class AutoAlignSystem {
         }
 
     }
-    public double getTurningPowerLimelight(double dt) {
+    public double getTurningPowerLimelight(double dt, double distance) {
         // Use the tx value from the already updated limelight system
         // Verify tag ID matches alliance color for DECODE season (24 for red goal, 20 for blue goal)
 
@@ -149,7 +149,6 @@ public class AutoAlignSystem {
             return 0;
         }
 
-        // Apply offset and calculate rotation command using PID with dt from TeleOp
         double error = tx + TxOffset;
         double rotationCmd = limelightPIDF.updatePIDF(error, dt);
 
@@ -159,7 +158,10 @@ public class AutoAlignSystem {
         // return rotation command for use in TeleOp
         return rotationCmd;
     }
-
+    public boolean isErrorAtTolerance() {
+        limelightPIDF.setTolerance(1);
+        return limelightPIDF.atSetpoint(limelightPIDF.getLastError());
+    }
     public double getTurningPowerPedro(Pose currentPose, double dt) {
         // Use the tx value from the already updated limelight system
         // Verify tag ID matches alliance color for DECODE season (24 for red goal, 20 for blue goal)

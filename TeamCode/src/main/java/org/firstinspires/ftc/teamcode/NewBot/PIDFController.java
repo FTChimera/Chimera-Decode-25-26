@@ -129,4 +129,11 @@ public class PIDFController {
     public double getLastOutput() {
         return lastOutput;
     }
+
+    /**
+     * Return last error (useful for diagnostics).
+     */
+    public double getLastError() {
+        return lastError;
+    }
 }
