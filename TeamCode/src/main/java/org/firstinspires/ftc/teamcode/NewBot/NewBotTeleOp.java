@@ -165,7 +165,7 @@ public class NewBotTeleOp extends LinearOpMode {
             if ((gamepad1.back || gamepad2.back)) {
                 rx = 0;
                 if (!(rgbIndicator.getPWM() == RGBIndicator.GREEN_PWM)) {
-                    rx = autoAlignSystem.getTurningPowerLimelight(deltaTime, distance);
+                    rx = autoAlignSystem.getTurningPowerLimelight(deltaTime);
                 }
             }
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
