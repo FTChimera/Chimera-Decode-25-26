@@ -33,10 +33,10 @@ public class AutoAlignSystem {
     boolean areWeUsingPedro;
     public void reset() {
         limelightPIDF.reset();
-        follower.startTeleopDrive();
+        if (areWeUsingPedro) follower.startTeleopDrive();
     }
 
-    public AutoAlignSystem(Constants.AllianceColor allianceColor) {
+    public AutoAlignSystem(Constants.AllianceColor allianceColor){
         currentGoal = allianceColor;
         if (currentGoal == Constants.AllianceColor.RED) {
             GoalCoordinates = Constants.RED_GOAL;

@@ -25,15 +25,16 @@ public class PedroPathingTeleOpDrive extends OpMode {
 
     @Override
     public void init() {
+        startingPose = MatchState.getStartingPose();
         follower = Constants.createPedroFollower(hardwareMap);
-        follower.setStartingPose(startingPose == null ? new Pose(120, 136, 180) : startingPose);
+        follower.setStartingPose(startingPose == null ? Constants.CHIMERA_TESTING_POSE: startingPose);
         follower.update();
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
 
-//        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-//                .addPath(new Path(new BezierLine(follower::getPose, new Pose(45, 98))))
-//                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
-//                .build();
+        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
+                .addPath(new Path(new BezierLine(follower::getPose, Constants.RED_PARKING)))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(0), 0.8))
+                .build();
     }
 
     @Override
@@ -63,11 +64,11 @@ public class PedroPathingTeleOpDrive extends OpMode {
 
         }
 
-//        //Automated PathFollowing
-//        if (gamepad1.aWasPressed()) {
-//            follower.followPath(pathChain.get());
-//            automatedDrive = true;
-//        }
+        //Automated PathFollowing
+        if (gamepad1.aWasPressed()) {
+            follower.followPath(pathChain.get());
+            automatedDrive = true;
+        }
 
         //Stop automated following if the follower is done
         if (gamepad1.bWasPressed() || !follower.isBusy()) {

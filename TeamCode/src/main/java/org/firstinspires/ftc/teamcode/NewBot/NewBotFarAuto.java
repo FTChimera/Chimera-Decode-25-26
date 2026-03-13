@@ -8,6 +8,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -23,9 +24,15 @@ public class NewBotFarAuto extends OpMode {
 
     private Follower follower;
     private Timer launcherTimer, waitTimer;
+    // calculate dt for turning with limelight
+    long lastTime;
+    long currentTime;
+    double deltaTime;
+    // ---------------------------------------
 
     private LimelightSystem limelight;
     private RGBIndicator rgbIndicator;
+    private AutoAlignSystem autoAlign; private boolean shouldAutoAlign = false;
 
     private DcMotorEx OuttakeMotor;
     private DcMotor intakeMotor;
@@ -36,11 +43,11 @@ public class NewBotFarAuto extends OpMode {
     private int launcherStage = 0;
     private int intake_iterations = 2;
     private boolean first_iteration = false;
-    double PREWARM_VELOCITY = 1000;
+    double PREWARM_VELOCITY = 1200;
     double TARGET_VELOCITY = 1375;
     final double FEED_DURATION_SECONDS = 3;
-    final double MAX_RPM_WAIT_TIME_SECONDS = 3;
-    final double INTAKE_WAIT_TIME_SECONDS = 1;
+    final double MAX_RPM_WAIT_TIME_SECONDS = 2;
+    final double INTAKE_WAIT_TIME_SECONDS = 2;
     final double WAIT_TIME_BETWEEN_ITERATION_SECONDS = 0.5;
 
     // ---------------- RED FAR POSES ----------------
@@ -54,18 +61,18 @@ public class NewBotFarAuto extends OpMode {
     private final Pose bluePark = new Pose(40.000, 18.000, Math.toRadians(90));
 
     // ---------------- RED HUMAN INTAKE ----------------
-    private final Pose redHuman = new Pose(136, 14.000, Math.toRadians(0));
+    private final Pose redHuman = new Pose(137.550, 14.000, Math.toRadians(0));
     private final Pose redIntakePrepPrep = new Pose(116.444, 10.500, Math.toRadians(0));
     private final Pose redIntakePrep = new Pose(131.893, 12.000, Math.toRadians(350));
-    private final Pose redHuman2 = new Pose(135.360, 16.550, Math.toRadians(0));
+    private final Pose redHuman2 = new Pose(137, 16.550, Math.toRadians(0));
     private final Pose redIntakePrepPrep2 = new Pose(116.444, 12.000, Math.toRadians(0));
     private final Pose redIntakePrep2 = new Pose(131.893, 14.500, Math.toRadians(350));
 
     // ---------------- BLUE HUMAN INTAKE ----------------
-    private final Pose blueHuman = new Pose(8.100, 13.000, Math.toRadians(180));
+    private final Pose blueHuman = new Pose(8.000, 13.000, Math.toRadians(180));
     private final Pose blueIntakePrepPrep = new Pose(27.556, 10.500, Math.toRadians(180));
     private final Pose blueIntakePrep = new Pose(12.107, 12.000, Math.toRadians(200));
-    private final Pose blueHuman2 = new Pose(9.640, 16.550, Math.toRadians(180));
+    private final Pose blueHuman2 = new Pose(9.000, 16.550, Math.toRadians(180));
     private final Pose blueIntakePrepPrep2 = new Pose(27.556, 12.000, Math.toRadians(180));
     private final Pose blueIntakePrep2 = new Pose(12.107, 14.500, Math.toRadians(210));
 
@@ -281,6 +288,13 @@ public class NewBotFarAuto extends OpMode {
     @Override
     public void start() {
 
+        // Initialize Auto Align System AFTER Alliance Color is set
+        autoAlign = new AutoAlignSystem(allianceColor);
+        autoAlign.LimelightSetUp(limelight);
+        // calculate dt for turning with limelight
+        lastTime = System.nanoTime();
+        // ---------------------------------------
+
         limelight.start(0);
         boolean isRedAlliance = allianceColor == Constants.AllianceColor.RED;
         startPose = isRedAlliance ? redStart : blueStart;
@@ -298,6 +312,7 @@ public class NewBotFarAuto extends OpMode {
         follower.setStartingPose(startPose);
         follower.followPath(toLaunch);
         OuttakeMotor.setVelocity(PREWARM_VELOCITY);
+        follower.setMaxPower(Constants.AUTO_MAX_POWER);
     }
 
     @Override
@@ -306,6 +321,10 @@ public class NewBotFarAuto extends OpMode {
         limelight.LLUpdate();
         rgbIndicator.updateUsingLL(limelight);
         follower.update();
+        // Calculate dt
+        currentTime = System.nanoTime();
+        deltaTime = (currentTime - lastTime) / 1e9; // convert to seconds
+        lastTime = currentTime; // Update lastTime each loop so dt is meaningful
 
         switch (autoStage) {
 
@@ -370,10 +389,14 @@ public class NewBotFarAuto extends OpMode {
     // ------------------------------------------------
 
     public boolean runLauncherSequence() {
-
+        follower.startTeleopDrive();
         if (!isLauncherRunning) {
             //TARGET_VELOCITY = VelocityCalculator.NEWBOT.calculateVelocity(limelight.dist);
             OuttakeMotor.setVelocity(TARGET_VELOCITY);
+            // Auto Align for Far Auto Start
+            autoAlign.reset();
+            shouldAutoAlign = true;
+            follower.startTeleopDrive(); // explicity switch to teleop mode
             isLauncherRunning = true;
             launcherStage = 0;
             launcherTimer.resetTimer();
@@ -383,13 +406,33 @@ public class NewBotFarAuto extends OpMode {
         switch (launcherStage) {
 
             case 0:
+                // calculate dynamic velocity
+                // apply lowpass filter
+                // Distance calculation
+                double distance = Double.NaN;
+                LLResultTypes.FiducialResult fiducialResult = limelight.getResultForTag(allianceColor.getTagID());
+                if (!(fiducialResult==null)) {
+                    distance = limelight.calculateDistance(fiducialResult);
+                    if (distance == 0) {
+                        distance = limelight.dist; // SAFETY CHECK
+                    }
+                }
+                TARGET_VELOCITY = 0.3*VelocityCalculator.NEWBOT.calculateVelocity(Double.isNaN(distance) ? TARGET_VELOCITY : distance)
+                + 0.7*TARGET_VELOCITY;
                 double currentVel = OuttakeMotor.getVelocity();
                 double threshold = TARGET_VELOCITY - Constants.VELOCITY_TOLERANCE;
 
                 boolean speedReached = currentVel >= threshold;
                 boolean timeout = launcherTimer.getElapsedTimeSeconds() > MAX_RPM_WAIT_TIME_SECONDS;
 
-                if (speedReached || timeout) {
+                // Auto Align Logic
+                follower.startTeleopDrive();// ensure we stay in teleop drive mode
+                double rotationCmd = -autoAlign.getTurningPowerLimelight(deltaTime);
+                if (Math.abs(limelight.tx) <= 1 || autoAlign.isErrorAtTolerance()) shouldAutoAlign = false;
+                if (!shouldAutoAlign) rotationCmd = 0;
+                follower.setTeleOpDrive(0,0, rotationCmd, false); // keep calling method
+                 //If speed reached OR timed out, start feeding
+                if (speedReached&&!shouldAutoAlign || timeout) {
                     launcherStage = 1;
                     launcherTimer.resetTimer();
                 }

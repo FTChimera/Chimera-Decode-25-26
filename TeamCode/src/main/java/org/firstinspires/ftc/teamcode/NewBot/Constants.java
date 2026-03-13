@@ -20,7 +20,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 @SuppressWarnings("SpellCheckingInspection")
 public class Constants {
 
-
+    public static double AUTO_MAX_POWER = 0.9;
     public static double applyPolynomialToDriveInputs(double input) {
         double output = input;
         output = output*Math.abs(output); // square for more control
@@ -65,6 +65,8 @@ public class Constants {
     public static Pose BLUE_SHOOTING_BACK = new Pose(30, 114, Math.toRadians(180));
     public static Pose RED_PARKING = new Pose((double) 270/7, (double) 234/7);
     public static Pose BLUE_PARKING = new Pose((double) 738/7, (double) 234/7);
+    public static Pose CHIMERA_TESTING_POSE = new Pose(120, 36, 180);
+
     // PEDRO PATHING CONSTANTS
     public static FollowerConstants pedroFollowerConstants = new FollowerConstants()
             .mass(11.4)

@@ -8,12 +8,12 @@ import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.Path;
 import com.pedropathing.util.Timer;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
@@ -25,10 +25,12 @@ public class NewBotAutoRed extends OpMode {
     private Timer pathTimer, opmodeTimer, launcherTimer;
     private int pathState, launcherStage = 0;
     private LimelightSystem limelight; private RGBIndicator rgbIndicator;
+    private AutoAlignSystem autoAlign; boolean shouldAutoAlign = false;
+    double deltaTime, lastTimeNs, curTimeNs;
 
     // Poses remain unchanged from your original file
     private final Pose startPose = new Pose(123.9, 122.2, Math.toRadians(42));
-    private final Pose launchPose = new Pose(99, 99, Math.toRadians(42));
+    private final Pose launchPose = new Pose(94, 94, Math.toRadians(42));
     private final Pose intakePrep = new Pose(96.4, 87, Math.toRadians(0));
     private final Pose red1Intake = new Pose(128.5, 87, Math.toRadians(0));
     private final Pose intakePrep2 = new Pose(101.0, 61, Math.toRadians(0));
@@ -43,9 +45,10 @@ public class NewBotAutoRed extends OpMode {
 
     // Updated Constants based on TeleOp
     // TeleOp "Front Launch" is 1100, Back is 500. Assuming Auto shoots from Front/Close range.
-    double TARGET_VELOCITY = 1040;
+    double PREWARM_VELOCITY = 800;
+    double TARGET_VELOCITY = 1070;
     // Duration to run the transfer motor to ensure all balls are fired
-    final double FEED_DURATION_SECONDS = 2;
+    final double FEED_DURATION_SECONDS = 2.2;
     final double MAX_RPM_WAIT_TIME_SECONDS = 1.2; // Fail-safe if RPM isn't reached
 
     // Path State Constants
@@ -93,7 +96,7 @@ public class NewBotAutoRed extends OpMode {
         pathFour.setLinearHeadingInterpolation(red1Intake.getHeading(), launchPose.getHeading());
 
         pathFive = new Path(new BezierLine(launchPose, intakePrep2));
-        pathFive.setLinearHeadingInterpolation(launchPose.getHeading(), red2Intake.getHeading());
+        pathFive.setLinearHeadingInterpolation(launchPose.getHeading(), intakePrep2.getHeading());
 
         pathSix = new Path(new BezierLine(intakePrep2, red2Intake));
         pathSix.setLinearHeadingInterpolation(intakePrep2.getHeading(), red2Intake.getHeading());
@@ -153,15 +156,18 @@ public class NewBotAutoRed extends OpMode {
                 break;
             case CHIMERA_PATH_THREE:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(0.7*Constants.AUTO_MAX_POWER);
                     follower.followPath(pathThree);
                     setPathState(CHIMERA_PATH_FOUR);
                 }
                 break;
             case CHIMERA_PATH_FOUR:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(1*Constants.AUTO_MAX_POWER);
                     follower.followPath(pathFour);
                     setPathState(CHIMERA_LAUNCH);
-                    IntakeSafe();
+                    PREWARM();
+                    IntakeStop();
                 }
                 break;
             case CHIMERA_PATH_FIVE:
@@ -173,6 +179,7 @@ public class NewBotAutoRed extends OpMode {
                 break;
             case CHIMERA_PATH_SIX:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(0.7*Constants.AUTO_MAX_POWER);
                     follower.followPath(pathSix);
                     IntakeSafe();
                     setPathState(CHIMERA_PATH_SEVEN);
@@ -180,7 +187,10 @@ public class NewBotAutoRed extends OpMode {
                 break;
             case CHIMERA_PATH_SEVEN:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(1*Constants.AUTO_MAX_POWER);
                     follower.followPath(pathSeven);
+                    PREWARM();
+                    IntakeStop();
                     setPathState(CHIMERA_LAUNCH);
                 }
                 break;
@@ -193,13 +203,16 @@ public class NewBotAutoRed extends OpMode {
                 break;
             case CHIMERA_PATH_NINE:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(0.7*Constants.AUTO_MAX_POWER);
                     follower.followPath(pathNine);
                     setPathState(CHIMERA_PATH_TEN);
                 }
                 break;
             case CHIMERA_PATH_TEN:
                 if (!follower.isBusy()) {
+                    follower.setMaxPower(1*Constants.AUTO_MAX_POWER);
                     follower.followPath(pathTen);
+                    PREWARM();
                     setPathState(CHIMERA_LAUNCH);
                 }
                 break;
@@ -229,6 +242,9 @@ public class NewBotAutoRed extends OpMode {
         rgbIndicator.updateUsingLL(limelight);
         follower.update();
         autonomousPathUpdate();
+        curTimeNs = System.nanoTime();
+        deltaTime = curTimeNs - lastTimeNs;
+        lastTimeNs = curTimeNs;
 
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
@@ -239,8 +255,10 @@ public class NewBotAutoRed extends OpMode {
 
     @Override
     public void init() {
+        autoAlign = new AutoAlignSystem(Constants.AllianceColor.RED);
         limelight = new LimelightSystem(hardwareMap);
         rgbIndicator = new RGBIndicator(hardwareMap);
+        autoAlign.LimelightSetUp(limelight);
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         launcherTimer = new Timer();
@@ -279,9 +297,12 @@ public class NewBotAutoRed extends OpMode {
 
     @Override
     public void start() {
+        lastTimeNs = System.nanoTime();
         opmodeTimer.resetTimer();
         limelight.start(0);
         setPathState(0);
+        OuttakeMotor.setVelocity(PREWARM_VELOCITY);
+        follower.setMaxPower(Constants.AUTO_MAX_POWER);
     }
 
     @Override
@@ -302,6 +323,10 @@ public class NewBotAutoRed extends OpMode {
         if (!isLauncherRunning) {
             //TARGET_VELOCITY = VelocityCalculator.NEWBOT.calculateVelocity(limelight.dist);
             OuttakeMotor.setVelocity(TARGET_VELOCITY);
+            // Auto Align for Far Auto Start
+            autoAlign.reset();
+            //shouldAutoAlign = true;
+            follower.startTeleopDrive(); // explicity switch to teleop mode
             isLauncherRunning = true;
             launcherStage = 0;
             launcherTimer.resetTimer();
@@ -314,16 +339,33 @@ public class NewBotAutoRed extends OpMode {
         // 2. State Machine
         switch (launcherStage) {
             case 0: // WAIT FOR RPM
-                // FEED BALL WHILE WAITING
-                if (first_iteration) IntakeSafe(); // dont intake for first iteration
+                // calculate dynamic velocity
+                // apply lowpass filter
+                // Distance calculation
+                double distance = Double.NaN;
+                LLResultTypes.FiducialResult fiducialResult = limelight.getResultForTag(Constants.AllianceColor.RED.getTagID());
+                if (!(fiducialResult==null)) {
+                    distance = limelight.calculateDistance(fiducialResult);
+                    if (distance == 0) {
+                        distance = limelight.dist; // SAFETY CHECK
+                    }
+                }
+                TARGET_VELOCITY = 0.3*VelocityCalculator.NEWBOT.calculateVelocity(Double.isNaN(distance) ? TARGET_VELOCITY : distance)
+                        + 0.7*TARGET_VELOCITY;
                 double currentVel = OuttakeMotor.getVelocity();
                 double targetThreshold = TARGET_VELOCITY - Constants.VELOCITY_TOLERANCE;
 
                 boolean isSpeedReached = (currentVel >= targetThreshold);
                 boolean isTimedOut = (launcherTimer.getElapsedTimeSeconds() > MAX_RPM_WAIT_TIME_SECONDS);
 
-                // If speed reached OR timed out, start feeding
-                if (isSpeedReached || isTimedOut) {
+//                // Auto Align Logic
+//                follower.startTeleopDrive();// ensure we stay in teleop drive mode
+//                double rotationCmd = -autoAlign.getTurningPowerLimelight(deltaTime);
+//                if (Math.abs(limelight.tx) <= 1 || autoAlign.isErrorAtTolerance()) shouldAutoAlign = false;
+//                if (!shouldAutoAlign) rotationCmd = 0;
+//                follower.setTeleOpDrive(0,0, rotationCmd, false); // keep calling method
+//                // If speed reached OR timed out, start feeding
+                  if (isSpeedReached&&!shouldAutoAlign || isTimedOut) {
                     launcherStage = 1;
                     launcherTimer.resetTimer();
                 }
@@ -342,9 +384,7 @@ public class NewBotAutoRed extends OpMode {
 
             case 2: // STOP & FINISH
                 OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);
-                intakeMotor.setPower(0);
-                transferMotor.setPower(Constants.TRANSFER_DOWN_POSITION);
-
+                IntakeStop();
                 isLauncherRunning = false;
                 return true; // Sequence Complete
         }
@@ -358,9 +398,12 @@ public class NewBotAutoRed extends OpMode {
 
     public void IntakeStop() {
         intakeMotor.setPower(0);
+        transferMotor.setPower(Constants.TRANSFER_DOWN_POSITION);
     }
     public void IntakeSafe() {
         intakeMotor.setPower(1);
         transferMotor.setPower(-0.7); // to avoid feeding balls to launcher
     }
+
+    public void PREWARM() {OuttakeMotor.setVelocity(PREWARM_VELOCITY);}
 }
