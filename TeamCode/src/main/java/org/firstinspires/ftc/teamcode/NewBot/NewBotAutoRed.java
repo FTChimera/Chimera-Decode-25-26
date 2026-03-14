@@ -319,6 +319,7 @@ public class NewBotAutoRed extends OpMode {
      * 4. Stop everything.
      */
     public boolean runLauncherSequence() {
+        follower.startTeleOpDrive();
         // 1. Initialization: Start Flywheel
         if (!isLauncherRunning) {
             //TARGET_VELOCITY = VelocityCalculator.NEWBOT.calculateVelocity(limelight.dist);
@@ -358,13 +359,12 @@ public class NewBotAutoRed extends OpMode {
                 boolean isSpeedReached = (currentVel >= targetThreshold);
                 boolean isTimedOut = (launcherTimer.getElapsedTimeSeconds() > MAX_RPM_WAIT_TIME_SECONDS);
 
-//                // Auto Align Logic
-//                follower.startTeleopDrive();// ensure we stay in teleop drive mode
-//                double rotationCmd = -autoAlign.getTurningPowerLimelight(deltaTime);
-//                if (Math.abs(limelight.tx) <= 1 || autoAlign.isErrorAtTolerance()) shouldAutoAlign = false;
-//                if (!shouldAutoAlign) rotationCmd = 0;
-//                follower.setTeleOpDrive(0,0, rotationCmd, false); // keep calling method
-//                // If speed reached OR timed out, start feeding
+                // Auto Align Logic
+                double rotationCmd = -0.5*autoAlign.getTurningPowerLimelight(deltaTime);
+                if (Math.abs(limelight.tx) <= 1 || autoAlign.isErrorAtTolerance()) shouldAutoAlign = false;
+                if (!shouldAutoAlign) rotationCmd = 0;
+                follower.setTeleOpDrive(0,0, rotationCmd, false); // keep calling method
+                // If speed reached OR timed out, start feeding
                   if (isSpeedReached&&!shouldAutoAlign || isTimedOut) {
                     launcherStage = 1;
                     launcherTimer.resetTimer();
@@ -372,6 +372,7 @@ public class NewBotAutoRed extends OpMode {
                 break;
 
             case 1: // FEEDING (RUN TRANSFER)
+                follower.setTeleOpDrive(0,0,0);
                 // TeleOp logic: Intake runs at 1, Transfer at 0.5
                 intakeMotor.setPower(1);
                 transferMotor.setPower(Constants.TRANSFER_UP_POSITION);
