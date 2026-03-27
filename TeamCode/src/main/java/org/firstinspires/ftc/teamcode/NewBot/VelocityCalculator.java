@@ -7,8 +7,7 @@ public class VelocityCalculator {
 
     public static final double minVelocityNewBot = 970, maxVelocityNewBot = 1500;
     public static final double[][] shotTableNewBot = {
-            // { distance (1/ta), velocity }
-            // fill in with tuned values- TODO - fix these based on mew launch angle + distance instead of target area
+            // { distance, velocity }
             {98, 1010},
             {138, 1060},
             {190, 1120},

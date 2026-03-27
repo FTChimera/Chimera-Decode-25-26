@@ -1,48 +1,31 @@
 package org.firstinspires.ftc.teamcode.NewBot;
 
-import com.pedropathing.control.KalmanFilter;
-import com.pedropathing.control.KalmanFilterParameters;
+
+import com.pedropathing.control.LowPassFilter;
 import com.pedropathing.geometry.Pose;
 import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 
 import java.util.Arrays;
 
-// Using PedroPathing's KalmanFilter implementation
+// Using PedroPathing's LowPassFilter implementation
 @SuppressWarnings("SpellCheckingInspection")
-public class KalmanAutoCorrectPedroLimelight {
+public class LPF_Corrector {
     public boolean isMeasured;
-    private final KalmanFilter kx;
-    private final KalmanFilter ky;
-    private final KalmanFilter kHeading;
+    private LowPassFilter kx, ky, kHeading;
     private Pose lastPose;
+    private double lastUpdateTimeMs;
 
-    // timestamps for simple prediction (not used for motion model here, but kept for potential extension)
-    private long lastUpdateTimeMs = -1;
-
-    public KalmanAutoCorrectPedroLimelight() {
-        // Reasonable defaults: start at 0 with large initial variance
-        double initVar = 1000.0; // large uncertainty initially
-        double processNoise = 0.5; // small process noise
-        double measNoise = 25.0; // measurement noise (tunable)
-
-        KalmanFilterParameters px = new KalmanFilterParameters(processNoise, measNoise);
-        KalmanFilterParameters py = new KalmanFilterParameters(processNoise, measNoise);
-        KalmanFilterParameters pHeading = new KalmanFilterParameters(processNoise, measNoise);
-
-        kx = new KalmanFilter(px);
-        ky = new KalmanFilter(py);
-        kHeading = new KalmanFilter(pHeading);
-
-        // initialize with large variance / zero state
-        kx.reset(0.0, initVar, 1.0);
-        ky.reset(0.0, initVar, 1.0);
-        kHeading.reset(0.0, initVar, 1.0);
+    public LPF_Corrector() {
+        double alpha = 0.3;;
+        kx = new LowPassFilter(alpha);
+        ky = new LowPassFilter(alpha);
+        kHeading = new LowPassFilter(alpha);
     }
 
     /**
      * Update the filter using a Limelight-derived Pedro pose (if available).
      * This will update the filters with the measured pose. If the Limelight does not have a valid detection,
-     * this method does nothing (we don't have a separate predict API on the provided KalmanFilter).
+     * this method does nothing (we don't have a separate predict API on the provided LowPassFilter).
      *
      * @param limelight the LimelightSystem to query
      * @param allianceColor the alliance color (used by PedroDrive.getPedroPoseFromLL)
@@ -55,10 +38,10 @@ public class KalmanAutoCorrectPedroLimelight {
             return;
         }
 
-        // The KalmanFilter API expects (updateData, updateProjection).
-        kx.update(pedroDrive.getPose().getX() - lastPose.getX(), measured.getX());
-        ky.update(pedroDrive.getPose().getY() - lastPose.getY(), measured.getY());
-        kHeading.update(pedroDrive.getPose().getHeading() - lastPose.getHeading(), measured.getHeading());
+        // The LowPassFilter API expects (updateData, updateProjection).
+        kx.update(pedroDrive.getPose().getX() - lastPose.getX(), 0);
+        ky.update(pedroDrive.getPose().getY() - lastPose.getY(), 0);
+        kHeading.update(pedroDrive.getPose().getHeading() - lastPose.getHeading(), 0);
         lastPose = pedroDrive.getPose();
 
         lastUpdateTimeMs = System.currentTimeMillis();
@@ -99,10 +82,4 @@ public class KalmanAutoCorrectPedroLimelight {
         }
     }
 
-    public String[] output() {
-        return new String[]{
-                "Heading" + Arrays.toString(kHeading.output()),
-                "X" + Arrays.toString(kx.output()),
-                "Y" + Arrays.toString(ky.output())
-        };}
 }

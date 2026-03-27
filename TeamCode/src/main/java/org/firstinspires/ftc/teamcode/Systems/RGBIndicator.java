@@ -86,13 +86,13 @@ public class RGBIndicator {
         if (ll.isDisconnected) {
             this.setColor(RGBIndicator.Color.BLACK); // Limelight not looking at target
         }
-        else if (ll.getLLScore() < 0.9) {
+        else if (ll.getLLScore() < 0.6) {
             // GREEN
             this.setColor(RGBIndicator.Color.GREEN);
-        } else if (ll.getLLScore() < 5) {
+        } else if (ll.getLLScore() < 4) {
             // YELLOW
             this.setColor(RGBIndicator.Color.YELLOW);
-        } else if (ll.getLLScore() < 12.5) {
+        } else if (ll.getLLScore() < 8.5) {
             // ORANGE
             this.setColor(RGBIndicator.Color.ORANGE);
         } else {

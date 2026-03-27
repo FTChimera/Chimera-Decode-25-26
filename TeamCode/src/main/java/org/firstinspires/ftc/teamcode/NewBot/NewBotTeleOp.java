@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 import org.firstinspires.ftc.teamcode.Systems.RGBIndicator;
@@ -17,28 +18,30 @@ import java.util.List;
 @SuppressWarnings({"FieldCanBeLocal", "SpellCheckingInspection"})
 @TeleOp(name = "NewBotTeleOp", group = "0:TeleOp")// Name and Group - 0 to put at top
 public class NewBotTeleOp extends LinearOpMode {
-
-    boolean testingMode = false;
+    boolean testingMode = false,
+    shouldUseLimelightAutoAlign = true,
+    slowMode = false;
     // declaring our PIDF tuning values
     double setTargetVelocity = 0;
     double setMinVelocity = 0;
     private PedroDrive follower;
-    private KalmanAutoCorrectPedroLimelight kalmanPoseCorrector;
+    private LPF_Corrector poseCorrector; // Use a lowpass filter instead
     Constants.AllianceColor allianceColor;
     LimelightSystem limelight;
     AutoAlignSystem autoAlignSystem; boolean shouldAutoAlign = false;
     RGBIndicator rgbIndicator;
-    int launcherStage = 0;
+    int launcherStage = 0; ElapsedTime launcherTimer;
 
     @Override
     public void runOpMode() throws InterruptedException {
+        launcherTimer = new ElapsedTime();
         // BULK READING
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
         for (LynxModule hub : allHubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
-        kalmanPoseCorrector = new KalmanAutoCorrectPedroLimelight();
+        poseCorrector = new LPF_Corrector();
         limelight = new LimelightSystem(hardwareMap);
         rgbIndicator = new RGBIndicator(hardwareMap);
         rgbIndicator.setColor(RGBIndicator.Color.VIOLET);
@@ -48,6 +51,7 @@ public class NewBotTeleOp extends LinearOpMode {
             // This method is called repeatedly during the init phase
             telemetry.addLine("Press X to switch alliance, B to switch between testing mode and comp mode");
             telemetry.addData("Alliance selected: ", allianceColor);
+            telemetry.addData("Is Testing Mode", testingMode);
             if (gamepad1.bWasPressed()) {
                 testingMode = !testingMode;
             }
@@ -55,7 +59,11 @@ public class NewBotTeleOp extends LinearOpMode {
                 allianceColor = allianceColor.switchColors();
             }
 
-
+            // color
+            RGBIndicator.Color col;
+            if (testingMode || MatchState.getAllianceColor() == null || MatchState.getStartingPose() == null) col = allianceColor == Constants.AllianceColor.RED ? RGBIndicator.Color.RED : RGBIndicator.Color.BLUE;
+            else col = MatchState.getAllianceColor() == Constants.AllianceColor.RED ? RGBIndicator.Color.RED : RGBIndicator.Color.BLUE;
+            rgbIndicator.setColor(col);
             telemetry.update();
         }
 
@@ -77,13 +85,13 @@ public class NewBotTeleOp extends LinearOpMode {
             allianceColor = MatchState.getAllianceColor() == null ? allianceColor : MatchState.getAllianceColor();
             Pose startPose = MatchState.getStartingPose() == null ? Constants.CHIMERA_TESTING_POSE : MatchState.getStartingPose();
             follower = new PedroDrive(hardwareMap, startPose);
-            kalmanPoseCorrector.resetToPose(startPose);
+            poseCorrector.resetToPose(startPose);
         } else {
             Pose startPose = Constants.CHIMERA_TESTING_POSE; // our testing pose
             // X: line between second to last and last field tile
             // Y: Middle of second to last field tile
             follower = new PedroDrive(hardwareMap, startPose);
-            kalmanPoseCorrector.resetToPose(startPose);
+            poseCorrector.resetToPose(startPose);
         }
 
         frontRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -120,21 +128,27 @@ public class NewBotTeleOp extends LinearOpMode {
         long currentTime;
         double deltaTime;
         // ---------------------------------------
-
+        boolean shouldKeepLauncherActive = false;
         double distance = 0;
 
         while (opModeIsActive()) {
             follower.update();
             limelight.LLUpdate();
             rgbIndicator.updateUsingLL(limelight);
-            kalmanPoseCorrector.updateFromLimelight(limelight, allianceColor, follower);
+            poseCorrector.updateFromLimelight(limelight, allianceColor, follower);
+
+            if (poseCorrector.isMeasured) follower.correctPose(poseCorrector.getEstimatedPose());
             // Clear cached data from control hubs for fresh readings
             for (LynxModule hub : allHubs) {
                 hub.clearBulkCache();
             }
             // Pose Corrector
             if (autoAlignSystem.LLCanSeeGoal()) {
-                follower.correctPose(kalmanPoseCorrector.getEstimatedPose());
+                follower.correctPose(poseCorrector.getEstimatedPose());
+            }
+            // Gamepad X
+            if (gamepad1.xWasPressed()) {
+                allianceColor = allianceColor.switchColors();
             }
             // Distance calculation
             LLResultTypes.FiducialResult fiducialResult = limelight.getResultForTag(allianceColor.getTagID());
@@ -151,9 +165,10 @@ public class NewBotTeleOp extends LinearOpMode {
             x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
             rx = gamepad1.right_stick_x * 1.01;
 
-            y *= Math.abs(y);
-            x *= Math.abs(x);
-            rx *= Math.abs(rx * 0.65);
+            double multiplier = slowMode ? 0.5 : 1.0;
+            y *= Math.abs(y)*multiplier;
+            x *= Math.abs(x)*multiplier;
+            rx *= Math.abs(rx * multiplier*0.65);
 
             // Calculate dt
             currentTime = System.nanoTime();
@@ -167,8 +182,9 @@ public class NewBotTeleOp extends LinearOpMode {
             }
             if (shouldAutoAlign) {
                 rx = 0;
-                if (!(rgbIndicator.getPWM() == RGBIndicator.GREEN_PWM)) {
-                    rx = autoAlignSystem.getTurningPowerLimelight(deltaTime);
+                if (!(rgbIndicator.getPWM() == RGBIndicator.GREEN_PWM)&&shouldUseLimelightAutoAlign || !shouldUseLimelightAutoAlign&&autoAlignSystem.isErrorAtTolerance()) {
+                    if (shouldUseLimelightAutoAlign) rx = autoAlignSystem.getTurningPowerLimelight(deltaTime);
+                    else rx = autoAlignSystem.getTurningPowerPose(follower.getPose(), follower.getVelocity(), deltaTime, true);
                 } else {
                     shouldAutoAlign = false; // automatic stop
                 }
@@ -178,7 +194,7 @@ public class NewBotTeleOp extends LinearOpMode {
             double frontLeftPower = 0.9 *(y + x + rx) / denominator;
             double backLeftPower = 0.9 *(y - x + rx) / denominator;
             double frontRightPower = 0.9 *(y - x - rx) / denominator;
-            double backRightPower = 0.9 * (y + x - rx) / denominator;
+            double backRightPower = 0.9 *(y + x - rx) / denominator;
 
             frontLeftMotor.setPower(frontLeftPower);
             backLeftMotor.setPower(backLeftPower);
@@ -201,7 +217,8 @@ public class NewBotTeleOp extends LinearOpMode {
             if (((gamepad1.yWasReleased() || gamepad2.yWasReleased() || gamepad1.aWasReleased() || gamepad2.aWasReleased()) && launcherStage == 2)
                     || gamepad1.b || gamepad2.b) {
                 // Stop the outtake wheel, reset launcher state, and lower transfer / stop intake
-                OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);
+                // NEW -- should keep launcher active for faster shooting.
+                if (!shouldKeepLauncherActive) OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);
                 launcherStage = 0;
                 transferMotor.setPower(Constants.TRANSFER_DOWN_POSITION);
                 intakeMotor.setPower(0);
@@ -222,22 +239,17 @@ public class NewBotTeleOp extends LinearOpMode {
                 }
             }
 
-            if (gamepad1.dpadUpWasPressed() || gamepad2.dpadUpWasPressed()) {
-                setTargetVelocity += 25;
-                setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
-                OuttakeMotor.setVelocity(setTargetVelocity);
-            }
-
-            if (gamepad1.dpadDownWasPressed() || gamepad2.dpadDownWasPressed()) {
-                setTargetVelocity -= 25;
-                setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
-                OuttakeMotor.setVelocity(setTargetVelocity);
-            }
+            // DPAD RESETS
+            if (gamepad1.dpadDownWasPressed()) follower.resetHeading(allianceColor == Constants.AllianceColor.RED ? 0 : 180);
+            //if (gamepad1.dpadLeftWasPressed()) shouldUseLimelightAutoAlign = !shouldUseLimelightAutoAlign;
+            if (gamepad1.dpadUpWasPressed()) slowMode = !slowMode;
+            if (gamepad1.dpadRightWasPressed()) shouldKeepLauncherActive = !shouldKeepLauncherActive;
 
             // ------------------------------------
             telemetry.addData("POSE", follower.getPose());
             telemetry.addData("LL Can see goal", autoAlignSystem.LLCanSeeGoal());
             telemetry.addData("RGB Indicator Color", rgbIndicator.getPWM() == RGBIndicator.GREEN_PWM ? "GREEN" : rgbIndicator.getPWM() == RGBIndicator.ORANGE_PWM ? "ORANGE" : rgbIndicator.getPWM() == RGBIndicator.YELLOW_PWM ? "YELLOW" : rgbIndicator.getPWM() == RGBIndicator.BLACK_PWM ? "BLACK" : rgbIndicator.getPWM() == RGBIndicator.RED_PWM ? "RED": ("UNKNOWN COLOR (PWM:" + rgbIndicator.getPWM() + ")"));
+            telemetry.addData("Slow Mode", slowMode);
             telemetry.addData("Launcher Stage", launcherStage);
             telemetry.addData("Alliance Color", allianceColor);
             telemetry.addData("Intake Motor power", intakeMotor.getPower());
@@ -249,7 +261,6 @@ public class NewBotTeleOp extends LinearOpMode {
             telemetry.addData("Is fiducial null", fiducialResult==null);
             telemetry.addData("Distance", distance);
             telemetry.addData("Turning Power (RX)", rx);
-            telemetry.addData("Is Error at Tolerance", autoAlignSystem.isErrorAtTolerance());
             telemetry.update();
         }
     }
@@ -263,6 +274,7 @@ public class NewBotTeleOp extends LinearOpMode {
                 setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
                 OuttakeMotor.setVelocity(setTargetVelocity);
                 launcherStage = 1;
+                launcherTimer.reset();
                 break;
             case 1:
                 double newSetVelocity = VelocityCalculator.NEWBOT.calculateVelocity(distance);
@@ -272,9 +284,13 @@ public class NewBotTeleOp extends LinearOpMode {
                 setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
                 OuttakeMotor.setVelocity(setTargetVelocity);
                 boolean speedOk = OuttakeMotor.getVelocity() >= setMinVelocity && (OuttakeMotor.getVelocity() <= setTargetVelocity+Constants.VELOCITY_TOLERANCE);
-                boolean autoAlignOk = autoAlign && (autoAlignSystem.isErrorAtTolerance() || rgbIndicator.getPWM() == RGBIndicator.GREEN_PWM);
-                if (speedOk && (!autoAlign || autoAlignOk)) {
+                boolean autoAlignOk = autoAlign && rgbIndicator.getPWM() == RGBIndicator.GREEN_PWM;
+                // Add auto align semi-ok check + time out to prevent trying to auto align forever
+                // if Aligning for more than 3 seconds, and stuck at deadzone, just shoot.
+                boolean autoAlignSemiOk = autoAlign && limelight.getLLScore() < 4 && launcherTimer.seconds() > 3;
+                if (speedOk && (!autoAlign || autoAlignOk || autoAlignSemiOk)) {
                     launcherStage = 2;
+                    launcherTimer.reset();
                     if (autoAlign) shouldAutoAlign = false;
                 }
                 break;
@@ -284,6 +300,7 @@ public class NewBotTeleOp extends LinearOpMode {
                 break;
             default:
                 launcherStage = 0;
+                launcherTimer.reset();
                 break;
         }
     }

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.NewBot;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.math.Vector;
 import com.pedropathing.paths.Path;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -12,7 +13,7 @@ import org.firstinspires.ftc.teamcode.Systems.LimelightSystem;
 public class AutoAlignSystem {
     // PEDRO STUFF
     private Pose currentPose, newPose;
-    double Posex, Posey, diffX, diffY;
+    double Posex, Posey, diffX, diffY, PoseAngle;
     double angle;
     private Constants.AllianceColor currentGoal;
 
@@ -31,8 +32,17 @@ public class AutoAlignSystem {
 
     boolean drivingMotorsUsed;
     boolean areWeUsingPedro;
+    // Controller for compensation when robot is pushed.
+    public static PIDFController autoAlign_pushed = new PIDFController(
+            Constants.AUTOALIGN_PUSHED, Constants.LIMELIGHT_PIDF_MIN_OUTPUT, Constants.LIMELIGHT_PIDF_MAX_OUTPUT, Constants.LIMELIGHT_PIDF_INTEGRAL_LIMIT
+    ); // Use the same min-max-integralLimit as Limelight as the output goes to the same thing
+    // need to use pedro pathing pose to measure velocity of robot
+    public static PIDFController autoAlignPedro = new PIDFController(
+            Constants.PedroAutoAlignmentTurning, Constants.LIMELIGHT_PIDF_MIN_OUTPUT, Constants.LIMELIGHT_PIDF_MAX_OUTPUT, Constants.LIMELIGHT_PIDF_INTEGRAL_LIMIT
+    );
     public void reset() {
         limelightPIDF.reset();
+        autoAlign_pushed.reset();
         if (areWeUsingPedro) follower.startTeleopDrive();
     }
 
@@ -152,15 +162,16 @@ public class AutoAlignSystem {
         double error = tx + TxOffset;
         double rotationCmd = limelightPIDF.updatePIDF(error, dt);
 
-        if (Math.abs(rotationCmd) < 0.13) {
-            rotationCmd = Math.copySign(0.13, rotationCmd);
+        if (Math.abs(rotationCmd) < 0.1) {
+            rotationCmd = Math.copySign(0.1, rotationCmd);
         }
         // return rotation command for use in TeleOp
         return rotationCmd;
     }
     public boolean isErrorAtTolerance() {
         limelightPIDF.setTolerance(1);
-        return limelightPIDF.atSetpoint(limelightPIDF.getLastError());
+        boolean result = limelightPIDF.atSetpoint(limelightPIDF.getLastError());
+        return limelightPIDF.getLastError() != 0.0 && result;
     }
     public double getTurningPowerPedro(Pose currentPose, double dt) {
         // Use the tx value from the already updated limelight system
@@ -229,5 +240,46 @@ public class AutoAlignSystem {
 
         // return rotation command for use in TeleOp
         return rotationCmd;
+    }
+
+
+    // NORMALIZE HEADING IN RADIANS
+    public static double normalizeHeading(double heading) {
+        while (heading > Math.PI) {
+            heading -= 2 * Math.PI;
+        }
+        while (heading < -Math.PI) {
+            heading += 2 * Math.PI;
+        }
+        return heading;
+    }
+    public double getTurningPowerPose(Pose robotPose, Vector robotVelocity, double deltaTime, boolean shouldCompensateAutoAlign) {
+        Posex = robotPose.getX();
+        Posey = robotPose.getY();
+        PoseAngle = robotPose.getHeading();
+
+        // Find angle using tan inverse
+        // Calculate signed differences to get correct direction
+
+        diffX = GoalCoordinates.getX() - Posex;
+        diffY = GoalCoordinates.getY() - Posey;
+
+        // tan theta = opposite divided by adjacent = y/x
+        // atan2 handles all quadrants correctly
+
+        angle = Math.atan2(diffY, diffX);
+
+        // normalize angle
+        double turnTo = angle - PoseAngle;
+        turnTo = Math.toDegrees(normalizeHeading(turnTo)); // turn to degrees
+
+        // Compensation logic
+        if (shouldCompensateAutoAlign) {
+            double direction = normalizeHeading(angle - robotVelocity.getTheta());
+            turnTo += autoAlign_pushed.updatePIDF(robotVelocity.getMagnitude() * Math.signum(direction), deltaTime);
+        }
+
+
+        return autoAlignPedro.updatePIDF(turnTo, deltaTime);
     }
 }

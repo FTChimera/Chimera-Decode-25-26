@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.NewBot;
 
-import static org.firstinspires.ftc.teamcode.NewBot.Constants.AllianceColor.BLUE;
-import static org.firstinspires.ftc.teamcode.NewBot.Constants.AllianceColor.RED;
 
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.follower.Follower;
@@ -29,7 +27,15 @@ public class Constants {
     }
     public static PIDFCoefficients LimelightAutoAlignmentTurning =
             new PIDFCoefficients(
-                    0.03, 0, 0, 0
+                    0.025, 0, 0, 0
+            );
+    public static PIDFCoefficients PedroAutoAlignmentTurning =
+            new PIDFCoefficients(
+                    -0.001, 0, 0.2, 0
+            );
+    public static PIDFCoefficients AUTOALIGN_PUSHED =
+            new PIDFCoefficients(
+                    -0.002, 0, 0.2, 0
             );
     public static final double LIMELIGHT_PIDF_MIN_OUTPUT = -1;
     public static final double LIMELIGHT_PIDF_MAX_OUTPUT = 1;
@@ -37,7 +43,7 @@ public class Constants {
     public static final double GOAL_HEIGHT_INCHES = 54;
     public static final double LIMELIGHT_LENS_HEIGHT_INCHES = 12.5; // measure
     public static final double LIMELIGHT_MOUNT_ANGLE_DEGREES = 12; // measure
-    public static final double TRANSFER_UP_POSITION = 0.7;
+    public static final double TRANSFER_UP_POSITION = 1;
     public static final double TRANSFER_DOWN_POSITION = 0;
     public static final double VELOCITY_TOLERANCE = 60;
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
@@ -87,7 +93,7 @@ public class Constants {
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
     public static final double VELOCITY_SCALING_FACTOR = 1;
     public static MecanumConstants pedroMecanumDriveConstants = new MecanumConstants()
-            .maxPower(1)
+            .maxPower(AUTO_MAX_POWER)
             .rightFrontMotorName("frontRightMotor")
             .rightRearMotorName("backRightMotor")
             .leftRearMotorName("backLeftMotor")

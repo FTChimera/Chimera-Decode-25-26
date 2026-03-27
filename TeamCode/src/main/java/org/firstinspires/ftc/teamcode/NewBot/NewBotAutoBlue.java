@@ -329,7 +329,6 @@ public class NewBotAutoBlue extends OpMode {
             // Auto Align for Far Auto Start
             autoAlign.reset();
             //shouldAutoAlign = true;
-            follower.startTeleopDrive(); // explicity switch to teleop mode
             isLauncherRunning = true;
             launcherStage = 0;
             launcherTimer.resetTimer();
@@ -363,7 +362,7 @@ public class NewBotAutoBlue extends OpMode {
 
                 // Auto Align Logic
                 double rotationCmd = -0.5*autoAlign.getTurningPowerLimelight(deltaTime);
-                if (Math.abs(limelight.tx) <= 1 || autoAlign.isErrorAtTolerance()) shouldAutoAlign = false;
+                if (Math.abs(limelight.tx) <= 1) shouldAutoAlign = false;
                 if (!shouldAutoAlign) rotationCmd = 0;
                 follower.setTeleOpDrive(0,0, rotationCmd, false); // keep calling method
                 // If speed reached OR timed out, start feeding

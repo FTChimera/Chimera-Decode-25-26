@@ -86,5 +86,8 @@ public class PedroDrive {
     public Vector getAcceleration() {
         return follower.getAcceleration();
     }
+    public Vector getVelocity() {
+        return follower.getVelocity();
+    }
 
 }
