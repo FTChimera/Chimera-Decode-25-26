@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.NewBot;
 
 import static org.firstinspires.ftc.teamcode.Systems.RGBIndicator.GREEN_PWM;
 
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -17,6 +18,7 @@ public class AutoAlign_ShootRobotCode extends LinearOpMode {
     public LimelightSystem limelightSystem;
     public RGBIndicator indicator;
     public DcMotor[] driveMotors;
+    public PedroDrive follower;
     public AutoAlignSystem autoAlignSystem;
     double deltaTime = 0.02; // For now: (derivative component not enabled)
 
@@ -38,7 +40,7 @@ public class AutoAlign_ShootRobotCode extends LinearOpMode {
         backRightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         frontLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         backLeftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
-
+        follower = new PedroDrive(hardwareMap, new Pose());
         driveMotors = new DcMotor[]{
                 frontLeftMotor,frontRightMotor,backLeftMotor,backRightMotor
         };
@@ -56,7 +58,7 @@ public class AutoAlign_ShootRobotCode extends LinearOpMode {
         OuttakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, Constants.LaunchPIDF);
 
         autoAlignSystem = new AutoAlignSystem(Constants.AllianceColor.RED);
-
+        follower.startTeleopDrive();
         limelightSystem = new LimelightSystem(hardwareMap);
         indicator = new RGBIndicator(hardwareMap);
         autoAlignSystem.LimelightSetUp(limelightSystem);

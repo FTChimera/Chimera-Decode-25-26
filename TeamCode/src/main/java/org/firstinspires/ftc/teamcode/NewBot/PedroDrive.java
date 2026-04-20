@@ -89,5 +89,8 @@ public class PedroDrive {
     public Vector getVelocity() {
         return follower.getVelocity();
     }
+    public void setTeleopDrive(double forward, double strafe, double rotation, boolean robotHeading) {
+        follower.setTeleOpDrive(forward,strafe,rotation,robotHeading);
+    }
 
 }

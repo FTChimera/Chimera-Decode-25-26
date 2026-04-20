@@ -71,7 +71,7 @@ public class PedroPathingTeleOpDrive extends OpMode {
         }
 
         //Stop automated following if the follower is done
-        if (gamepad1.bWasPressed() || !follower.isBusy()) {
+        if (gamepad1.bWasPressed()) {
             follower.startTeleopDrive();
             automatedDrive = false;
         }

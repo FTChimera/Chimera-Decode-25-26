@@ -427,7 +427,7 @@ public class NewBotFarAuto extends OpMode {
 
                 // Auto Align Logic
                 double rotationCmd = -autoAlign.getTurningPowerLimelight(deltaTime);
-                if (Math.abs(limelight.tx) <= 1) shouldAutoAlign = false;
+                if (rotationCmd == 0) shouldAutoAlign = false;
                 if (!shouldAutoAlign) rotationCmd = 0;
                 follower.setTeleOpDrive(0,0, rotationCmd, false); // keep calling method
                  //If speed reached OR timed out, start feeding
