@@ -47,10 +47,6 @@ public class PedroPathingTeleOpDrive extends OpMode {
 
     @Override
     public void loop() {
-        //Call this once per loop
-        follower.update();
-        telemetryM.update();
-
         if (!automatedDrive) {
             //Make the last parameter false for field-centric
 
@@ -59,8 +55,8 @@ public class PedroPathingTeleOpDrive extends OpMode {
                     -gamepad1.left_stick_y,
                     -gamepad1.left_stick_x,
                     -gamepad1.right_stick_x,
-                    true // Robot Centric
-            );
+                     true // Robot Centric
+             );
 
         }
 
@@ -75,6 +71,10 @@ public class PedroPathingTeleOpDrive extends OpMode {
             follower.startTeleopDrive();
             automatedDrive = false;
         }
+
+        // Call this once per loop after any teleop/path command updates.
+        follower.update();
+        telemetryM.update();
 
         telemetryM.debug("position", follower.getPose());
         telemetryM.debug("velocity", follower.getVelocity());

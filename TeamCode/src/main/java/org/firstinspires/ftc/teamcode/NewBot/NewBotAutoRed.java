@@ -240,12 +240,11 @@ public class NewBotAutoRed extends OpMode {
     public void loop() {
         limelight.LLUpdate();
         rgbIndicator.updateUsingLL(limelight);
-        follower.update();
         autonomousPathUpdate();
         curTimeNs = System.nanoTime();
         deltaTime = curTimeNs - lastTimeNs;
         lastTimeNs = curTimeNs;
-
+        follower.update();
         telemetry.addData("path state", pathState);
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());

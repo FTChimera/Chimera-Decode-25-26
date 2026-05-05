@@ -320,7 +320,6 @@ public class NewBotFarAuto extends OpMode {
 
         limelight.LLUpdate();
         rgbIndicator.updateUsingLL(limelight);
-        follower.update();
         // Calculate dt
         currentTime = System.nanoTime();
         deltaTime = (currentTime - lastTime) / 1e9; // convert to seconds
@@ -376,6 +375,8 @@ public class NewBotFarAuto extends OpMode {
                 break;
         }
 
+        follower.update();
+
         telemetry.addData("Alliance", allianceColor);
         telemetry.addData("Auto Stage", autoStage);
         telemetry.addData("Iteration number (counting down)", intake_iterations);
@@ -389,7 +390,6 @@ public class NewBotFarAuto extends OpMode {
     // ------------------------------------------------
 
     public boolean runLauncherSequence() {
-        follower.startTeleopDrive();
         if (!isLauncherRunning) {
             //TARGET_VELOCITY = VelocityCalculator.NEWBOT.calculateVelocity(limelight.dist);
             OuttakeMotor.setVelocity(TARGET_VELOCITY);
@@ -427,7 +427,7 @@ public class NewBotFarAuto extends OpMode {
 
                 // Auto Align Logic
                 double rotationCmd = -autoAlign.getTurningPowerLimelight(deltaTime);
-                if (rotationCmd == 0) shouldAutoAlign = false;
+                if (Math.abs(limelight.tx) <= 1) shouldAutoAlign = false;
                 if (!shouldAutoAlign) rotationCmd = 0;
                 follower.setTeleOpDrive(0,0, rotationCmd, false); // keep calling method
                  //If speed reached OR timed out, start feeding
@@ -438,7 +438,7 @@ public class NewBotFarAuto extends OpMode {
                 break;
 
             case 1:
-                follower.setTeleOpDrive(0,0,0);
+                follower.setTeleOpDrive(0,0,0, false);
                 intakeMotor.setPower(1);
                 transferMotor.setPower(Constants.TRANSFER_UP_POSITION);
 
