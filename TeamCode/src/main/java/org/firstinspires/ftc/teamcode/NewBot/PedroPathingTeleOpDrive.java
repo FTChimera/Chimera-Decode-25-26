@@ -20,8 +20,10 @@ public class PedroPathingTeleOpDrive extends OpMode {
     private Follower follower;
     public static Pose startingPose; //See ExampleAuto to understand how to use this
     private boolean automatedDrive;
+    boolean isRobotCentric = false;
     private Supplier<PathChain> pathChain;
     private TelemetryManager telemetryM;
+    public static int DegreesOffset = 90;
 
     @Override
     public void init() {
@@ -55,9 +57,13 @@ public class PedroPathingTeleOpDrive extends OpMode {
                     -gamepad1.left_stick_y,
                     -gamepad1.left_stick_x,
                     -gamepad1.right_stick_x,
-                     true // Robot Centric
+                     isRobotCentric,
+                    isRobotCentric ? 0 : Math.toRadians(DegreesOffset)
              );
 
+        }
+        if (gamepad1.backWasPressed()) {
+            isRobotCentric = !isRobotCentric;
         }
 
         //Automated PathFollowing
@@ -79,5 +85,6 @@ public class PedroPathingTeleOpDrive extends OpMode {
         telemetryM.debug("position", follower.getPose());
         telemetryM.debug("velocity", follower.getVelocity());
         telemetryM.debug("automatedDrive", automatedDrive);
+        telemetryM.debug("Drive Mode", isRobotCentric?"Robot Centric":"Field Centric");
     }
 }

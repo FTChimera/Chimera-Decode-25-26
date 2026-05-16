@@ -92,5 +92,8 @@ public class PedroDrive {
     public void setTeleopDrive(double forward, double strafe, double rotation, boolean robotHeading) {
         follower.setTeleOpDrive(forward,strafe,rotation,robotHeading);
     }
+    public void setTeleopDrive(double forward, double strafe, double rotation, boolean robotHeading, double degOffset) {
+        follower.setTeleOpDrive(forward,strafe,rotation,robotHeading, Math.toRadians(degOffset));
+    }
 
 }

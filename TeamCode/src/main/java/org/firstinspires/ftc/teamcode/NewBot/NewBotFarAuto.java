@@ -426,7 +426,7 @@ public class NewBotFarAuto extends OpMode {
                 boolean timeout = launcherTimer.getElapsedTimeSeconds() > MAX_RPM_WAIT_TIME_SECONDS;
 
                 // Auto Align Logic
-                double rotationCmd = -autoAlign.getTurningPowerLimelight(deltaTime);
+                double rotationCmd = -0.59085*autoAlign.getTurningPowerLimelight(deltaTime);
                 if (Math.abs(limelight.tx) <= 1) shouldAutoAlign = false;
                 if (!shouldAutoAlign) rotationCmd = 0;
                 follower.setTeleOpDrive(0,0, rotationCmd, false); // keep calling method
