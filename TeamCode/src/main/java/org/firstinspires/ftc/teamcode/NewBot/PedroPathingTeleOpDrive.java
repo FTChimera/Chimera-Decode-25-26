@@ -65,6 +65,9 @@ public class PedroPathingTeleOpDrive extends OpMode {
         if (gamepad1.backWasPressed()) {
             isRobotCentric = !isRobotCentric;
         }
+        if (gamepad1.dpadDownWasPressed()) {
+            follower.setPose(follower.getPose().setHeading(0));
+        }
 
         //Automated PathFollowing
         if (gamepad1.aWasPressed()) {

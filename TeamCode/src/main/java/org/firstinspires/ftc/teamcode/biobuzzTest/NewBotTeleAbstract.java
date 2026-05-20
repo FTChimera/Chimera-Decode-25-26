@@ -35,7 +35,7 @@ public abstract class NewBotTeleAbstract extends LinearOpMode {
     AutoAlignSystem autoAlignSystem; boolean shouldAutoAlign = false;
     RGBIndicator rgbIndicator;
     int launcherStage = 0; ElapsedTime launcherTimer;
-    boolean fieldCentric = false;
+    boolean fieldCentric;
 
     public NewBotTeleAbstract(Constants.AllianceColor col, boolean field) {
         allianceColor = col;
@@ -141,7 +141,7 @@ public abstract class NewBotTeleAbstract extends LinearOpMode {
             follower.update();
             limelight.LLUpdate();
             rgbIndicator.updateUsingLL(limelight);
-            poseCorrector.updateFromLimelight(limelight, allianceColor, follower);
+            //poseCorrector.updateFromLimelight(limelight, allianceColor, follower);
             if (poseCorrector.isMeasured) follower.correctPose(poseCorrector.getEstimatedPose());
             // Clear cached data from control hubs for fresh readings
             for (LynxModule hub : allHubs) {
@@ -197,7 +197,7 @@ public abstract class NewBotTeleAbstract extends LinearOpMode {
                 }
             }
 
-            follower.setTeleopDrive(y*0.9, x*0.9, rx*0.9, !fieldCentric, allianceColor == Constants.AllianceColor.BLUE ? 180 : 0);
+            follower.setTeleopDrive(y*0.9, x*0.9, rx*0.9, false,0);
 
             if (gamepad1.y || gamepad2.y) {
                 handleTeleOpShootingUpdate(
@@ -238,7 +238,7 @@ public abstract class NewBotTeleAbstract extends LinearOpMode {
             }
 
             // DPAD RESETS
-            if (gamepad1.dpadDownWasPressed()) follower.resetHeading(allianceColor == Constants.AllianceColor.RED ? 0 : 180);
+            if (gamepad1.dpadDownWasPressed()) follower.resetHeading(0);
             //if (gamepad1.dpadLeftWasPressed()) shouldUseLimelightAutoAlign = !shouldUseLimelightAutoAlign;
             if (gamepad1.dpadUpWasPressed()) slowMode = !slowMode;
             if (gamepad1.dpadRightWasPressed()) shouldKeepLauncherActive = !shouldKeepLauncherActive;
