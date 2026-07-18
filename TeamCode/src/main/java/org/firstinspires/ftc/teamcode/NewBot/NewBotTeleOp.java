@@ -311,6 +311,7 @@ public class NewBotTeleOp extends LinearOpMode {
         double fusionWeight = 0.3; // use lowpass filter
         setTargetVelocity = setTargetVelocity*(1-fusionWeight) + newSetVelocity*fusionWeight;
         setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
+        if (gamepad1.right_bumper) {setTargetVelocity += 40; setMinVelocity += 40;} //fast shooting
         OuttakeMotor.setVelocity(setTargetVelocity);
     }
 }

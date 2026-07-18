@@ -45,7 +45,7 @@ public class Constants {
     public static final double LIMELIGHT_MOUNT_ANGLE_DEGREES = 12; // measure
     public static final double TRANSFER_UP_POSITION = 1;
     public static final double TRANSFER_DOWN_POSITION = 0;
-    public static final double VELOCITY_TOLERANCE = 0; // in RPM, for determining if the shooter is up to speed
+    public static final double VELOCITY_TOLERANCE = 10; // in RPM, for determining if the shooter is up to speed
     public static double STOP_VELOCITY = 0; // Set target velocity- in RPM(e.g., 3000 RPM)
     public static PIDFCoefficients LaunchPIDF = new PIDFCoefficients(
             300.0025, 0, 0.0002, 10

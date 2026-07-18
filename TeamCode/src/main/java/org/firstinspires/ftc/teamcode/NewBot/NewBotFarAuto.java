@@ -28,7 +28,7 @@ public class NewBotFarAuto extends OpMode {
     long lastTime;
     long currentTime;
     double deltaTime;
-    boolean speedReached, timeout;
+    boolean speedReached, timeout, firstShoot=false;
     // ---------------------------------------
 
     private LimelightSystem limelight;
@@ -47,6 +47,7 @@ public class NewBotFarAuto extends OpMode {
     double PREWARM_VELOCITY = 1200;
     double TARGET_VELOCITY = 1375;
     final double FEED_DURATION_SECONDS = 3;
+    final double WAIT_FIRST_ITERATION = 3;
     final double MAX_RPM_WAIT_TIME_SECONDS = 3;
     final double INTAKE_WAIT_TIME_SECONDS = 2;
     final double WAIT_TIME_BETWEEN_ITERATION_SECONDS = 0.5;
@@ -409,8 +410,9 @@ public class NewBotFarAuto extends OpMode {
             case 0:
                 handleVelocityAndAutoAlignLoop();
                  //If speed reached OR timed out, start feeding
-                if (speedReached&&!shouldAutoAlign || timeout) {
+                if ((speedReached&&!shouldAutoAlign || timeout) && firstShoot || (!firstShoot &&launcherTimer.getElapsedTimeSeconds() >= WAIT_FIRST_ITERATION)) {
                     launcherStage = 1;
+                    firstShoot = true;
                     launcherTimer.resetTimer();
                 }
                 break;
