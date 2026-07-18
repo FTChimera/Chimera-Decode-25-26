@@ -28,6 +28,7 @@ public class NewBotFarAuto extends OpMode {
     long lastTime;
     long currentTime;
     double deltaTime;
+    boolean speedReached, timeout;
     // ---------------------------------------
 
     private LimelightSystem limelight;
@@ -46,7 +47,7 @@ public class NewBotFarAuto extends OpMode {
     double PREWARM_VELOCITY = 1200;
     double TARGET_VELOCITY = 1375;
     final double FEED_DURATION_SECONDS = 3;
-    final double MAX_RPM_WAIT_TIME_SECONDS = 2;
+    final double MAX_RPM_WAIT_TIME_SECONDS = 3;
     final double INTAKE_WAIT_TIME_SECONDS = 2;
     final double WAIT_TIME_BETWEEN_ITERATION_SECONDS = 0.5;
 
@@ -311,7 +312,7 @@ public class NewBotFarAuto extends OpMode {
 
         follower.setStartingPose(startPose);
         follower.followPath(toLaunch);
-        OuttakeMotor.setVelocity(PREWARM_VELOCITY);
+        OuttakeMotor.setVelocity(TARGET_VELOCITY);
         follower.setMaxPower(Constants.AUTO_MAX_POWER);
     }
 
@@ -406,30 +407,7 @@ public class NewBotFarAuto extends OpMode {
         switch (launcherStage) {
 
             case 0:
-                // calculate dynamic velocity
-                // apply lowpass filter
-                // Distance calculation
-                double distance = Double.NaN;
-                LLResultTypes.FiducialResult fiducialResult = limelight.getResultForTag(allianceColor.getTagID());
-                if (!(fiducialResult==null)) {
-                    distance = limelight.calculateDistance(fiducialResult);
-                    if (distance == 0) {
-                        distance = limelight.dist; // SAFETY CHECK
-                    }
-                }
-                TARGET_VELOCITY = 0.3*VelocityCalculator.NEWBOT.calculateVelocity(Double.isNaN(distance) ? TARGET_VELOCITY : distance)
-                + 0.7*TARGET_VELOCITY;
-                double currentVel = OuttakeMotor.getVelocity();
-                double threshold = TARGET_VELOCITY - Constants.VELOCITY_TOLERANCE;
-
-                boolean speedReached = currentVel >= threshold;
-                boolean timeout = launcherTimer.getElapsedTimeSeconds() > MAX_RPM_WAIT_TIME_SECONDS;
-
-                // Auto Align Logic
-                double rotationCmd = -0.59085*autoAlign.getTurningPowerLimelight(deltaTime);
-                if (Math.abs(limelight.tx) <= 1) shouldAutoAlign = false;
-                if (!shouldAutoAlign) rotationCmd = 0;
-                follower.setTeleOpDrive(0,0, rotationCmd, false); // keep calling method
+                handleVelocityAndAutoAlignLoop();
                  //If speed reached OR timed out, start feeding
                 if (speedReached&&!shouldAutoAlign || timeout) {
                     launcherStage = 1;
@@ -438,7 +416,7 @@ public class NewBotFarAuto extends OpMode {
                 break;
 
             case 1:
-                follower.setTeleOpDrive(0,0,0, false);
+                handleVelocityAndAutoAlignLoop();
                 intakeMotor.setPower(1);
                 transferMotor.setPower(Constants.TRANSFER_UP_POSITION);
 
@@ -448,7 +426,7 @@ public class NewBotFarAuto extends OpMode {
                 break;
 
             case 2:
-                OuttakeMotor.setVelocity(Constants.STOP_VELOCITY);
+                OuttakeMotor.setVelocity(PREWARM_VELOCITY);
                 intakeMotor.setPower(0);
                 transferMotor.setPower(Constants.TRANSFER_DOWN_POSITION);
 
@@ -457,5 +435,32 @@ public class NewBotFarAuto extends OpMode {
         }
 
         return false;
+    }
+
+    public void handleVelocityAndAutoAlignLoop()
+    {
+        // calculate dynamic velocity
+        // apply lowpass filter
+        // Distance calculation
+        double distance = Double.NaN;
+        LLResultTypes.FiducialResult fiducialResult = limelight.getResultForTag(allianceColor.getTagID());
+        if (!(fiducialResult==null)) {
+            distance = limelight.calculateDistance(fiducialResult);
+            if (distance == 0) {
+                distance = limelight.dist; // SAFETY CHECK
+            }
+        }
+        TARGET_VELOCITY = 0.3*(Double.isNaN(distance) ? TARGET_VELOCITY : VelocityCalculator.NEWBOT.calculateVelocity(distance))  + 0.7*TARGET_VELOCITY;
+        double currentVel = OuttakeMotor.getVelocity();
+        double threshold = TARGET_VELOCITY - Constants.VELOCITY_TOLERANCE;
+
+        speedReached = currentVel >= threshold;
+        timeout = launcherTimer.getElapsedTimeSeconds() > MAX_RPM_WAIT_TIME_SECONDS;
+
+        // Auto Align Logic
+        double rotationCmd = -0.8*autoAlign.getTurningPowerLimelight(deltaTime)/follower.getMaxPowerScaling();
+        if (Math.abs(limelight.tx) <= 1) shouldAutoAlign = false;
+        if (!shouldAutoAlign) rotationCmd = 0;
+        follower.setTeleOpDrive(0,0, rotationCmd, false); // keep calling method
     }
 }

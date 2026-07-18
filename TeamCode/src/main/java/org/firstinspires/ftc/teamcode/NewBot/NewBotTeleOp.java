@@ -239,6 +239,10 @@ public class NewBotTeleOp extends LinearOpMode {
                 }
             }
 
+            if (shouldKeepLauncherActive) {
+                handleFlywheelSpinUpToSpeed(distance, OuttakeMotor);
+            }
+
             // DPAD RESETS
             if (gamepad1.dpadDownWasPressed()) follower.resetHeading(allianceColor == Constants.AllianceColor.RED ? 0 : 180);
             //if (gamepad1.dpadLeftWasPressed()) shouldUseLimelightAutoAlign = !shouldUseLimelightAutoAlign;
@@ -261,6 +265,7 @@ public class NewBotTeleOp extends LinearOpMode {
             telemetry.addData("Is fiducial null", fiducialResult==null);
             telemetry.addData("Distance", distance);
             telemetry.addData("Turning Power (RX)", rx);
+            telemetry.addData("Should Keep Launcher Active (dpad right)", shouldKeepLauncherActive);
             telemetry.update();
         }
     }
@@ -277,21 +282,15 @@ public class NewBotTeleOp extends LinearOpMode {
                 launcherTimer.reset();
                 break;
             case 1:
-                double newSetVelocity = VelocityCalculator.NEWBOT.calculateVelocity(distance);
-                if (Double.isNaN(newSetVelocity)) newSetVelocity = setTargetVelocity;
-                double fusionWeight = 0.3; // use lowpass filter
-                setTargetVelocity = setTargetVelocity*(1-fusionWeight) + newSetVelocity*fusionWeight;
-                setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
-                OuttakeMotor.setVelocity(setTargetVelocity);
+                handleFlywheelSpinUpToSpeed(distance, OuttakeMotor);
                 boolean speedOk = OuttakeMotor.getVelocity() >= setMinVelocity && (OuttakeMotor.getVelocity() <= setTargetVelocity+Constants.VELOCITY_TOLERANCE);
                 boolean autoAlignOk = autoAlign && rgbIndicator.getPWM() == RGBIndicator.GREEN_PWM;
                 // Add auto align semi-ok check + time out to prevent trying to auto align forever
                 // if Aligning for more than 3 seconds, and stuck at deadzone, just shoot.
                 boolean autoAlignSemiOk = autoAlign && limelight.getLLScore() < 4 && launcherTimer.seconds() > 3;
-                if (speedOk && (!autoAlign || autoAlignOk || autoAlignSemiOk)) {
+                if (speedOk && (!autoAlign || autoAlignOk || autoAlignSemiOk) || gamepad1.left_bumper) {
                     launcherStage = 2;
                     launcherTimer.reset();
-                    if (autoAlign) shouldAutoAlign = false;
                 }
                 break;
             case 2:
@@ -299,9 +298,19 @@ public class NewBotTeleOp extends LinearOpMode {
                 transferMotor.setPower(Constants.TRANSFER_UP_POSITION);
                 break;
             default:
+                if (autoAlign) shouldAutoAlign = false;
                 launcherStage = 0;
                 launcherTimer.reset();
                 break;
         }
+    }
+
+    public void handleFlywheelSpinUpToSpeed(double distance, DcMotorEx OuttakeMotor) {
+        double newSetVelocity = VelocityCalculator.NEWBOT.calculateVelocity(distance);
+        if (Double.isNaN(newSetVelocity)) newSetVelocity = setTargetVelocity;
+        double fusionWeight = 0.3; // use lowpass filter
+        setTargetVelocity = setTargetVelocity*(1-fusionWeight) + newSetVelocity*fusionWeight;
+        setMinVelocity = setTargetVelocity - Constants.VELOCITY_TOLERANCE;
+        OuttakeMotor.setVelocity(setTargetVelocity);
     }
 }
