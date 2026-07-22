@@ -44,8 +44,8 @@ public class NewBotFarAuto extends OpMode {
     private int launcherStage = 0;
     private int intake_iterations = 2;
     private boolean first_iteration = false;
-    double PREWARM_VELOCITY = 1375; // don't. just don't slow down.
-    double TARGET_VELOCITY = 1375;
+    final double SET_VELOCITY = 1375;
+    double ADJUSTED_VELOCITY = 1375;
     final double FEED_DURATION_SECONDS = 3;
     final double WAIT_FIRST_ITERATION = 3;
     final double MAX_RPM_WAIT_TIME_SECONDS = 3;
@@ -313,7 +313,7 @@ public class NewBotFarAuto extends OpMode {
 
         follower.setStartingPose(startPose);
         follower.followPath(toLaunch);
-        OuttakeMotor.setVelocity(TARGET_VELOCITY);
+        OuttakeMotor.setVelocity(ADJUSTED_VELOCITY);
         follower.setMaxPower(Constants.AUTO_MAX_POWER);
     }
 
@@ -393,8 +393,8 @@ public class NewBotFarAuto extends OpMode {
 
     public boolean runLauncherSequence() {
         if (!isLauncherRunning) {
-            //TARGET_VELOCITY = VelocityCalculator.NEWBOT.calculateVelocity(limelight.dist);
-            OuttakeMotor.setVelocity(TARGET_VELOCITY);
+            //ADJUSTED_VELOCITY = VelocityCalculator.NEWBOT.calculateVelocity(limelight.dist);
+            OuttakeMotor.setVelocity(ADJUSTED_VELOCITY);
             // Auto Align for Far Auto Start
             autoAlign.reset();
             shouldAutoAlign = true;
@@ -428,9 +428,10 @@ public class NewBotFarAuto extends OpMode {
                 break;
 
             case 2:
-                OuttakeMotor.setVelocity(PREWARM_VELOCITY);
+                OuttakeMotor.setVelocity(SET_VELOCITY);
                 intakeMotor.setPower(0);
                 transferMotor.setPower(Constants.TRANSFER_DOWN_POSITION);
+                ADJUSTED_VELOCITY = SET_VELOCITY; //RESET IT
 
                 isLauncherRunning = false;
                 return true;
@@ -442,7 +443,7 @@ public class NewBotFarAuto extends OpMode {
     public void handleVelocityAndAutoAlignLoop()
     {
         // calculate dynamic velocity
-        // apply lowpass filter
+        // apply lowpass filter (more of a weighted average)
         // Distance calculation
         double distance = Double.NaN;
         LLResultTypes.FiducialResult fiducialResult = limelight.getResultForTag(allianceColor.getTagID());
@@ -452,13 +453,14 @@ public class NewBotFarAuto extends OpMode {
                 distance = limelight.dist; // SAFETY CHECK
             }
         }
-        TARGET_VELOCITY = 0.3*(Double.isNaN(distance) ? TARGET_VELOCITY : VelocityCalculator.NEWBOT.calculateVelocity(distance))  + 0.7*TARGET_VELOCITY;
+        // Here we use the lowpass filter (but this has become a more of a weighted average), but we also add the set velocity as an argument so that we don't deviate much from it.
+        ADJUSTED_VELOCITY = 0.3*(Double.isNaN(distance) ? ADJUSTED_VELOCITY : VelocityCalculator.NEWBOT.calculateVelocity(distance)) + 0.6* ADJUSTED_VELOCITY + 0.1*SET_VELOCITY;
         double currentVel = OuttakeMotor.getVelocity();
-        double threshold = TARGET_VELOCITY - Constants.VELOCITY_TOLERANCE;
+        double threshold = ADJUSTED_VELOCITY - Constants.VELOCITY_TOLERANCE;
 
         speedReached = currentVel >= threshold;
         timeout = launcherTimer.getElapsedTimeSeconds() > MAX_RPM_WAIT_TIME_SECONDS;
-
+        OuttakeMotor.setVelocity(ADJUSTED_VELOCITY); // ACTUALLY SET VELOCITY
         // Auto Align Logic
         double rotationCmd = -0.8*autoAlign.getTurningPowerLimelight(deltaTime)/follower.getMaxPowerScaling();
         if (Math.abs(limelight.tx) <= 1) shouldAutoAlign = false;
