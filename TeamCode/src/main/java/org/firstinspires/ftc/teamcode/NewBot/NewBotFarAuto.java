@@ -44,7 +44,7 @@ public class NewBotFarAuto extends OpMode {
     private int launcherStage = 0;
     private int intake_iterations = 2;
     private boolean first_iteration = false;
-    double PREWARM_VELOCITY = 1200;
+    double PREWARM_VELOCITY = 1375; // don't. just don't slow down.
     double TARGET_VELOCITY = 1375;
     final double FEED_DURATION_SECONDS = 3;
     final double WAIT_FIRST_ITERATION = 3;
