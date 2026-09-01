@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp
-public class testIntake extends LinearOpMode {
+public class testIntakeRev extends LinearOpMode {
 
     /**
      * Override this method and place your code here.
@@ -23,9 +23,7 @@ public class testIntake extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         DcMotor intake = hardwareMap.get(DcMotor.class, "frontLeftMotor");
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake.setPower(1);
         waitForStart();
-        while (opModeIsActive()) {
-            intake.setPower(gamepad1.left_trigger - gamepad1.right_trigger);
-        }
     }
 }
